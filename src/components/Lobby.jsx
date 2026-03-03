@@ -1,0 +1,175 @@
+import { useState, useEffect } from 'react'
+import { supabase } from '../supabase'
+
+export default function Lobby({ session, profile, activeSport }) {
+  const [myPools, setMyPools] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [showCreate, setShowCreate] = useState(false)
+  const [showJoin, setShowJoin] = useState(false)
+  const [poolName, setPoolName] = useState('')
+  const [joinCode, setJoinCode] = useState('')
+  const [creating, setCreating] = useState(false)
+  const [joining, setJoining] = useState(false)
+  const [error, setError] = useState('')
+
+  useEffect(() => { loadMyPools() }, [activeSport])
+
+  async function loadMyPools() {
+    setLoading(true)
+    const { data } = await supabase
+      .from('pool_entries')
+      .select('*, friend_pools(*)')
+      .eq('user_id', session.user.id)
+    setMyPools(data?.filter(e => e.friend_pools?.sport === activeSport) || [])
+    setLoading(false)
+  }
+
+  function generateCode() {
+    return Math.random().toString(36).substring(2, 8).toUpperCase()
+  }
+
+  async function createPool() {
+    setCreating(true)
+    setError('')
+    if (!poolName.trim()) { setError('Give your pool a name'); setCreating(false); return }
+    const code = generateCode()
+    const { data: pool, error: poolError } = await supabase
+      .from('friend_pools')
+      .insert({
+        name: poolName.trim(),
+        invite_code: code,
+        commissioner_id: session.user.id,
+        sport: activeSport,
+        week_label: `Week 14`
+      })
+      .select()
+      .single()
+    if (poolError) { setError(poolError.message); setCreating(false); return }
+    await supabase.from('pool_entries').insert({
+      user_id: session.user.id,
+      friend_pool_id: pool.id
+    })
+    setPoolName('')
+    setShowCreate(false)
+    setCreating(false)
+    loadMyPools()
+  }
+
+  async function joinPool() {
+    setJoining(true)
+    setError('')
+    const { data: pool } = await supabase
+      .from('friend_pools')
+      .select('*')
+      .eq('invite_code', joinCode.trim().toUpperCase())
+      .single()
+    if (!pool) { setError('Pool not found — check your code'); setJoining(false); return }
+    const { error: entryError } = await supabase
+      .from('pool_entries')
+      .insert({ user_id: session.user.id, friend_pool_id: pool.id })
+    if (entryError) { setError('You may already be in this pool'); setJoining(false); return }
+    setJoinCode('')
+    setShowJoin(false)
+    setJoining(false)
+    loadMyPools()
+  }
+
+  return (
+    <div>
+      {/* Hero */}
+      <div style={s.hero}>
+        <div style={s.heroLabel}>Friend Pools</div>
+        <div style={s.heroTitle}>Play Against <em style={{fontStyle:'normal',color:'#C9A84C'}}>Your Crew</em></div>
+        <div style={s.heroSub}>Create a private pool and invite friends with a code. Same picks, same rules — bragging rights on the line.</div>
+        <div style={s.heroButtons}>
+          <button style={s.btnCreate} onClick={() => { setShowCreate(true); setShowJoin(false); setError('') }}>+ Create Pool</button>
+          <button style={s.btnJoin} onClick={() => { setShowJoin(true); setShowCreate(false); setError('') }}>Enter Code</button>
+        </div>
+      </div>
+
+      {/* Create Pool Form */}
+      {showCreate && (
+        <div style={s.formCard}>
+          <div style={s.formTitle}>Create a Pool</div>
+          <div style={s.field}>
+            <label style={s.label}>Pool Name</label>
+            <input style={s.input} type="text" placeholder="e.g. Friday Night Crew"
+              value={poolName} onChange={e => setPoolName(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && createPool()} />
+          </div>
+          {error && <div style={s.error}>{error}</div>}
+          <div style={{display:'flex',gap:'8px',marginTop:'16px'}}>
+            <button style={s.btnCancel} onClick={() => setShowCreate(false)}>Cancel</button>
+            <button style={s.btnConfirm} onClick={createPool} disabled={creating}>
+              {creating ? 'Creating...' : 'Create Pool →'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Join Pool Form */}
+      {showJoin && (
+        <div style={s.formCard}>
+          <div style={s.formTitle}>Join a Pool</div>
+          <div style={s.field}>
+            <label style={s.label}>Invite Code</label>
+            <input style={s.input} type="text" placeholder="e.g. FNC7K2"
+              value={joinCode} onChange={e => setJoinCode(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && joinPool()} />
+          </div>
+          {error && <div style={s.error}>{error}</div>}
+          <div style={{display:'flex',gap:'8px',marginTop:'16px'}}>
+            <button style={s.btnCancel} onClick={() => setShowJoin(false)}>Cancel</button>
+            <button style={s.btnConfirm} onClick={joinPool} disabled={joining}>
+              {joining ? 'Joining...' : 'Join Pool →'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* My Pools */}
+      <div style={s.sectionTitle}><span>Your Pools This Week</span></div>
+      {loading ? <div style={s.empty}>Loading...</div> :
+       myPools.length === 0 ? <div style={s.empty}>No pools yet — create one or enter a code above.</div> :
+       myPools.map(entry => (
+        <div key={entry.id} style={s.poolCard}>
+          <div style={s.poolIcon}>👥</div>
+          <div style={s.poolInfo}>
+            <div style={s.poolName}>{entry.friend_pools.name}</div>
+            <div style={s.poolMeta}>Code: <strong>{entry.friend_pools.invite_code}</strong> · {entry.friend_pools.sport.toUpperCase()}</div>
+          </div>
+          <div style={s.poolBadge}>
+            {entry.friend_pools.commissioner_id === session.user.id ? '👑 Commissioner' : '✓ Joined'}
+          </div>
+        </div>
+       ))
+      }
+    </div>
+  )
+}
+
+const s = {
+  hero:{background:'#1a1a1a',borderRadius:'16px',padding:'26px',marginBottom:'24px',position:'relative',overflow:'hidden'},
+  heroLabel:{fontFamily:"'Barlow Condensed',sans-serif",fontSize:'0.62rem',textTransform:'uppercase',letterSpacing:'3px',color:'rgba(255,255,255,0.35)',marginBottom:'6px'},
+  heroTitle:{fontFamily:"'Playfair Display',serif",fontWeight:900,fontSize:'1.5rem',color:'#fff',marginBottom:'5px'},
+  heroSub:{fontSize:'0.82rem',color:'rgba(255,255,255,0.5)',lineHeight:1.5,maxWidth:'420px',marginBottom:'18px'},
+  heroButtons:{display:'flex',gap:'10px'},
+  btnCreate:{padding:'10px 22px',background:'#4B2E83',border:'none',borderRadius:'9px',color:'#fff',fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.85rem',textTransform:'uppercase',letterSpacing:'1px',cursor:'pointer'},
+  btnJoin:{padding:'10px 22px',background:'rgba(255,255,255,0.08)',border:'1px solid rgba(255,255,255,0.2)',borderRadius:'9px',color:'rgba(255,255,255,0.8)',fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.85rem',textTransform:'uppercase',letterSpacing:'1px',cursor:'pointer'},
+  formCard:{background:'#fff',border:'1px solid #e2dfd8',borderRadius:'14px',padding:'22px',marginBottom:'20px'},
+  formTitle:{fontFamily:"'Playfair Display',serif",fontWeight:700,fontSize:'1.1rem',marginBottom:'16px'},
+  field:{marginBottom:'12px'},
+  label:{display:'block',fontSize:'0.66rem',fontFamily:"'Barlow Condensed',sans-serif",textTransform:'uppercase',letterSpacing:'1.5px',color:'#888580',marginBottom:'5px'},
+  input:{width:'100%',border:'1.5px solid #e2dfd8',borderRadius:'9px',padding:'10px 14px',fontFamily:"'Barlow',sans-serif",fontSize:'0.9rem',outline:'none',boxSizing:'border-box'},
+  error:{background:'rgba(192,57,43,0.08)',border:'1px solid rgba(192,57,43,0.3)',borderRadius:'8px',padding:'10px 14px',color:'#c0392b',fontSize:'0.82rem'},
+  btnCancel:{padding:'10px 18px',background:'#f9f8f6',border:'1.5px solid #e2dfd8',borderRadius:'9px',color:'#888580',fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.85rem',cursor:'pointer'},
+  btnConfirm:{flex:1,padding:'10px',background:'#4B2E83',border:'none',borderRadius:'9px',color:'#fff',fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.85rem',textTransform:'uppercase',letterSpacing:'1px',cursor:'pointer'},
+  sectionTitle:{fontFamily:"'Barlow Condensed',sans-serif",fontSize:'0.68rem',fontWeight:700,letterSpacing:'3px',color:'#888580',textTransform:'uppercase',marginBottom:'14px',display:'flex',alignItems:'center',gap:'10px'},
+  empty:{textAlign:'center',padding:'40px 20px',color:'#888580',fontSize:'0.9rem',background:'#fff',border:'2px dashed #e2dfd8',borderRadius:'12px'},
+  poolCard:{background:'#fff',border:'1.5px solid #e2dfd8',borderRadius:'13px',padding:'16px',display:'flex',alignItems:'center',gap:'14px',marginBottom:'10px'},
+  poolIcon:{width:'42px',height:'42px',borderRadius:'10px',background:'#2e8b57',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'1.2rem',flexShrink:0},
+  poolInfo:{flex:1},
+  poolName:{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.95rem',marginBottom:'2px'},
+  poolMeta:{fontSize:'0.72rem',color:'#888580'},
+  poolBadge:{fontSize:'0.72rem',fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,color:'#4B2E83',whiteSpace:'nowrap'},
+}
