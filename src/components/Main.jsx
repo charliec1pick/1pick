@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../supabase'
 import Topbar from './Topbar'
 import Lobby from './Lobby'
+import Picks from './Picks'
 
 const SPORTS = [
   {id:'nfl', label:'NFL', color:'#C9A84C'},
@@ -62,7 +63,7 @@ export default function Main({ session }) {
         {/* Tab Content */}
         <div style={{padding:'0'}}>
           {activeTab === 'Lobby' && <Lobby session={session} profile={profile} activeSport={activeSport} />}
-          {activeTab === 'My Picks' && <div style={s.placeholder}>🎯 Picks coming soon</div>}
+          {activeTab === 'My Picks' && <Picks session={session} activeSport={activeSport} />}
           {activeTab === 'Leaderboard' && <div style={s.placeholder}>📊 Leaderboard coming soon</div>}
           {activeTab === 'Profile' && <div style={s.placeholder}>👤 Profile coming soon</div>}
         </div>
