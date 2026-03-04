@@ -1,13 +1,19 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../supabase'
 
+
+
 export default function Leaderboard({ session, activeSport }) {
   const [myPools, setMyPools] = useState([])
   const [activePool, setActivePool] = useState(null)
   const [entries, setEntries] = useState([])
   const [loading, setLoading] = useState(true)
-
+  const [view, setView] = useState('week') // 'week' or 'season'
+  
   useEffect(() => { loadMyPools() }, [activeSport])
+  useEffect(() => {
+  if (activePool) loadLeaderboard(activePool.id)
+  }, [view])
 
   async function loadMyPools() {
     setLoading(true)
@@ -24,9 +30,8 @@ export default function Leaderboard({ session, activeSport }) {
     setLoading(false)
   }
 
-  async function loadLeaderboard(poolId) {
+async function loadLeaderboard(poolId) {
     setLoading(true)
-    // Get all entries for this pool
     const { data: poolEntries } = await supabase
       .from('pool_entries')
       .select('*, profiles(*)')
@@ -34,38 +39,46 @@ export default function Leaderboard({ session, activeSport }) {
 
     if (!poolEntries) { setEntries([]); setLoading(false); return }
 
-    // Get all picks for each entry
     const entriesWithPicks = await Promise.all(poolEntries.map(async entry => {
-      const { data: picks } = await supabase
-        .from('picks')
-        .select('*')
-        .eq('pool_entry_id', entry.id)
+      let picksQuery = supabase.from('picks').select('*').eq('pool_entry_id', entry.id)
+      
+      // For weekly view, only get picks from current pool entry
+      // For season view, get ALL picks by this user across all pools for this sport
+      let allPicks = []
+      if (view === 'season') {
+        const { data: allEntries } = await supabase
+          .from('pool_entries')
+          .select('id, friend_pools(sport)')
+          .eq('user_id', entry.user_id)
+        
+        const sportEntries = allEntries?.filter(e => e.friend_pools?.sport === activeSport) || []
+        
+        for (const e of sportEntries) {
+          const { data: p } = await supabase.from('picks').select('*').eq('pool_entry_id', e.id)
+          if (p) allPicks = [...allPicks, ...p]
+        }
+      } else {
+        const { data: p } = await picksQuery
+        allPicks = p || []
+      }
 
-      const wins = picks?.filter(p => p.result === 'win').length || 0
-      const losses = picks?.filter(p => p.result === 'loss').length || 0
-      const netUnits = picks?.reduce((sum, p) => {
+      const wins = allPicks.filter(p => p.result === 'win').length
+      const losses = allPicks.filter(p => p.result === 'loss').length
+      const netUnits = allPicks.reduce((sum, p) => {
         if (p.result === 'win') return sum + p.units
         if (p.result === 'loss') return sum - p.units
         return sum
-      }, 0) || 0
-      const totalPicks = picks?.length || 0
+      }, 0)
 
-      return {
-        ...entry,
-        wins,
-        losses,
-        netUnits,
-        totalPicks,
-        isYou: entry.user_id === session.user.id
-      }
+      return { ...entry, wins, losses, netUnits, totalPicks: allPicks.length, isYou: entry.user_id === session.user.id }
     }))
 
-    // Sort by net units
     entriesWithPicks.sort((a, b) => b.netUnits - a.netUnits)
     setEntries(entriesWithPicks)
     setLoading(false)
   }
 
+ 
   const ranks = ['🥇', '🥈', '🥉']
   const avatarColors = ['#4B2E83', '#e05c00', '#0055a5', '#2e8b57', '#c9082a', '#C9A84C', '#6b47b8', '#1565c0']
 
@@ -109,7 +122,10 @@ export default function Leaderboard({ session, activeSport }) {
             <div style={s.playerCount}>{entries.length} players</div>
           </div>
         </div>
-
+<div style={s.viewToggle}>
+  <button style={{...s.toggleBtn, ...(view==='week' ? s.toggleActive : {})}} onClick={() => setView('week')}>This Week</button>
+  <button style={{...s.toggleBtn, ...(view==='season' ? s.toggleActive : {})}} onClick={() => setView('season')}>All Season</button>
+</div>
         {/* Column Headers */}
         <div style={s.colHeaders}>
           <div>Rank</div>
@@ -155,6 +171,9 @@ export default function Leaderboard({ session, activeSport }) {
 }
 
 const s = {
+  viewToggle:{display:'flex',gap:'4px',padding:'10px 16px',borderBottom:'1px solid #e2dfd8',background:'#f9f8f6'},
+  toggleBtn:{padding:'6px 16px',borderRadius:'7px',border:'1.5px solid #e2dfd8',background:'#fff',fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.72rem',textTransform:'uppercase',letterSpacing:'1px',cursor:'pointer',color:'#888580'},
+  toggleActive:{background:'#4B2E83',borderColor:'#4B2E83',color:'#fff'},
   empty:{textAlign:'center',padding:'60px 20px',color:'#888580',background:'#fff',border:'2px dashed #e2dfd8',borderRadius:'12px'},
   poolSelector:{background:'#fff',border:'1px solid #e2dfd8',borderRadius:'10px',padding:'12px 16px',marginBottom:'20px',display:'flex',alignItems:'center',gap:'12px',flexWrap:'wrap'},
   poolSelectorLabel:{fontSize:'0.66rem',fontFamily:"'Barlow Condensed',sans-serif",textTransform:'uppercase',letterSpacing:'1.5px',color:'#888580',whiteSpace:'nowrap'},
