@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../supabase'
+import { useOdds } from '../useOdds'
 
 const PICK_CATS = [
   { id: 'ml-fav', label: 'ML Favorite', color: '#4B2E83' },
@@ -188,10 +189,10 @@ export default function Picks({ session, activeSport }) {
     setUnits(prev => ({ ...prev, [catId]: capped }))
   }
 
-  const games = GAMES[activeSport] || []
-  const odds = ODDS[activeSport] || {}
+  const { games, odds, loading: oddsLoading, error: oddsError } = useOdds(activeSport)
 
-  if (loading) return <div style={s.empty}>Loading...</div>
+  if (loading || oddsLoading) return <div style={s.empty}>Loading...</div>
+  if (oddsError) return <div style={s.empty}>⚠️ {oddsError}</div>
   if (myPools.length === 0) return (
     <div style={s.empty}>
       <div style={{ fontSize: '1.5rem', marginBottom: '12px' }}>🎯</div>
