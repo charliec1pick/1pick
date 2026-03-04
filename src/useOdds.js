@@ -62,7 +62,7 @@ export function useOdds(activeSport) {
       setLoading(true)
       setError(null)
       try {
-        const baseUrl = import.meta.env.DEV ? 'http://localhost:3000' : ''
+        const baseUrl = ''
         const res = await fetch(`${baseUrl}/api/odds?sport=${activeSport}`)
         const data = await res.json()
         if (!Array.isArray(data) || data.length === 0) {
