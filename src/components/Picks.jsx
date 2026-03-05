@@ -55,32 +55,69 @@ export default function Picks({ session, activeSport }) {
     const { data: existingData } = await supabase.from('picks').select('id').eq('pool_entry_id', activePoolEntry.id).eq('category', catId)
     const existing = existingData?.[0] || null
     if (existing) {
-      await supabase.from('picks').update({ game_id: gameId, team, locked_odds: lockedOdds, units: units[catId], updated_at: new Date().toISOString() }).eq('id', existing.id)
+      await supabase.from('picks').update({
+        game_id: gameId, team, locked_odds: lockedOdds,
+        units: units[catId], updated_at: new Date().toISOString()
+      }).eq('id', existing.id)
     } else {
-      await supabase.from('picks').insert({ user_id: session.user.id, pool_entry_id: activePoolEntry.id, category: catId, game_id: gameId, team, locked_odds: lockedOdds, units: units[catId] })
+      await supabase.from('picks').insert({
+        user_id: session.user.id,
+        pool_entry_id: activePoolEntry.id,
+        category: catId, game_id: gameId,
+        team, locked_odds: lockedOdds, units: units[catId]
+      })
     }
     setPicks(prev => ({ ...prev, [catId]: { gameId, team, lockedOdds } }))
     setOpenModal(null)
   }
 
-  function increment(catId) {
+async function increment(catId) {
+    const pick = picks[catId]
+    const game = pick ? games.find(g => g.id === pick.gameId) : null
+    const locked = game?.started || false
+    if (locked) return
     const current = units[catId]
     if (totalUnits >= 100) return
     if (current >= 40) return
-    setUnits(prev => ({ ...prev, [catId]: prev[catId] + 1 }))
+    const newVal = current + 1
+    setUnits(prev => ({ ...prev, [catId]: newVal }))
+    if (pick && activePoolEntry) {
+      const { data: existingData } = await supabase.from('picks').select('id').eq('pool_entry_id', activePoolEntry.id).eq('category', catId)
+      const existing = existingData?.[0] || null
+      if (existing) await supabase.from('picks').update({ units: newVal, updated_at: new Date().toISOString() }).eq('id', existing.id)
+    }
   }
 
-  function decrement(catId) {
+  async function decrement(catId) {
+    const pick = picks[catId]
+    const game = pick ? games.find(g => g.id === pick.gameId) : null
+    const locked = game?.started || false
+    if (locked) return
     const current = units[catId]
     if (current <= 1) return
-    setUnits(prev => ({ ...prev, [catId]: prev[catId] - 1 }))
+    const newVal = current - 1
+    setUnits(prev => ({ ...prev, [catId]: newVal }))
+    if (pick && activePoolEntry) {
+      const { data: existingData } = await supabase.from('picks').select('id').eq('pool_entry_id', activePoolEntry.id).eq('category', catId)
+      const existing = existingData?.[0] || null
+      if (existing) await supabase.from('picks').update({ units: newVal, updated_at: new Date().toISOString() }).eq('id', existing.id)
+    }
   }
 
-  function setUnitVal(catId, val) {
+async function setUnitVal(catId, val) {
+    const pick = picks[catId]
+    const game = pick ? games.find(g => g.id === pick.gameId) : null
+    const locked = game?.started || false
+    if (locked) return
     const newVal = Math.max(1, Math.min(40, parseInt(val) || 1))
     const otherTotal = totalUnits - units[catId]
     const capped = Math.min(newVal, 100 - otherTotal)
     setUnits(prev => ({ ...prev, [catId]: capped }))
+    if (pick && activePoolEntry) {
+      const { data: existingData } = await supabase.from('picks').select('id').eq('pool_entry_id', activePoolEntry.id).eq('category', catId)
+      const existing = existingData?.[0] || null
+      if (existing) await supabase.from('picks').update({ units: capped, updated_at: new Date().toISOString() }).eq('id', existing.id)
+    }
   }
 
   const { games, odds, loading: oddsLoading, error: oddsError } = useOdds(activeSport)
@@ -135,7 +172,7 @@ export default function Picks({ session, activeSport }) {
           const game = pick ? games.find(g => g.id === pick.gameId) : null
           const locked = game?.started || false
           const catUnits = units[cat.id]
-          const canIncrease = !locked && totalUnits < 100 && catUnits < 70
+          const canIncrease = !locked && totalUnits < 100 && catUnits < 40
 
           return (
             <div key={cat.id}
@@ -165,7 +202,7 @@ export default function Picks({ session, activeSport }) {
                     style={{ ...s.unitDisplay, color: cat.color, border: '1.5px solid #e2dfd8', borderRadius: '8px', padding: '3px 8px', width: '100%', textAlign: 'center', outline: 'none' }}
                     type="number"
                     min="1"
-                    max="70"
+                    max="40"
                     value={catUnits}
                     onClick={e => e.stopPropagation()}
                     onKeyDown={e => { e.stopPropagation(); if (['ArrowUp','ArrowDown'].includes(e.key)) e.preventDefault() }}
@@ -174,8 +211,8 @@ export default function Picks({ session, activeSport }) {
                   <div style={s.unitLabel}>units</div>
                 </div>
                 <button
-                  style={{ ...s.unitBtn, opacity: canIncrease ? 1 : 0.4 }}
-                  onClick={() => increment(cat.id)}>+</button>
+                   style={{ ...s.unitBtn, opacity: (canIncrease) ? 1 : 0.4 }}
+                   onClick={() => increment(cat.id)}>+</button>
               </div>
             </div>
           )
