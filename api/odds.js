@@ -1,23 +1,55 @@
+const { createClient } = require('@supabase/supabase-js')
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_KEY
+)
+
+const CACHE_HOURS = 4
+
+const sportMap = {
+  cbb: 'basketball_ncaab',
+  nba: 'basketball_nba',
+  nfl: 'americanfootball_nfl',
+  cfb: 'americanfootball_ncaaf',
+  mlb: 'baseball_mlb',
+  nhl: 'icehockey_nhl',
+}
+
 export default async function handler(req, res) {
   const { sport } = req.query
-  
-  const sportMap = {
-    cbb: 'basketball_ncaab',
-    nba: 'basketball_nba',
-    nfl: 'americanfootball_nfl',
-    cfb: 'americanfootball_ncaaf',
-    mlb: 'baseball_mlb',
-    nhl: 'icehockey_nhl',
-  }
-
   const sportKey = sportMap[sport]
   if (!sportKey) return res.status(400).json({ error: 'Invalid sport' })
 
   try {
+    // Check cache first
+    const { data: cached } = await supabase
+      .from('odds_cache')
+      .select('*')
+      .eq('sport', sport)
+      .single()
+
+    if (cached) {
+      const fetchedAt = new Date(cached.fetched_at)
+      const ageHours = (Date.now() - fetchedAt.getTime()) / (1000 * 60 * 60)
+      if (ageHours < CACHE_HOURS) {
+        return res.status(200).json(cached.data)
+      }
+    }
+
+    // Cache miss or stale — fetch fresh
     const response = await fetch(
       `https://api.the-odds-api.com/v4/sports/${sportKey}/odds/?apiKey=${process.env.ODDS_API_KEY}&regions=us&markets=h2h,spreads,totals&oddsFormat=american`
     )
     const data = await response.json()
+
+    // Save to cache
+    await supabase.from('odds_cache').upsert({
+      sport,
+      data,
+      fetched_at: new Date().toISOString()
+    }, { onConflict: 'sport' })
+
     res.status(200).json(data)
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch odds' })
