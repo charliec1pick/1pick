@@ -1,4 +1,4 @@
-const { createClient } = require('@supabase/supabase-js')
+import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -14,7 +14,7 @@ const sportMap = {
   nhl: 'icehockey_nhl',
 }
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   const sports = ['cbb', 'nba', 'nfl', 'cfb', 'mlb', 'nhl']
   let refreshed = []
 

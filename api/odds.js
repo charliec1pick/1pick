@@ -1,4 +1,4 @@
-const { createClient } = require('@supabase/supabase-js')
+import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -16,13 +16,12 @@ const sportMap = {
   nhl: 'icehockey_nhl',
 }
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   const { sport } = req.query
   const sportKey = sportMap[sport]
   if (!sportKey) return res.status(400).json({ error: 'Invalid sport' })
 
   try {
-    // Check cache first
     const { data: cached } = await supabase
       .from('odds_cache')
       .select('*')
@@ -37,13 +36,11 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    // Cache miss or stale — fetch fresh
     const response = await fetch(
       `https://api.the-odds-api.com/v4/sports/${sportKey}/odds/?apiKey=${process.env.ODDS_API_KEY}&regions=us&markets=h2h,spreads,totals&oddsFormat=american`
     )
     const data = await response.json()
 
-    // Save to cache
     await supabase.from('odds_cache').upsert({
       sport,
       data,
