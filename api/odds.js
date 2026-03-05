@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+const { createClient } = require('@supabase/supabase-js')
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -16,7 +16,7 @@ const sportMap = {
   nhl: 'icehockey_nhl',
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   const { sport } = req.query
   const sportKey = sportMap[sport]
   if (!sportKey) return res.status(400).json({ error: 'Invalid sport' })

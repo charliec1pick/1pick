@@ -1,0 +1,118 @@
+const { createClient } = require('@supabase/supabase-js')
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_KEY
+)
+
+const sportMap = {
+  cbb: 'basketball_ncaab',
+  nba: 'basketball_nba',
+  nfl: 'americanfootball_nfl',
+  cfb: 'americanfootball_ncaaf',
+  mlb: 'baseball_mlb',
+  nhl: 'icehockey_nhl',
+}
+
+function determineWinner(game) {
+  if (!game.scores) return null
+  const home = game.scores.find(s => s.name === game.home_team)
+  const away = game.scores.find(s => s.name === game.away_team)
+  if (!home || !away) return null
+  const homeScore = parseFloat(home.score)
+  const awayScore = parseFloat(away.score)
+  if (homeScore > awayScore) return game.home_team
+  if (awayScore > homeScore) return game.away_team
+  return 'draw'
+}
+
+function checkPickResult(pick, game, winner) {
+  if (!winner || winner === 'draw') return 'pending'
+  
+  const loser = winner === game.home_team ? game.away_team : game.home_team
+
+  // Get spread from odds cache if available
+  if (pick.category === 'ml-fav' || pick.category === 'ml-dog') {
+    return pick.team === winner ? 'win' : 'loss'
+  }
+
+  if (pick.category === 'tot-ov' || pick.category === 'tot-un') {
+    // Extract total from team field e.g. "Over 147.5"
+    const match = pick.team.match(/(\d+\.?\d*)/)
+    if (!match) return 'pending'
+    const total = parseFloat(match[1])
+    const homeScore = parseFloat(game.scores.find(s => s.name === game.home_team)?.score || 0)
+    const awayScore = parseFloat(game.scores.find(s => s.name === game.away_team)?.score || 0)
+    const combined = homeScore + awayScore
+    if (pick.category === 'tot-ov') return combined > total ? 'win' : 'loss'
+    if (pick.category === 'tot-un') return combined < total ? 'win' : 'loss'
+  }
+
+  if (pick.category === 'sp-fav' || pick.category === 'sp-dog') {
+    // Extract spread from team field e.g. "Duke -4.5"
+    const match = pick.team.match(/([+-]?\d+\.?\d*)$/)
+    if (!match) return 'pending'
+    const spread = parseFloat(match[1])
+    const homeScore = parseFloat(game.scores.find(s => s.name === game.home_team)?.score || 0)
+    const awayScore = parseFloat(game.scores.find(s => s.name === game.away_team)?.score || 0)
+    
+    // Find which team this pick is for
+    const teamName = pick.team.replace(/[+-]?\d+\.?\d*$/, '').trim()
+    const isHome = game.home_team.includes(teamName) || teamName.includes(game.home_team.split(' ').pop())
+    const teamScore = isHome ? homeScore : awayScore
+    const oppScore = isHome ? awayScore : homeScore
+    
+    return (teamScore + spread) > oppScore ? 'win' : 'loss'
+  }
+
+  return 'pending'
+}
+
+module.exports = async function handler(req, res) {
+  const sports = ['cbb', 'nba', 'nfl', 'cfb', 'mlb', 'nhl']
+  let totalUpdated = 0
+
+  for (const sport of sports) {
+    const sportKey = sportMap[sport]
+    
+    try {
+      // Fetch completed scores
+      const response = await fetch(
+        `https://api.the-odds-api.com/v4/sports/${sportKey}/scores/?apiKey=${process.env.ODDS_API_KEY}&daysFrom=2`
+      )
+      const games = await response.json()
+      if (!Array.isArray(games)) continue
+
+      const completedGames = games.filter(g => g.completed)
+      
+      for (const game of completedGames) {
+        const winner = determineWinner(game)
+        if (!winner) continue
+
+        // Find all picks for this game
+        const { data: picks } = await supabase
+          .from('picks')
+          .select('*')
+          .eq('game_id', game.id)
+          .eq('result', 'pending')
+
+        if (!picks || picks.length === 0) continue
+
+        for (const pick of picks) {
+          const result = checkPickResult(pick, game, winner)
+          if (result !== 'pending') {
+            await supabase
+              .from('picks')
+              .update({ result, updated_at: new Date().toISOString() })
+              .eq('id', pick.id)
+            totalUpdated++
+          }
+        }
+      }
+    } catch (err) {
+      console.error(`Error processing ${sport}:`, err)
+    }
+  }
+
+  res.status(200).json({ updated: totalUpdated })
+}
