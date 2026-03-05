@@ -69,7 +69,7 @@ function checkPickResult(pick, game, winner) {
 }
 
 export default async function handler(req, res) {
-  const sports = ['cbb', 'nba', 'nfl', 'cfb', 'mlb', 'nhl']
+  const sports = ['cbb', 'nba'] //update as seasons change
   let totalUpdated = 0
 
   for (const sport of sports) {
@@ -96,15 +96,26 @@ export default async function handler(req, res) {
         if (!picks || picks.length === 0) continue
 
         for (const pick of picks) {
-          const result = checkPickResult(pick, game, winner)
-          if (result !== 'pending') {
-            await supabase
-              .from('picks')
-              .update({ result, updated_at: new Date().toISOString() })
-              .eq('id', pick.id)
-            totalUpdated++
-          }
-        }
+  const result = checkPickResult(pick, game, winner)
+  if (result !== 'pending') {
+    let payoutUnits = 0
+    if (result === 'win') {
+      const odds = parseFloat(pick.locked_odds)
+      if (odds < 0) {
+        payoutUnits = parseFloat((pick.units / (Math.abs(odds) / 100)).toFixed(1))
+      } else {
+        payoutUnits = parseFloat((pick.units * (odds / 100)).toFixed(1))
+      }
+    } else {
+      payoutUnits = -pick.units
+    }
+    await supabase
+      .from('picks')
+      .update({ result, payout_units: payoutUnits, updated_at: new Date().toISOString() })
+      .eq('id', pick.id)
+    totalUpdated++
+  }
+}
       }
     } catch (err) {
       console.error(`Error processing ${sport}:`, err)

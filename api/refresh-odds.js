@@ -15,7 +15,7 @@ const sportMap = {
 }
 
 export default async function handler(req, res) {
-  const sports = ['cbb', 'nba', 'nfl', 'cfb', 'mlb', 'nhl']
+  const sports = ['cbb', 'nba']// update as seasons change
   let refreshed = []
 
   for (const sport of sports) {
