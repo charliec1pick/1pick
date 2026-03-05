@@ -1,5 +1,15 @@
 {
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" }
+  ],
+  "crons": [
+    {
+      "path": "/api/refresh-odds",
+      "schedule": "0 8,14,20 * * *"
+    },
+    {
+      "path": "/api/scores",
+      "schedule": "0 * * * *"
+    }
   ]
 }
