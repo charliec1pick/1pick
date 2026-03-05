@@ -33,7 +33,9 @@ function checkPickResult(pick, game, winner) {
   if (!winner || winner === 'draw') return 'pending'
 
   if (pick.category === 'ml-fav' || pick.category === 'ml-dog') {
-    return pick.team === winner ? 'win' : 'loss'
+    const won = pick.team === winner
+    if (!won) return 'loss'
+    return 'win'
   }
 
   if (pick.category === 'tot-ov' || pick.category === 'tot-un') {
@@ -43,6 +45,7 @@ function checkPickResult(pick, game, winner) {
     const homeScore = parseFloat(game.scores.find(s => s.name === game.home_team)?.score || 0)
     const awayScore = parseFloat(game.scores.find(s => s.name === game.away_team)?.score || 0)
     const combined = homeScore + awayScore
+    if (combined === total) return 'pending'
     if (pick.category === 'tot-ov') return combined > total ? 'win' : 'loss'
     if (pick.category === 'tot-un') return combined < total ? 'win' : 'loss'
   }
@@ -57,7 +60,9 @@ function checkPickResult(pick, game, winner) {
     const isHome = game.home_team.includes(teamName) || teamName.includes(game.home_team.split(' ').pop())
     const teamScore = isHome ? homeScore : awayScore
     const oppScore = isHome ? awayScore : homeScore
-    return (teamScore + spread) > oppScore ? 'win' : 'loss'
+    const margin = (teamScore + spread) - oppScore
+    if (margin === 0) return 'pending'
+    return margin > 0 ? 'win' : 'loss'
   }
 
   return 'pending'

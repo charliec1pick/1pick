@@ -31,11 +31,10 @@ export default function Profile({ session, profile, setProfile }) {
 
     const wins = picks.filter(p => p.result === 'win').length
     const losses = picks.filter(p => p.result === 'loss').length
-    const netUnits = picks.reduce((sum, p) => {
-      if (p.result === 'win') return sum + p.units
-      if (p.result === 'loss') return sum - p.units
-      return sum
-    }, 0)
+    const netUnits = allPicks.reduce((sum, p) => {
+  if (p.result === 'win' || p.result === 'loss') return sum + (p.payout_units || 0)
+  return sum
+}, 0)
 
     // Load pools entered
     const { data: entries } = await supabase

@@ -65,10 +65,9 @@ async function loadLeaderboard(poolId) {
       const wins = allPicks.filter(p => p.result === 'win').length
       const losses = allPicks.filter(p => p.result === 'loss').length
       const netUnits = allPicks.reduce((sum, p) => {
-        if (p.result === 'win') return sum + p.units
-        if (p.result === 'loss') return sum - p.units
-        return sum
-      }, 0)
+  if (p.result === 'win' || p.result === 'loss') return sum + (p.payout_units || 0)
+  return sum
+}, 0)
 
       return { ...entry, wins, losses, netUnits, totalPicks: allPicks.length, isYou: entry.user_id === session.user.id }
     }))
