@@ -16,11 +16,14 @@ const sportMap = {
 
 function determineWinner(game) {
   if (!game.scores) return null
+  if (!game.completed) return null
   const home = game.scores.find(s => s.name === game.home_team)
   const away = game.scores.find(s => s.name === game.away_team)
   if (!home || !away) return null
   const homeScore = parseFloat(home.score)
   const awayScore = parseFloat(away.score)
+  if (isNaN(homeScore) || isNaN(awayScore)) return null
+  if (homeScore === 0 && awayScore === 0) return null
   if (homeScore > awayScore) return game.home_team
   if (awayScore > homeScore) return game.away_team
   return 'draw'
