@@ -1,19 +1,17 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../supabase'
 
-
-
 export default function Leaderboard({ session, activeSport }) {
   const [myPools, setMyPools] = useState([])
   const [activePool, setActivePool] = useState(null)
   const [entries, setEntries] = useState([])
   const [loading, setLoading] = useState(true)
-  const [view, setView] = useState('week') // 'week' or 'season'
-  
+  const [view, setView] = useState('week')
+  const [selectedSession, setSelectedSession] = useState(null)
+  const [totalSessions, setTotalSessions] = useState(1)
+
   useEffect(() => { loadMyPools() }, [activeSport])
-  useEffect(() => {
-  if (activePool) loadLeaderboard(activePool.id)
-  }, [view])
+  useEffect(() => { if (activePool) loadLeaderboard(activePool.id) }, [view, selectedSession])
 
   async function loadMyPools() {
     setLoading(true)
@@ -21,7 +19,7 @@ export default function Leaderboard({ session, activeSport }) {
       .from('pool_entries')
       .select('*, friend_pools(*)')
       .eq('user_id', session.user.id)
-    
+
     const filtered = data?.filter(e => {
       const pool = e.friend_pools
       if (!pool) return false
@@ -29,7 +27,6 @@ export default function Leaderboard({ session, activeSport }) {
       return e.period === (pool.current_period || 1)
     }) || []
 
-    // Dedupe by pool id in case of any duplicates
     const seen = new Set()
     const deduped = filtered.filter(e => {
       if (seen.has(e.friend_pool_id)) return false
@@ -39,23 +36,25 @@ export default function Leaderboard({ session, activeSport }) {
 
     setMyPools(deduped)
     if (deduped.length > 0) {
-      setActivePool(deduped[0].friend_pools)
-      await loadLeaderboard(deduped[0].friend_pool_id)
+      const pool = deduped[0].friend_pools
+      setActivePool(pool)
+      const currentPeriod = pool.current_period || 1
+      setTotalSessions(currentPeriod)
+      setSelectedSession(currentPeriod)
+      await loadLeaderboard(deduped[0].friend_pool_id, currentPeriod)
     }
     setLoading(false)
   }
 
-async function loadLeaderboard(poolId) {
+  async function loadLeaderboard(poolId, periodOverride) {
     setLoading(true)
-    
-    // Get pool to know current period
+
     const { data: pool } = await supabase
       .from('friend_pools')
       .select('*')
       .eq('id', poolId)
       .single()
 
-    // Get all pool entries
     const { data: allEntries } = await supabase
       .from('pool_entries')
       .select('*, profiles(*)')
@@ -64,28 +63,26 @@ async function loadLeaderboard(poolId) {
     if (!allEntries) { setEntries([]); setLoading(false); return }
 
     const currentPeriod = pool?.current_period || 1
+    const viewPeriod = periodOverride ?? selectedSession ?? currentPeriod
+    setTotalSessions(currentPeriod)
 
-    // For "this week" only show current period entries
-    // For "season" aggregate across all periods but dedupe by user
     const users = [...new Map(allEntries.map(e => [e.user_id, e])).values()]
 
     const entriesWithPicks = await Promise.all(users.map(async entry => {
       let allPicks = []
 
       if (view === 'season') {
-        // Get all picks across all periods for this user in this pool
         const userEntries = allEntries.filter(e => e.user_id === entry.user_id)
         for (const e of userEntries) {
           const { data: p } = await supabase.from('picks').select('*').eq('pool_entry_id', e.id)
           if (p) allPicks = [...allPicks, ...p]
         }
       } else {
-        // Only current period
-        const currentEntry = allEntries.find(e => 
-          e.user_id === entry.user_id && e.period === currentPeriod
+        const periodEntry = allEntries.find(e =>
+          e.user_id === entry.user_id && e.period === viewPeriod
         )
-        if (currentEntry) {
-          const { data: p } = await supabase.from('picks').select('*').eq('pool_entry_id', currentEntry.id)
+        if (periodEntry) {
+          const { data: p } = await supabase.from('picks').select('*').eq('pool_entry_id', periodEntry.id)
           allPicks = p || []
         }
       }
@@ -97,11 +94,11 @@ async function loadLeaderboard(poolId) {
         return sum
       }, 0).toFixed(1))
 
-      return { 
-        ...entry, 
-        wins, losses, netUnits, 
-        totalPicks: allPicks.length, 
-        isYou: entry.user_id === session.user.id 
+      return {
+        ...entry,
+        wins, losses, netUnits,
+        totalPicks: allPicks.length,
+        isYou: entry.user_id === session.user.id
       }
     }))
 
@@ -110,7 +107,6 @@ async function loadLeaderboard(poolId) {
     setLoading(false)
   }
 
- 
   const ranks = ['🥇', '🥈', '🥉']
   const avatarColors = ['#4B2E83', '#e05c00', '#0055a5', '#2e8b57', '#c9082a', '#C9A84C', '#6b47b8', '#1565c0']
 
@@ -124,9 +120,10 @@ async function loadLeaderboard(poolId) {
     </div>
   )
 
+  const sessionOptions = Array.from({length: totalSessions}, (_, i) => i + 1)
+
   return (
     <div>
-      {/* Pool Selector */}
       {myPools.length > 1 && (
         <div style={s.poolSelector}>
           <div style={s.poolSelectorLabel}>Pool</div>
@@ -134,7 +131,13 @@ async function loadLeaderboard(poolId) {
             {myPools.map(entry => (
               <div key={entry.id}
                 style={{...s.poolChip, ...(activePool?.id===entry.friend_pool_id ? s.poolChipActive : {})}}
-                onClick={() => { setActivePool(entry.friend_pools); loadLeaderboard(entry.friend_pool_id) }}>
+                onClick={() => {
+                  setActivePool(entry.friend_pools)
+                  const p = entry.friend_pools.current_period || 1
+                  setTotalSessions(p)
+                  setSelectedSession(p)
+                  loadLeaderboard(entry.friend_pool_id, p)
+                }}>
                 {entry.friend_pools.name}
               </div>
             ))}
@@ -142,7 +145,6 @@ async function loadLeaderboard(poolId) {
         </div>
       )}
 
-      {/* Leaderboard Card */}
       <div style={s.card}>
         <div style={s.cardHeader}>
           <div>
@@ -154,11 +156,24 @@ async function loadLeaderboard(poolId) {
             <div style={s.playerCount}>{entries.length} players</div>
           </div>
         </div>
-<div style={s.viewToggle}>
-  <button style={{...s.toggleBtn, ...(view==='week' ? s.toggleActive : {})}} onClick={() => setView('week')}>This Week</button>
-  <button style={{...s.toggleBtn, ...(view==='season' ? s.toggleActive : {})}} onClick={() => setView('season')}>All Season</button>
-</div>
-        {/* Column Headers */}
+
+        <div style={s.viewToggle}>
+          <button style={{...s.toggleBtn, ...(view==='week' ? s.toggleActive : {})}} onClick={() => setView('week')}>Session</button>
+          <button style={{...s.toggleBtn, ...(view==='season' ? s.toggleActive : {})}} onClick={() => setView('season')}>All Season</button>
+          {view === 'week' && totalSessions > 1 && (
+            <select
+              style={s.sessionSelect}
+              value={selectedSession}
+              onChange={e => setSelectedSession(parseInt(e.target.value))}>
+              {sessionOptions.map(n => (
+                <option key={n} value={n}>
+                  {n === (activePool?.current_period || 1) ? `Session ${n} (Current)` : `Session ${n}`}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+
         <div style={s.colHeaders}>
           <div>Rank</div>
           <div>Player</div>
@@ -167,7 +182,6 @@ async function loadLeaderboard(poolId) {
           <div>Picks</div>
         </div>
 
-        {/* Rows */}
         {entries.length === 0 ? (
           <div style={{padding:'32px',textAlign:'center',color:'#888580',fontSize:'0.85rem'}}>
             No picks submitted yet — be the first!
@@ -203,9 +217,10 @@ async function loadLeaderboard(poolId) {
 }
 
 const s = {
-  viewToggle:{display:'flex',gap:'4px',padding:'10px 16px',borderBottom:'1px solid #e2dfd8',background:'#f9f8f6'},
+  viewToggle:{display:'flex',gap:'4px',padding:'10px 16px',borderBottom:'1px solid #e2dfd8',background:'#f9f8f6',alignItems:'center',flexWrap:'wrap'},
   toggleBtn:{padding:'6px 16px',borderRadius:'7px',border:'1.5px solid #e2dfd8',background:'#fff',fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.72rem',textTransform:'uppercase',letterSpacing:'1px',cursor:'pointer',color:'#888580'},
   toggleActive:{background:'#4B2E83',borderColor:'#4B2E83',color:'#fff'},
+  sessionSelect:{marginLeft:'auto',padding:'5px 10px',borderRadius:'7px',border:'1.5px solid #e2dfd8',background:'#fff',fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.72rem',color:'#4B2E83',cursor:'pointer',outline:'none'},
   empty:{textAlign:'center',padding:'60px 20px',color:'#888580',background:'#fff',border:'2px dashed #e2dfd8',borderRadius:'12px'},
   poolSelector:{background:'#fff',border:'1px solid #e2dfd8',borderRadius:'10px',padding:'12px 16px',marginBottom:'20px',display:'flex',alignItems:'center',gap:'12px',flexWrap:'wrap'},
   poolSelectorLabel:{fontSize:'0.66rem',fontFamily:"'Barlow Condensed',sans-serif",textTransform:'uppercase',letterSpacing:'1.5px',color:'#888580',whiteSpace:'nowrap'},

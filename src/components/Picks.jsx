@@ -13,36 +13,49 @@ const PICK_CATS = [
 
 export default function Picks({ session, activeSport }) {
   const [myPools, setMyPools] = useState([])
+  const [allPoolEntries, setAllPoolEntries] = useState([])
   const [activePoolEntry, setActivePoolEntry] = useState(null)
   const [picks, setPicks] = useState({})
   const [units, setUnits] = useState({ 'ml-fav': 15, 'ml-dog': 15, 'sp-fav': 15, 'sp-dog': 15, 'tot-ov': 15, 'tot-un': 15 })
   const [openModal, setOpenModal] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [selectedSession, setSelectedSession] = useState(null)
+  const [totalSessions, setTotalSessions] = useState(1)
+  const [viewingPastSession, setViewingPastSession] = useState(false)
 
   const totalUnits = units['ml-fav'] + units['ml-dog'] + units['sp-fav'] + units['sp-dog'] + units['tot-ov'] + units['tot-un']
   const remaining = 100 - totalUnits
 
   useEffect(() => { loadMyPools() }, [activeSport])
 
-async function loadMyPools() {
+  async function loadMyPools() {
     setLoading(true)
     setPicks({})
     setUnits({ 'ml-fav': 15, 'ml-dog': 15, 'sp-fav': 15, 'sp-dog': 15, 'tot-ov': 15, 'tot-un': 15 })
-    
+
     const { data: allEntries } = await supabase
       .from('pool_entries')
       .select('*, friend_pools(*)')
       .eq('user_id', session.user.id)
 
     if (allEntries) {
+      // Store all entries for session browsing
+      setAllPoolEntries(allEntries)
+
       const currentEntries = allEntries.filter(entry => {
         const pool = entry.friend_pools
         if (!pool) return false
         if (pool.sport !== activeSport) return false
         return entry.period === (pool.current_period || 1)
       })
+
       setMyPools(currentEntries)
       if (currentEntries.length > 0) {
+        const pool = currentEntries[0].friend_pools
+        const currentPeriod = pool.current_period || 1
+        setTotalSessions(currentPeriod)
+        setSelectedSession(currentPeriod)
+        setViewingPastSession(false)
         setActivePoolEntry(currentEntries[0])
         await loadPicks(currentEntries[0].id)
       }
@@ -58,19 +71,44 @@ async function loadMyPools() {
       const pickMap = {}
       const unitMap = { 'ml-fav': 15, 'ml-dog': 15, 'sp-fav': 15, 'sp-dog': 15, 'tot-ov': 15, 'tot-un': 15 }
       data.forEach(p => {
-        pickMap[p.category] = { 
+        pickMap[p.category] = {
           gameId: p.game_id, team: p.team, lockedOdds: p.locked_odds,
-          homeTeam: p.home_team, awayTeam: p.away_team
+          homeTeam: p.home_team, awayTeam: p.away_team,
+          result: p.result, payoutUnits: p.payout_units, units: p.units
         }
         unitMap[p.category] = p.units
       })
       setPicks(pickMap)
       setUnits(unitMap)
+    } else {
+      setPicks({})
+      setUnits({ 'ml-fav': 15, 'ml-dog': 15, 'sp-fav': 15, 'sp-dog': 15, 'tot-ov': 15, 'tot-un': 15 })
+    }
+  }
+
+  async function handleSessionChange(sessionNum) {
+    if (!activePoolEntry) return
+    setSelectedSession(sessionNum)
+    const currentPeriod = activePoolEntry.friend_pools.current_period || 1
+    const isPast = sessionNum < currentPeriod
+    setViewingPastSession(isPast)
+
+    // Find the pool entry for this session
+    const poolEntry = allPoolEntries.find(e =>
+      e.friend_pool_id === activePoolEntry.friend_pool_id &&
+      e.period === sessionNum
+    )
+    if (poolEntry) {
+      await loadPicks(poolEntry.id)
+    } else {
+      setPicks({})
+      setUnits({ 'ml-fav': 15, 'ml-dog': 15, 'sp-fav': 15, 'sp-dog': 15, 'tot-ov': 15, 'tot-un': 15 })
     }
   }
 
   async function savePick(catId, gameId, team, lockedOdds, homeTeam, awayTeam) {
     if (!activePoolEntry) return
+    if (viewingPastSession) return
     const game = games.find(g => g.id === gameId)
     if (game?.started) return
     const { data: existingData } = await supabase.from('picks').select('id').eq('pool_entry_id', activePoolEntry.id).eq('category', catId)
@@ -95,10 +133,11 @@ async function loadMyPools() {
     setOpenModal(null)
   }
 
-async function increment(catId) {
+  async function increment(catId) {
+    if (viewingPastSession) return
     const pick = picks[catId]
     const game = pick ? games.find(g => g.id === pick.gameId) : null
-    const locked = game?.started || false
+    const locked = !game && !!pick ? true : game?.started || false
     if (locked) return
     const current = units[catId]
     if (totalUnits >= 100) return
@@ -113,9 +152,10 @@ async function increment(catId) {
   }
 
   async function decrement(catId) {
+    if (viewingPastSession) return
     const pick = picks[catId]
     const game = pick ? games.find(g => g.id === pick.gameId) : null
-    const locked = game?.started || false
+    const locked = !game && !!pick ? true : game?.started || false
     if (locked) return
     const current = units[catId]
     if (current <= 1) return
@@ -128,10 +168,11 @@ async function increment(catId) {
     }
   }
 
-async function setUnitVal(catId, val) {
+  async function setUnitVal(catId, val) {
+    if (viewingPastSession) return
     const pick = picks[catId]
     const game = pick ? games.find(g => g.id === pick.gameId) : null
-    const locked = game?.started || false
+    const locked = !game && !!pick ? true : game?.started || false
     if (locked) return
     const newVal = Math.max(1, Math.min(40, parseInt(val) || 1))
     const otherTotal = totalUnits - units[catId]
@@ -156,6 +197,9 @@ async function setUnitVal(catId, val) {
     </div>
   )
 
+  const sessionOptions = Array.from({ length: totalSessions }, (_, i) => i + 1)
+  const currentPeriod = activePoolEntry?.friend_pools?.current_period || 1
+
   return (
     <div>
       {myPools.length > 1 && (
@@ -163,13 +207,17 @@ async function setUnitVal(catId, val) {
           <div style={s.poolSelectorLabel}>Pool</div>
           <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
             {myPools.map(entry => (
-              <div key={entry.id} style={{ ...s.poolChip, ...(activePoolEntry?.id === entry.id ? s.poolChipActive : {}) }}
-                onClick={() => { 
-  setPicks({})
-  setUnits({ 'ml-fav': 15, 'ml-dog': 15, 'sp-fav': 15, 'sp-dog': 15, 'tot-ov': 15, 'tot-un': 15 })
-  setActivePoolEntry(entry)
-  loadPicks(entry.id) 
-}}>
+              <div key={entry.id} style={{ ...s.poolChip, ...(activePoolEntry?.friend_pool_id === entry.friend_pool_id ? s.poolChipActive : {}) }}
+                onClick={() => {
+                  setPicks({})
+                  setUnits({ 'ml-fav': 15, 'ml-dog': 15, 'sp-fav': 15, 'sp-dog': 15, 'tot-ov': 15, 'tot-un': 15 })
+                  setActivePoolEntry(entry)
+                  const p = entry.friend_pools.current_period || 1
+                  setTotalSessions(p)
+                  setSelectedSession(p)
+                  setViewingPastSession(false)
+                  loadPicks(entry.id)
+                }}>
                 {entry.friend_pools.name}
               </div>
             ))}
@@ -177,80 +225,122 @@ async function setUnitVal(catId, val) {
         </div>
       )}
 
-      <div style={s.unitsPanel}>
-        <div style={s.unitsLeft}>
-          <div style={s.unitsLabel}>Left</div>
-          <div style={{ ...s.unitsNumber, color: remaining < 0 ? '#c0392b' : '#4B2E83' }}>{remaining}</div>
-        </div>
-        <div style={s.unitsDivider} />
-        <div style={{ flex: 1 }}>
-          <div style={s.unitsLabel}>Units Allocated — {totalUnits}/100</div>
-          <div style={s.unitsTrack}>
-            <div style={{ ...s.unitsFill, width: Math.min(totalUnits, 100) + '%', background: remaining < 0 ? '#c0392b' : 'linear-gradient(90deg,#4B2E83,#C9A84C)' }} />
-          </div>
-          <div style={s.unitsSub}>
-            {remaining > 0 ? `${remaining} units left to allocate` : remaining === 0 ? '✅ All 100 units allocated' : '⚠️ Over budget'}
-          </div>
-        </div>
+      {/* Session selector */}
+      <div style={s.sessionBar}>
+        <div style={s.sessionLabel}>Session</div>
+        <select
+          style={s.sessionSelect}
+          value={selectedSession || currentPeriod}
+          onChange={e => handleSessionChange(parseInt(e.target.value))}>
+          {sessionOptions.map(n => (
+            <option key={n} value={n}>
+              {n === currentPeriod ? `Session ${n} (Current)` : `Session ${n}`}
+            </option>
+          ))}
+        </select>
+        {viewingPastSession && (
+          <div style={s.pastBadge}>📖 Read Only</div>
+        )}
       </div>
 
-      <div style={s.sectionTitle}><span>This Week's Picks — Tap to select</span></div>
+      {!viewingPastSession && (
+        <div style={s.unitsPanel}>
+          <div style={s.unitsLeft}>
+            <div style={s.unitsLabel}>Left</div>
+            <div style={{ ...s.unitsNumber, color: remaining < 0 ? '#c0392b' : '#4B2E83' }}>{remaining}</div>
+          </div>
+          <div style={s.unitsDivider} />
+          <div style={{ flex: 1 }}>
+            <div style={s.unitsLabel}>Units Allocated — {totalUnits}/100</div>
+            <div style={s.unitsTrack}>
+              <div style={{ ...s.unitsFill, width: Math.min(totalUnits, 100) + '%', background: remaining < 0 ? '#c0392b' : 'linear-gradient(90deg,#4B2E83,#C9A84C)' }} />
+            </div>
+            <div style={s.unitsSub}>
+              {remaining > 0 ? `${remaining} units left to allocate` : remaining === 0 ? '✅ All 100 units allocated' : '⚠️ Over budget'}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div style={s.sectionTitle}>
+        <span>{viewingPastSession ? `Session ${selectedSession} Results` : "This Session's Picks — Tap to select"}</span>
+      </div>
+
       <div style={s.picksGrid}>
         {PICK_CATS.map(cat => {
           const pick = picks[cat.id]
           const game = pick ? games.find(g => g.id === pick.gameId) : null
-          const locked = game?.started || false
+          const locked = viewingPastSession || (!game && !!pick) || game?.started || false
           const catUnits = units[cat.id]
           const canIncrease = !locked && totalUnits < 100 && catUnits < 40
+          const result = pick?.result
+          const resultColor = result === 'win' ? '#1a7a4a' : result === 'loss' ? '#c0392b' : '#888580'
+          const resultLabel = result === 'win' ? '✅ Win' : result === 'loss' ? '❌ Loss' : result === 'pending' ? '⏳ Pending' : null
 
           return (
             <div key={cat.id}
-              style={{ ...s.pickCard, borderColor: pick ? cat.color : '#e2dfd8', opacity: locked ? 0.75 : 1 }}
+              style={{ ...s.pickCard, borderColor: pick ? (result === 'win' ? '#1a7a4a' : result === 'loss' ? '#c0392b' : cat.color) : '#e2dfd8', opacity: locked && !viewingPastSession ? 0.75 : 1 }}
               onClick={() => !locked && setOpenModal(cat.id)}>
               <div style={{ ...s.pickCardTop, background: cat.color }}>
                 <div style={s.pickTypeLabel}>{cat.label}</div>
-                <div style={s.pickLockBadge}>{locked ? '🔒 Locked' : 'Open'}</div>
+                <div style={s.pickLockBadge}>
+                  {viewingPastSession ? (resultLabel || '—') : locked ? '🔒 Locked' : 'Open'}
+                </div>
               </div>
               <div style={s.pickCardBody}>
-  {pick ? (
-    <>
-      <div style={s.pickTeam}>{pick.team}</div>
-      <div style={s.pickMeta}>
-        {game ? `${game.away} @ ${game.home}` : pick.awayTeam && pick.homeTeam ? `${pick.awayTeam} @ ${pick.homeTeam}` : ''}
-      </div>
-      <span style={s.oddsChip}>{pick.lockedOdds}</span>
-    </>
-  ) : (
-    <div style={s.pickEmpty}>Tap to choose a game →</div>
-  )}
-</div>
-              <div style={s.pickCardFooter} onClick={e => e.stopPropagation()}>
-                <button
-                  style={{ ...s.unitBtn, opacity: locked ? 0.4 : 1 }}
-                  onClick={() => !locked && decrement(cat.id)}>−</button>
-                <div style={{ flex: 1, textAlign: 'center' }}>
-                  <input
-                    style={{ ...s.unitDisplay, color: cat.color, border: '1.5px solid #e2dfd8', borderRadius: '8px', padding: '3px 8px', width: '100%', textAlign: 'center', outline: 'none' }}
-                    type="number"
-                    min="1"
-                    max="40"
-                    value={catUnits}
-                    onClick={e => e.stopPropagation()}
-                    onKeyDown={e => { e.stopPropagation(); if (['ArrowUp','ArrowDown'].includes(e.key)) e.preventDefault() }}
-                    onChange={e => { e.stopPropagation(); !locked && setUnitVal(cat.id, e.target.value) }}
-                 />
-                  <div style={s.unitLabel}>units</div>
-                </div>
-                <button
-                   style={{ ...s.unitBtn, opacity: (canIncrease) ? 1 : 0.4 }}
-                   onClick={() => increment(cat.id)}>+</button>
+                {pick ? (
+                  <>
+                    <div style={s.pickTeam}>{pick.team}</div>
+                    <div style={s.pickMeta}>
+                      {game ? `${game.away} @ ${game.home}` : pick.awayTeam && pick.homeTeam ? `${pick.awayTeam} @ ${pick.homeTeam}` : ''}
+                    </div>
+                    <span style={s.oddsChip}>{pick.lockedOdds}</span>
+                    {viewingPastSession && result && result !== 'pending' && (
+                      <div style={{ ...s.payoutChip, color: resultColor }}>
+                        {result === 'win' ? `+${pick.payoutUnits}` : pick.payoutUnits} units
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div style={s.pickEmpty}>{viewingPastSession ? 'No pick made' : 'Tap to choose a game →'}</div>
+                )}
               </div>
+              {!viewingPastSession && (
+                <div style={s.pickCardFooter} onClick={e => e.stopPropagation()}>
+                  <button
+                    style={{ ...s.unitBtn, opacity: locked ? 0.4 : 1 }}
+                    onClick={() => !locked && decrement(cat.id)}>−</button>
+                  <div style={{ flex: 1, textAlign: 'center' }}>
+                    <input
+                      style={{ ...s.unitDisplay, color: cat.color, border: '1.5px solid #e2dfd8', borderRadius: '8px', padding: '3px 8px', width: '100%', textAlign: 'center', outline: 'none' }}
+                      type="number"
+                      min="1"
+                      max="40"
+                      value={catUnits}
+                      onClick={e => e.stopPropagation()}
+                      onKeyDown={e => { e.stopPropagation(); if (['ArrowUp', 'ArrowDown'].includes(e.key)) e.preventDefault() }}
+                      onChange={e => { e.stopPropagation(); !locked && setUnitVal(cat.id, e.target.value) }}
+                    />
+                    <div style={s.unitLabel}>units</div>
+                  </div>
+                  <button
+                    style={{ ...s.unitBtn, opacity: canIncrease ? 1 : 0.4 }}
+                    onClick={() => increment(cat.id)}>+</button>
+                </div>
+              )}
+              {viewingPastSession && (
+                <div style={{ ...s.pickCardFooter, justifyContent: 'center' }}>
+                  <div style={{ fontSize: '0.72rem', color: '#888580', fontFamily: "'Barlow Condensed',sans-serif" }}>
+                    {pick ? `${pick.units || catUnits} units wagered` : '—'}
+                  </div>
+                </div>
+              )}
             </div>
           )
         })}
       </div>
 
-      {openModal && (
+      {!viewingPastSession && openModal && (
         <div style={s.modalOverlay} onClick={() => setOpenModal(null)}>
           <div style={s.modalBox} onClick={e => e.stopPropagation()}>
             <div style={s.modalHeader}>
@@ -297,6 +387,10 @@ const s = {
   poolSelectorLabel: { fontSize: '0.66rem', fontFamily: "'Barlow Condensed',sans-serif", textTransform: 'uppercase', letterSpacing: '1.5px', color: '#888580', whiteSpace: 'nowrap' },
   poolChip: { padding: '5px 14px', borderRadius: '20px', fontSize: '0.7rem', fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, cursor: 'pointer', border: '1.5px solid #e2dfd8', color: '#888580', background: '#f9f8f6' },
   poolChipActive: { background: '#4B2E83', borderColor: '#4B2E83', color: '#fff' },
+  sessionBar: { background: '#fff', border: '1px solid #e2dfd8', borderRadius: '10px', padding: '10px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '12px' },
+  sessionLabel: { fontSize: '0.66rem', fontFamily: "'Barlow Condensed',sans-serif", textTransform: 'uppercase', letterSpacing: '1.5px', color: '#888580', whiteSpace: 'nowrap' },
+  sessionSelect: { padding: '5px 10px', borderRadius: '7px', border: '1.5px solid #e2dfd8', background: '#fff', fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: '0.72rem', color: '#4B2E83', cursor: 'pointer', outline: 'none' },
+  pastBadge: { marginLeft: 'auto', fontSize: '0.66rem', fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, color: '#888580', background: '#f9f8f6', border: '1px solid #e2dfd8', borderRadius: '6px', padding: '3px 10px' },
   unitsPanel: { background: '#fff', border: '1px solid #e2dfd8', borderRadius: '12px', padding: '16px 20px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '20px' },
   unitsLeft: { textAlign: 'center', minWidth: '56px' },
   unitsLabel: { fontSize: '0.58rem', fontFamily: "'Barlow Condensed',sans-serif", textTransform: 'uppercase', letterSpacing: '1.5px', color: '#888580' },
@@ -316,6 +410,7 @@ const s = {
   pickTeam: { fontFamily: "'Playfair Display',serif", fontWeight: 700, fontSize: '1rem', marginBottom: '2px' },
   pickMeta: { fontSize: '0.7rem', color: '#888580' },
   oddsChip: { display: 'inline-block', background: '#fdf8ed', color: '#C9A84C', border: '1px solid #C9A84C', borderRadius: '6px', padding: '2px 8px', fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: '0.75rem', marginTop: '4px' },
+  payoutChip: { display: 'inline-block', fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: '0.75rem', marginTop: '4px', marginLeft: '6px' },
   pickCardFooter: { display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', borderTop: '1px solid #e2dfd8', background: '#f9f8f6' },
   unitBtn: { width: '28px', height: '28px', borderRadius: '7px', border: '1.5px solid #e2dfd8', background: '#fff', cursor: 'pointer', fontSize: '0.95rem', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   unitDisplay: { fontFamily: "'Playfair Display',serif", fontWeight: 700, fontSize: '1.4rem', lineHeight: 1 },
