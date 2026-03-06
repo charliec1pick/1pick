@@ -21,55 +21,88 @@ export default function Leaderboard({ session, activeSport }) {
       .from('pool_entries')
       .select('*, friend_pools(*)')
       .eq('user_id', session.user.id)
-    const filtered = data?.filter(e => e.friend_pools?.sport === activeSport) || []
-    setMyPools(filtered)
-    if (filtered.length > 0) {
-      setActivePool(filtered[0].friend_pools)
-      await loadLeaderboard(filtered[0].friend_pool_id)
+    
+    const filtered = data?.filter(e => {
+      const pool = e.friend_pools
+      if (!pool) return false
+      if (pool.sport !== activeSport) return false
+      return e.period === (pool.current_period || 1)
+    }) || []
+
+    // Dedupe by pool id in case of any duplicates
+    const seen = new Set()
+    const deduped = filtered.filter(e => {
+      if (seen.has(e.friend_pool_id)) return false
+      seen.add(e.friend_pool_id)
+      return true
+    })
+
+    setMyPools(deduped)
+    if (deduped.length > 0) {
+      setActivePool(deduped[0].friend_pools)
+      await loadLeaderboard(deduped[0].friend_pool_id)
     }
     setLoading(false)
   }
 
 async function loadLeaderboard(poolId) {
     setLoading(true)
-    const { data: poolEntries } = await supabase
+    
+    // Get pool to know current period
+    const { data: pool } = await supabase
+      .from('friend_pools')
+      .select('*')
+      .eq('id', poolId)
+      .single()
+
+    // Get all pool entries
+    const { data: allEntries } = await supabase
       .from('pool_entries')
       .select('*, profiles(*)')
       .eq('friend_pool_id', poolId)
 
-    if (!poolEntries) { setEntries([]); setLoading(false); return }
+    if (!allEntries) { setEntries([]); setLoading(false); return }
 
-    const entriesWithPicks = await Promise.all(poolEntries.map(async entry => {
-      let picksQuery = supabase.from('picks').select('*').eq('pool_entry_id', entry.id)
-      
-      // For weekly view, only get picks from current pool entry
-      // For season view, get ALL picks by this user across all pools for this sport
+    const currentPeriod = pool?.current_period || 1
+
+    // For "this week" only show current period entries
+    // For "season" aggregate across all periods but dedupe by user
+    const users = [...new Map(allEntries.map(e => [e.user_id, e])).values()]
+
+    const entriesWithPicks = await Promise.all(users.map(async entry => {
       let allPicks = []
+
       if (view === 'season') {
-        const { data: allEntries } = await supabase
-          .from('pool_entries')
-          .select('id, friend_pools(sport)')
-          .eq('user_id', entry.user_id)
-        
-        const sportEntries = allEntries?.filter(e => e.friend_pools?.sport === activeSport) || []
-        
-        for (const e of sportEntries) {
+        // Get all picks across all periods for this user in this pool
+        const userEntries = allEntries.filter(e => e.user_id === entry.user_id)
+        for (const e of userEntries) {
           const { data: p } = await supabase.from('picks').select('*').eq('pool_entry_id', e.id)
           if (p) allPicks = [...allPicks, ...p]
         }
       } else {
-        const { data: p } = await picksQuery
-        allPicks = p || []
+        // Only current period
+        const currentEntry = allEntries.find(e => 
+          e.user_id === entry.user_id && e.period === currentPeriod
+        )
+        if (currentEntry) {
+          const { data: p } = await supabase.from('picks').select('*').eq('pool_entry_id', currentEntry.id)
+          allPicks = p || []
+        }
       }
 
       const wins = allPicks.filter(p => p.result === 'win').length
       const losses = allPicks.filter(p => p.result === 'loss').length
-      const netUnits = allPicks.reduce((sum, p) => {
-  if (p.result === 'win' || p.result === 'loss') return sum + (p.payout_units || 0)
-  return sum
-}, 0)
+      const netUnits = parseFloat(allPicks.reduce((sum, p) => {
+        if (p.result === 'win' || p.result === 'loss') return sum + (p.payout_units || 0)
+        return sum
+      }, 0).toFixed(1))
 
-      return { ...entry, wins, losses, netUnits, totalPicks: allPicks.length, isYou: entry.user_id === session.user.id }
+      return { 
+        ...entry, 
+        wins, losses, netUnits, 
+        totalPicks: allPicks.length, 
+        isYou: entry.user_id === session.user.id 
+      }
     }))
 
     entriesWithPicks.sort((a, b) => b.netUnits - a.netUnits)

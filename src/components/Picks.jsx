@@ -24,14 +24,30 @@ export default function Picks({ session, activeSport }) {
 
   useEffect(() => { loadMyPools() }, [activeSport])
 
-  async function loadMyPools() {
+async function loadMyPools() {
     setLoading(true)
-    const { data } = await supabase.from('pool_entries').select('*, friend_pools(*)').eq('user_id', session.user.id)
-    const filtered = data?.filter(e => e.friend_pools?.sport === activeSport) || []
-    setMyPools(filtered)
-    if (filtered.length > 0) {
-      setActivePoolEntry(filtered[0])
-      await loadPicks(filtered[0].id)
+    setPicks({})
+    setUnits({ 'ml-fav': 15, 'ml-dog': 15, 'sp-fav': 15, 'sp-dog': 15, 'tot-ov': 15, 'tot-un': 15 })
+    
+    const { data: allEntries } = await supabase
+      .from('pool_entries')
+      .select('*, friend_pools(*)')
+      .eq('user_id', session.user.id)
+
+    if (allEntries) {
+      const currentEntries = allEntries.filter(entry => {
+        const pool = entry.friend_pools
+        if (!pool) return false
+        if (pool.sport !== activeSport) return false
+        return entry.period === (pool.current_period || 1)
+      })
+      setMyPools(currentEntries)
+      if (currentEntries.length > 0) {
+        setActivePoolEntry(currentEntries[0])
+        await loadPicks(currentEntries[0].id)
+      }
+    } else {
+      setMyPools([])
     }
     setLoading(false)
   }
@@ -148,7 +164,12 @@ async function setUnitVal(catId, val) {
           <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
             {myPools.map(entry => (
               <div key={entry.id} style={{ ...s.poolChip, ...(activePoolEntry?.id === entry.id ? s.poolChipActive : {}) }}
-                onClick={() => { setActivePoolEntry(entry); loadPicks(entry.id) }}>
+                onClick={() => { 
+  setPicks({})
+  setUnits({ 'ml-fav': 15, 'ml-dog': 15, 'sp-fav': 15, 'sp-dog': 15, 'tot-ov': 15, 'tot-un': 15 })
+  setActivePoolEntry(entry)
+  loadPicks(entry.id) 
+}}>
                 {entry.friend_pools.name}
               </div>
             ))}

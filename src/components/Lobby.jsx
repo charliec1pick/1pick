@@ -11,18 +11,29 @@ export default function Lobby({ session, profile, activeSport }) {
   const [creating, setCreating] = useState(false)
   const [joining, setJoining] = useState(false)
   const [error, setError] = useState('')
-  const [showResetConfirm, setShowResetConfirm] = useState(null) // holds pool id
+  const [showResetConfirm, setShowResetConfirm] = useState(null)
   const [resetting, setResetting] = useState(false)
 
   useEffect(() => { loadMyPools() }, [activeSport])
 
   async function loadMyPools() {
     setLoading(true)
-    const { data } = await supabase
+    const { data: allEntries } = await supabase
       .from('pool_entries')
       .select('*, friend_pools(*)')
       .eq('user_id', session.user.id)
-    setMyPools(data?.filter(e => e.friend_pools?.sport === activeSport) || [])
+
+    if (allEntries) {
+      const currentEntries = allEntries.filter(entry => {
+        const pool = entry.friend_pools
+        if (!pool) return false
+        if (pool.sport !== activeSport) return false
+        return entry.period === (pool.current_period || 1)
+      })
+      setMyPools(currentEntries)
+    } else {
+      setMyPools([])
+    }
     setLoading(false)
   }
 
@@ -42,14 +53,15 @@ export default function Lobby({ session, profile, activeSport }) {
         invite_code: code,
         commissioner_id: session.user.id,
         sport: activeSport,
-        week_label: `Week 14`
+        current_period: 1
       })
       .select()
       .single()
     if (poolError) { setError(poolError.message); setCreating(false); return }
     await supabase.from('pool_entries').insert({
       user_id: session.user.id,
-      friend_pool_id: pool.id
+      friend_pool_id: pool.id,
+      period: 1
     })
     setPoolName('')
     setShowCreate(false)
@@ -66,9 +78,10 @@ export default function Lobby({ session, profile, activeSport }) {
       .eq('invite_code', joinCode.trim().toUpperCase())
       .single()
     if (!pool) { setError('Pool not found — check your code'); setJoining(false); return }
+    const currentPeriod = pool.current_period || 1
     const { error: entryError } = await supabase
       .from('pool_entries')
-      .insert({ user_id: session.user.id, friend_pool_id: pool.id })
+      .insert({ user_id: session.user.id, friend_pool_id: pool.id, period: currentPeriod })
     if (entryError) { setError('You may already be in this pool'); setJoining(false); return }
     setJoinCode('')
     setShowJoin(false)
@@ -78,15 +91,12 @@ export default function Lobby({ session, profile, activeSport }) {
 
   async function resetPool(poolId) {
     setResetting(true)
-
-    // Get all entries for this pool
     const { data: entries } = await supabase
       .from('pool_entries')
       .select('id, user_id')
       .eq('friend_pool_id', poolId)
 
     if (entries) {
-      // Get current period number
       const { data: pool } = await supabase
         .from('friend_pools')
         .select('current_period')
@@ -95,7 +105,6 @@ export default function Lobby({ session, profile, activeSport }) {
 
       const newPeriod = (pool?.current_period || 1) + 1
 
-      // Create new pool entries for each member
       for (const entry of entries) {
         await supabase.from('pool_entries').insert({
           user_id: entry.user_id,
@@ -105,7 +114,6 @@ export default function Lobby({ session, profile, activeSport }) {
         })
       }
 
-      // Update pool's current period
       await supabase
         .from('friend_pools')
         .update({ current_period: newPeriod })
@@ -119,7 +127,6 @@ export default function Lobby({ session, profile, activeSport }) {
 
   return (
     <div>
-      {/* Hero */}
       <div style={s.hero}>
         <div style={s.heroLabel}>Friend Pools</div>
         <div style={s.heroTitle}>Play Against <em style={{fontStyle:'normal',color:'#C9A84C'}}>Your Crew</em></div>
@@ -130,7 +137,6 @@ export default function Lobby({ session, profile, activeSport }) {
         </div>
       </div>
 
-      {/* Create Pool Form */}
       {showCreate && (
         <div style={s.formCard}>
           <div style={s.formTitle}>Create a Pool</div>
@@ -150,7 +156,6 @@ export default function Lobby({ session, profile, activeSport }) {
         </div>
       )}
 
-      {/* Join Pool Form */}
       {showJoin && (
         <div style={s.formCard}>
           <div style={s.formTitle}>Join a Pool</div>
@@ -170,8 +175,7 @@ export default function Lobby({ session, profile, activeSport }) {
         </div>
       )}
 
-{/* My Pools */}
-      <div style={s.sectionTitle}><span>Your Pools This Week</span></div>
+      <div style={s.sectionTitle}><span>Your Pools</span></div>
       {loading ? <div style={s.empty}>Loading...</div> :
        myPools.length === 0 ? <div style={s.empty}>No pools yet — create one or enter a code above.</div> :
        myPools.map(entry => (
@@ -180,7 +184,7 @@ export default function Lobby({ session, profile, activeSport }) {
             <div style={s.poolIcon}>👥</div>
             <div style={s.poolInfo}>
               <div style={s.poolName}>{entry.friend_pools.name}</div>
-              <div style={s.poolMeta}>Code: <strong>{entry.friend_pools.invite_code}</strong> · {entry.friend_pools.sport.toUpperCase()} · Period {entry.friend_pools.current_period || 1}</div>
+              <div style={s.poolMeta}>Code: <strong>{entry.friend_pools.invite_code}</strong> · {entry.friend_pools.sport.toUpperCase()} · Session {entry.friend_pools.current_period || 1}</div>
             </div>
             <div style={{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:'6px'}}>
               <div style={s.poolBadge}>
