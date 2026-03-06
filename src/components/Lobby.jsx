@@ -11,6 +11,8 @@ export default function Lobby({ session, profile, activeSport }) {
   const [creating, setCreating] = useState(false)
   const [joining, setJoining] = useState(false)
   const [error, setError] = useState('')
+  const [showResetConfirm, setShowResetConfirm] = useState(null) // holds pool id
+  const [resetting, setResetting] = useState(false)
 
   useEffect(() => { loadMyPools() }, [activeSport])
 
@@ -74,6 +76,47 @@ export default function Lobby({ session, profile, activeSport }) {
     loadMyPools()
   }
 
+  async function resetPool(poolId) {
+    setResetting(true)
+
+    // Get all entries for this pool
+    const { data: entries } = await supabase
+      .from('pool_entries')
+      .select('id, user_id')
+      .eq('friend_pool_id', poolId)
+
+    if (entries) {
+      // Get current period number
+      const { data: pool } = await supabase
+        .from('friend_pools')
+        .select('current_period')
+        .eq('id', poolId)
+        .single()
+
+      const newPeriod = (pool?.current_period || 1) + 1
+
+      // Create new pool entries for each member
+      for (const entry of entries) {
+        await supabase.from('pool_entries').insert({
+          user_id: entry.user_id,
+          friend_pool_id: poolId,
+          period: newPeriod,
+          joined_at: new Date().toISOString()
+        })
+      }
+
+      // Update pool's current period
+      await supabase
+        .from('friend_pools')
+        .update({ current_period: newPeriod })
+        .eq('id', poolId)
+    }
+
+    setShowResetConfirm(null)
+    setResetting(false)
+    loadMyPools()
+  }
+
   return (
     <div>
       {/* Hero */}
@@ -127,20 +170,41 @@ export default function Lobby({ session, profile, activeSport }) {
         </div>
       )}
 
-      {/* My Pools */}
+{/* My Pools */}
       <div style={s.sectionTitle}><span>Your Pools This Week</span></div>
       {loading ? <div style={s.empty}>Loading...</div> :
        myPools.length === 0 ? <div style={s.empty}>No pools yet — create one or enter a code above.</div> :
        myPools.map(entry => (
-        <div key={entry.id} style={s.poolCard}>
-          <div style={s.poolIcon}>👥</div>
-          <div style={s.poolInfo}>
-            <div style={s.poolName}>{entry.friend_pools.name}</div>
-            <div style={s.poolMeta}>Code: <strong>{entry.friend_pools.invite_code}</strong> · {entry.friend_pools.sport.toUpperCase()}</div>
+        <div key={entry.id}>
+          <div style={s.poolCard}>
+            <div style={s.poolIcon}>👥</div>
+            <div style={s.poolInfo}>
+              <div style={s.poolName}>{entry.friend_pools.name}</div>
+              <div style={s.poolMeta}>Code: <strong>{entry.friend_pools.invite_code}</strong> · {entry.friend_pools.sport.toUpperCase()} · Period {entry.friend_pools.current_period || 1}</div>
+            </div>
+            <div style={{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:'6px'}}>
+              <div style={s.poolBadge}>
+                {entry.friend_pools.commissioner_id === session.user.id ? '👑 Commissioner' : '✓ Joined'}
+              </div>
+              {entry.friend_pools.commissioner_id === session.user.id && (
+                <button style={s.resetBtn} onClick={() => setShowResetConfirm(entry.friend_pools.id)}>
+                  New Session
+                </button>
+              )}
+            </div>
           </div>
-          <div style={s.poolBadge}>
-            {entry.friend_pools.commissioner_id === session.user.id ? '👑 Commissioner' : '✓ Joined'}
-          </div>
+          {showResetConfirm === entry.friend_pools.id && (
+            <div style={s.confirmCard}>
+              <div style={s.confirmTitle}>⚠️ New Session?</div>
+              <div style={s.confirmText}>This will clear all picks for everyone in <strong>{entry.friend_pools.name}</strong> and start a new session. Season standings will be preserved. This cannot be undone.</div>
+              <div style={{display:'flex',gap:'8px',marginTop:'14px'}}>
+                <button style={s.btnCancel} onClick={() => setShowResetConfirm(null)}>Cancel</button>
+                <button style={s.btnConfirm} onClick={() => resetPool(entry.friend_pools.id)} disabled={resetting}>
+                  {resetting ? 'Resetting...' : 'Yes, New Session →'}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
        ))
       }
@@ -172,4 +236,8 @@ const s = {
   poolName:{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.95rem',marginBottom:'2px'},
   poolMeta:{fontSize:'0.72rem',color:'#888580'},
   poolBadge:{fontSize:'0.72rem',fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,color:'#4B2E83',whiteSpace:'nowrap'},
+  resetBtn:{padding:'4px 10px',background:'rgba(192,57,43,0.08)',border:'1px solid rgba(192,57,43,0.3)',borderRadius:'6px',color:'#c0392b',fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.65rem',textTransform:'uppercase',letterSpacing:'1px',cursor:'pointer'},
+  confirmCard:{background:'#fff8f8',border:'1.5px solid rgba(192,57,43,0.3)',borderRadius:'12px',padding:'16px',marginBottom:'10px'},
+  confirmTitle:{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.95rem',color:'#c0392b',marginBottom:'6px'},
+  confirmText:{fontSize:'0.8rem',color:'#555',lineHeight:1.5},
 }
