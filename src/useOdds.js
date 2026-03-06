@@ -7,7 +7,7 @@ function parseOddsData(rawGames) {
   rawGames.forEach(game => {
     const commenced = new Date(game.commence_time)
     const now = new Date()
-    const started = now >= commenced
+    const started = Date.now() >= new Date(game.commence_time).getTime()
 
     games.push({
       id: game.id,
