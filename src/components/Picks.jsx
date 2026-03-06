@@ -42,7 +42,10 @@ export default function Picks({ session, activeSport }) {
       const pickMap = {}
       const unitMap = { 'ml-fav': 15, 'ml-dog': 15, 'sp-fav': 15, 'sp-dog': 15, 'tot-ov': 15, 'tot-un': 15 }
       data.forEach(p => {
-        pickMap[p.category] = { gameId: p.game_id, team: p.team, lockedOdds: p.locked_odds }
+        pickMap[p.category] = { 
+          gameId: p.game_id, team: p.team, lockedOdds: p.locked_odds,
+          homeTeam: p.home_team, awayTeam: p.away_team
+        }
         unitMap[p.category] = p.units
       })
       setPicks(pickMap)
@@ -50,13 +53,16 @@ export default function Picks({ session, activeSport }) {
     }
   }
 
-  async function savePick(catId, gameId, team, lockedOdds) {
+  async function savePick(catId, gameId, team, lockedOdds, homeTeam, awayTeam) {
     if (!activePoolEntry) return
+    const game = games.find(g => g.id === gameId)
+    if (game?.started) return
     const { data: existingData } = await supabase.from('picks').select('id').eq('pool_entry_id', activePoolEntry.id).eq('category', catId)
     const existing = existingData?.[0] || null
     if (existing) {
       await supabase.from('picks').update({
         game_id: gameId, team, locked_odds: lockedOdds,
+        home_team: homeTeam, away_team: awayTeam,
         units: units[catId], updated_at: new Date().toISOString()
       }).eq('id', existing.id)
     } else {
@@ -64,10 +70,12 @@ export default function Picks({ session, activeSport }) {
         user_id: session.user.id,
         pool_entry_id: activePoolEntry.id,
         category: catId, game_id: gameId,
-        team, locked_odds: lockedOdds, units: units[catId]
+        team, locked_odds: lockedOdds,
+        home_team: homeTeam, away_team: awayTeam,
+        units: units[catId]
       })
     }
-    setPicks(prev => ({ ...prev, [catId]: { gameId, team, lockedOdds } }))
+    setPicks(prev => ({ ...prev, [catId]: { gameId, team, lockedOdds, homeTeam, awayTeam } }))
     setOpenModal(null)
   }
 
@@ -183,16 +191,18 @@ async function setUnitVal(catId, val) {
                 <div style={s.pickLockBadge}>{locked ? '🔒 Locked' : 'Open'}</div>
               </div>
               <div style={s.pickCardBody}>
-                {pick ? (
-                  <>
-                    <div style={s.pickTeam}>{pick.team}</div>
-                    <div style={s.pickMeta}>{game ? `${game.away} @ ${game.home}` : ''}</div>
-                    <span style={s.oddsChip}>{pick.lockedOdds}</span>
-                  </>
-                ) : (
-                  <div style={s.pickEmpty}>Tap to choose a game →</div>
-                )}
-              </div>
+  {pick ? (
+    <>
+      <div style={s.pickTeam}>{pick.team}</div>
+      <div style={s.pickMeta}>
+        {game ? `${game.away} @ ${game.home}` : pick.awayTeam && pick.homeTeam ? `${pick.awayTeam} @ ${pick.homeTeam}` : ''}
+      </div>
+      <span style={s.oddsChip}>{pick.lockedOdds}</span>
+    </>
+  ) : (
+    <div style={s.pickEmpty}>Tap to choose a game →</div>
+  )}
+</div>
               <div style={s.pickCardFooter} onClick={e => e.stopPropagation()}>
                 <button
                   style={{ ...s.unitBtn, opacity: locked ? 0.4 : 1 }}
@@ -240,7 +250,7 @@ async function setUnitVal(catId, val) {
                 return (
                   <div key={game.id}
                     style={{ ...s.modalGame, borderColor: isSelected ? PICK_CATS.find(c => c.id === openModal)?.color : '#e2dfd8', background: isSelected ? '#f0eaf9' : '#fff', opacity: game.started ? 0.45 : 1, cursor: game.started ? 'not-allowed' : 'pointer' }}
-                    onClick={() => !game.started && savePick(openModal, game.id, gameOdds.team, gameOdds.odds)}>
+                    onClick={() => !game.started && savePick(openModal, game.id, gameOdds.team, gameOdds.odds, game.home, game.away)}>
                     <div style={s.modalGameHeader}>
                       <span>{game.away} @ {game.home}</span>
                       <span style={{ color: game.started ? '#c0392b' : '#888580' }}>{game.started ? '🔒 In Progress' : game.time}</span>
