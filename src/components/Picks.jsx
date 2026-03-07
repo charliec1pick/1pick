@@ -354,7 +354,12 @@ export default function Picks({ session, activeSport }) {
               <button style={s.modalClose} onClick={() => setOpenModal(null)}>✕</button>
             </div>
             <div style={{ padding: '14px 16px 24px' }}>
-              {games.map(game => {
+              {games.filter(game => {
+                const pool = activePoolEntry?.friend_pools
+                if (!pool?.session_start || !pool?.session_end) return true
+                const gameDate = game.commence_time.split('T')[0]
+                return gameDate >= pool.session_start && gameDate <= pool.session_end
+              }).map(game => {
                 const gameOdds = odds[game.id]?.[openModal]
                 if (!gameOdds) return null
                 const isSelected = picks[openModal]?.gameId === game.id

@@ -1,5 +1,16 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../supabase'
+import { useOdds } from '../useOdds'
+import UserProfileModal from './UserProfileModal'
+
+const PICK_CATS = [
+  { id: 'ml-fav', label: 'ML Fav', color: '#4B2E83' },
+  { id: 'ml-dog', label: 'ML Dog', color: '#C9A84C' },
+  { id: 'sp-fav', label: 'Spread Fav', color: '#4B2E83' },
+  { id: 'sp-dog', label: 'Spread Dog', color: '#C9A84C' },
+  { id: 'tot-ov', label: 'Over', color: '#1a7a4a' },
+  { id: 'tot-un', label: 'Under', color: '#6b47b8' },
+]
 
 export default function Leaderboard({ session, activeSport }) {
   const [myPools, setMyPools] = useState([])
@@ -9,6 +20,12 @@ export default function Leaderboard({ session, activeSport }) {
   const [view, setView] = useState('week')
   const [selectedSession, setSelectedSession] = useState(null)
   const [totalSessions, setTotalSessions] = useState(1)
+  const [expandedEntry, setExpandedEntry] = useState(null)
+  const [viewingProfile, setViewingProfile] = useState(null)
+  const [expandedPicks, setExpandedPicks] = useState({})
+  const [loadingPicks, setLoadingPicks] = useState(false)
+
+  const { games } = useOdds(activeSport)
 
   useEffect(() => { loadMyPools() }, [activeSport])
   useEffect(() => { if (activePool) loadLeaderboard(activePool.id) }, [view, selectedSession])
@@ -87,29 +104,25 @@ export default function Leaderboard({ session, activeSport }) {
         }
       }
 
-      const wins = allPicks.filter(p => p.result === 'win').length
-      const losses = allPicks.filter(p => p.result === 'loss').length
-      const netUnitsRaw = allPicks.reduce((sum, p) => {
+      const wins = allPicks.filter(p => p.result === 'win' && p.category !== 'unallocated-penalty').length
+      const losses = allPicks.filter(p => p.result === 'loss' && p.category !== 'unallocated-penalty').length
+      const netUnits = parseFloat(allPicks.reduce((sum, p) => {
         if (p.result === 'win' || p.result === 'loss') return sum + (p.payout_units || 0)
         return sum
-      }, 0)
+      }, 0).toFixed(1))
 
-      // Penalty: if all picks are locked and total units < 100
-      const allocatedUnits = allPicks.reduce((sum, p) => sum + (p.units || 0), 0)
-      const allLocked = allPicks.length > 0 && allPicks.every(p => p.result === 'win' || p.result === 'loss')
-      const penalty = (view !== 'season' && allLocked && allocatedUnits < 100)
-        ? -(100 - allocatedUnits)
-        : 0
+      const penaltyPick = allPicks.find(p => p.category === 'unallocated-penalty')
+      const penalty = penaltyPick ? penaltyPick.payout_units : 0
 
-      const netUnits = parseFloat((netUnitsRaw + penalty).toFixed(1))
+      // Store picks on entry for dropdown
+      const sessionPicks = allPicks.filter(p => p.category !== 'unallocated-penalty')
 
       return {
         ...entry,
         wins, losses, netUnits,
-        totalPicks: allPicks.length,
-        allocatedUnits,
+        totalPicks: sessionPicks.length,
         penalty,
-        allLocked,
+        sessionPicks,
         isYou: entry.user_id === session.user.id
       }
     }))
@@ -117,6 +130,10 @@ export default function Leaderboard({ session, activeSport }) {
     entriesWithPicks.sort((a, b) => b.netUnits - a.netUnits)
     setEntries(entriesWithPicks)
     setLoading(false)
+  }
+
+  function toggleExpand(entryId) {
+    setExpandedEntry(prev => prev === entryId ? null : entryId)
   }
 
   const ranks = ['🥇', '🥈', '🥉']
@@ -148,6 +165,7 @@ export default function Leaderboard({ session, activeSport }) {
                   const p = entry.friend_pools.current_period || 1
                   setTotalSessions(p)
                   setSelectedSession(p)
+                  setExpandedEntry(null)
                   loadLeaderboard(entry.friend_pool_id, p)
                 }}>
                 {entry.friend_pools.name}
@@ -161,7 +179,7 @@ export default function Leaderboard({ session, activeSport }) {
         <div style={s.cardHeader}>
           <div>
             <div style={s.cardTitle}>{activePool?.name} Leaderboard</div>
-            <div style={s.cardSub}>Results update as games finish</div>
+            <div style={s.cardSub}>Tap a player to see their locked picks</div>
           </div>
           <div style={{textAlign:'right'}}>
             <div style={s.poolCode}>Code: <strong>{activePool?.invite_code}</strong></div>
@@ -188,7 +206,7 @@ export default function Leaderboard({ session, activeSport }) {
 
         {view !== 'season' && (
           <div style={s.penaltyNote}>
-            ⚠️ Unallocated units are deducted once all your games lock
+            ⚠️ Unused units are deducted at session end — use all 100
           </div>
         )}
 
@@ -204,45 +222,113 @@ export default function Leaderboard({ session, activeSport }) {
           <div style={{padding:'32px',textAlign:'center',color:'#888580',fontSize:'0.85rem'}}>
             No picks submitted yet — be the first!
           </div>
-        ) : entries.map((entry, i) => (
-          <div key={entry.id}>
-            <div style={{...s.row, ...(entry.isYou ? s.rowYou : {})}}>
-              <div style={{...s.rank, ...(i===0?{color:'#C9A84C',fontSize:'1.25rem'}:i===1?{color:'#aaa',fontSize:'1.1rem'}:i===2?{color:'#cd7f32'}:{})}}>
-                {i < 3 ? ranks[i] : i + 1}
-              </div>
-              <div style={s.player}>
-                <div style={{...s.avatar, background: avatarColors[i % avatarColors.length]}}>
-                  {entry.profiles?.username?.[0]?.toUpperCase() || '?'}
+        ) : entries.map((entry, i) => {
+          const isExpanded = expandedEntry === entry.id
+          const picks = entry.sessionPicks || []
+
+          return (
+            <div key={entry.id}>
+              {/* Main row */}
+              <div
+                style={{...s.row, ...(entry.isYou ? s.rowYou : {}), cursor: view !== 'season' ? 'pointer' : 'default', userSelect:'none'}}
+                onClick={() => view !== 'season' && toggleExpand(entry.id)}>
+                <div style={{...s.rank, ...(i===0?{color:'#C9A84C',fontSize:'1.25rem'}:i===1?{color:'#aaa',fontSize:'1.1rem'}:i===2?{color:'#cd7f32'}:{})}}>
+                  {i < 3 ? ranks[i] : i + 1}
                 </div>
-                <div>
-                  <div style={s.playerName}>
-                    {entry.profiles?.username || 'Unknown'}
-                    {entry.isYou && <span style={s.youTag}>You</span>}
+                <div style={s.player}>
+                  <div style={{...s.avatar, background: avatarColors[i % avatarColors.length]}}>
+                    {entry.profiles?.username?.[0]?.toUpperCase() || '?'}
+                  </div>
+                  <div>
+                    <div style={s.playerName}>
+                      {entry.profiles?.username || 'Unknown'}
+                      {entry.isYou && <span style={s.youTag}>You</span>}
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div style={s.record}>{entry.wins}–{entry.losses}</div>
-              <div style={{...s.netUnits, color: entry.netUnits > 0 ? '#1a7a4a' : entry.netUnits < 0 ? '#c0392b' : '#888580'}}>
-                {entry.netUnits > 0 ? '+' : ''}{entry.netUnits}
-              </div>
-              <div style={s.picksCount}>
-                {view === 'season' ? `${entry.totalPicks}/${totalSessions * 6}` : `${entry.totalPicks}/6`}
-              </div>
-            </div>
-            {entry.penalty < 0 && (
-              <div style={s.penaltyRow}>
-                <div style={{gridColumn:'1/3',display:'flex',alignItems:'center',gap:'6px'}}>
-                  <span style={s.penaltyIcon}>⚠️</span>
-                  <span style={s.penaltyText}>Unallocated unit penalty</span>
+                <div style={s.record}>{entry.wins}–{entry.losses}</div>
+                <div style={{...s.netUnits, color: entry.netUnits > 0 ? '#1a7a4a' : entry.netUnits < 0 ? '#c0392b' : '#888580'}}>
+                  {entry.netUnits > 0 ? '+' : ''}{entry.netUnits}
                 </div>
-                <div />
-                <div style={s.penaltyAmount}>{entry.penalty}</div>
-                <div style={s.penaltyUnused}>{100 - entry.allocatedUnits} unused</div>
+                <div style={{...s.picksCount, display:'flex', alignItems:'center', gap:'4px'}}>
+                  {view === 'season' ? `${entry.totalPicks}/${totalSessions * 6}` : `${entry.totalPicks}/6`}
+                  {view !== 'season' && <span style={{fontSize:'0.6rem', color:'#aaa'}}>{isExpanded ? '▲' : '▼'}</span>}
+                </div>
               </div>
-            )}
-          </div>
-        ))}
+
+              {/* Penalty row */}
+              {entry.penalty < 0 && view !== 'season' && (
+                <div style={s.penaltyRow}>
+                  <div style={{gridColumn:'1/3',display:'flex',alignItems:'center',gap:'6px'}}>
+                    <span style={s.penaltyIcon}>⚠️</span>
+                    <span style={s.penaltyText}>Unallocated unit penalty</span>
+                  </div>
+                  <div />
+                  <div style={s.penaltyAmount}>{entry.penalty}</div>
+                  <div style={s.penaltyUnused}>{Math.abs(entry.penalty)} unused</div>
+                </div>
+              )}
+
+              {/* Picks dropdown */}
+              {isExpanded && (
+                <div style={s.picksDropdown}>
+                  <div style={s.picksDropdownTitle}>
+                    <span style={{cursor:'pointer', textDecoration:'underline', textDecorationStyle:'dotted'}} onClick={() => setViewingProfile(entry.user_id)}>
+                      {entry.profiles?.username}'s Picks 👤
+                    </span>
+                    <span style={s.picksDropdownHint}>🔒 Locked picks visible · Unlocked picks hidden</span>
+                  </div>
+                  <div style={s.picksDropdownGrid}>
+                    {PICK_CATS.map(cat => {
+                      const pick = picks.find(p => p.category === cat.id)
+                      const game = pick ? games.find(g => g.id === pick.game_id) : null
+                      const isLocked = pick && (game?.started || !game)
+                      const resultColor = pick?.result === 'win' ? '#1a7a4a' : pick?.result === 'loss' ? '#c0392b' : '#888580'
+
+                      return (
+                        <div key={cat.id} style={s.pickChip}>
+                          <div style={{...s.pickChipCat, background: cat.color}}>{cat.label}</div>
+                          <div style={{
+                            ...s.pickChipBody,
+                            filter: pick && !isLocked ? 'blur(4px)' : 'none',
+                            userSelect: pick && !isLocked ? 'none' : 'auto'
+                          }}>
+                            {pick ? (
+                              <>
+                                <div style={s.pickChipTeam}>{pick.team}</div>
+                                <div style={s.pickChipMeta}>
+                                  {pick.away_team && pick.home_team ? `${pick.away_team} @ ${pick.home_team}` : ''}
+                                </div>
+                                <div style={{display:'flex', alignItems:'center', gap:'6px', marginTop:'4px', flexWrap:'wrap'}}>
+                                  <span style={s.pickChipOdds}>{pick.locked_odds}</span>
+                                  <span style={s.pickChipUnits}>{pick.units}u</span>
+                                  {pick.result && pick.result !== 'pending' && (
+                                    <span style={{...s.pickChipResult, color: resultColor}}>
+                                      {pick.result === 'win' ? `✅ +${pick.payout_units}` : `❌ ${pick.payout_units}`}
+                                    </span>
+                                  )}
+                                </div>
+                              </>
+                            ) : (
+                              <div style={s.pickChipEmpty}>No pick</div>
+                            )}
+                          </div>
+                          {pick && !isLocked && (
+                            <div style={s.pickChipLockMsg}>🔓 Not locked yet</div>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          )
+        })}
       </div>
+    {viewingProfile && (
+        <UserProfileModal userId={viewingProfile} onClose={() => setViewingProfile(null)} />
+      )}
     </div>
   )
 }
@@ -280,4 +366,18 @@ const s = {
   penaltyText:{fontSize:'0.68rem',fontFamily:"'Barlow Condensed',sans-serif",color:'#c0392b',textTransform:'uppercase',letterSpacing:'0.5px'},
   penaltyAmount:{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.88rem',color:'#c0392b'},
   penaltyUnused:{fontSize:'0.68rem',color:'#c0392b',fontFamily:"'Barlow Condensed',sans-serif"},
+  picksDropdown:{background:'#f9f8f6',borderTop:'1px solid #e2dfd8',padding:'14px 16px'},
+  picksDropdownTitle:{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.72rem',textTransform:'uppercase',letterSpacing:'1.5px',color:'#4B2E83',marginBottom:'10px',display:'flex',justifyContent:'space-between',alignItems:'center',flexWrap:'wrap',gap:'4px'},
+  picksDropdownHint:{fontSize:'0.62rem',color:'#888580',fontWeight:400,textTransform:'none',letterSpacing:'0'},
+  picksDropdownGrid:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(160px,1fr))',gap:'8px'},
+  pickChip:{background:'#fff',border:'1.5px solid #e2dfd8',borderRadius:'10px',overflow:'hidden'},
+  pickChipCat:{padding:'4px 10px',fontSize:'0.58rem',fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,textTransform:'uppercase',letterSpacing:'1.5px',color:'#fff'},
+  pickChipBody:{padding:'8px 10px',minHeight:'52px',position:'relative'},
+  pickChipTeam:{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.82rem'},
+  pickChipMeta:{fontSize:'0.65rem',color:'#888580',marginTop:'1px'},
+  pickChipOdds:{display:'inline-block',background:'#fdf8ed',color:'#C9A84C',border:'1px solid #C9A84C',borderRadius:'4px',padding:'1px 6px',fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.65rem'},
+  pickChipUnits:{fontSize:'0.65rem',color:'#888580',fontFamily:"'Barlow Condensed',sans-serif",fontWeight:600},
+  pickChipResult:{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.7rem'},
+  pickChipEmpty:{fontSize:'0.75rem',color:'#ccc',fontStyle:'italic'},
+  pickChipLockMsg:{padding:'3px 10px',background:'#f0f0f0',fontSize:'0.6rem',color:'#aaa',fontFamily:"'Barlow Condensed',sans-serif",textAlign:'center'},
 }
