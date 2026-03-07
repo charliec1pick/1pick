@@ -236,9 +236,13 @@ export default function Leaderboard({ session, activeSport }) {
                   {i < 3 ? ranks[i] : i + 1}
                 </div>
                 <div style={s.player}>
-                  <div style={{...s.avatar, background: avatarColors[i % avatarColors.length]}}>
-                    {entry.profiles?.username?.[0]?.toUpperCase() || '?'}
-                  </div>
+                  {entry.profiles?.avatar_url ? (
+                    <img src={entry.profiles.avatar_url} alt="avatar" style={{...s.avatar, objectFit:'cover', background:'none'}} />
+                  ) : (
+                    <div style={{...s.avatar, background: avatarColors[i % avatarColors.length]}}>
+                      {entry.profiles?.username?.[0]?.toUpperCase() || '?'}
+                    </div>
+                  )}
                   <div>
                     <div style={s.playerName}>
                       {entry.profiles?.username || 'Unknown'}
