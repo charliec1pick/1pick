@@ -38,7 +38,7 @@ export default function Main({ session }) {
 
   return (
     <div style={{position:'relative',zIndex:1}}>
-      <Topbar profile={profile} weekLabel={`${activeSportData.label} · Week 14`} />
+      <Topbar profile={profile} activeSport={activeSportData.label} onAvatarClick={() => setActiveTab('Profile')} />
 
       {/* Sport Bar */}
       <div style={s.sportBar}>
