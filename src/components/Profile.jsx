@@ -30,9 +30,10 @@ async function loadStats() {
 
     if (!picks) return
 
-    const filteredPicks = selectedSport === 'all' 
+    const filteredPicks = (selectedSport === 'all' 
       ? picks 
       : picks.filter(p => p.pool_entries?.friend_pools?.sport === selectedSport)
+      ).filter(p => p.category !== 'unallocated-penalty')
 
     const wins = filteredPicks.filter(p => p.result === 'win').length
     const losses = filteredPicks.filter(p => p.result === 'loss').length
