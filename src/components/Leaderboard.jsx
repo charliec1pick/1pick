@@ -89,15 +89,27 @@ export default function Leaderboard({ session, activeSport }) {
 
       const wins = allPicks.filter(p => p.result === 'win').length
       const losses = allPicks.filter(p => p.result === 'loss').length
-      const netUnits = parseFloat(allPicks.reduce((sum, p) => {
+      const netUnitsRaw = allPicks.reduce((sum, p) => {
         if (p.result === 'win' || p.result === 'loss') return sum + (p.payout_units || 0)
         return sum
-      }, 0).toFixed(1))
+      }, 0)
+
+      // Penalty: if all picks are locked and total units < 100
+      const allocatedUnits = allPicks.reduce((sum, p) => sum + (p.units || 0), 0)
+      const allLocked = allPicks.length > 0 && allPicks.every(p => p.result === 'win' || p.result === 'loss')
+      const penalty = (view !== 'season' && allLocked && allocatedUnits < 100)
+        ? -(100 - allocatedUnits)
+        : 0
+
+      const netUnits = parseFloat((netUnitsRaw + penalty).toFixed(1))
 
       return {
         ...entry,
         wins, losses, netUnits,
         totalPicks: allPicks.length,
+        allocatedUnits,
+        penalty,
+        allLocked,
         isYou: entry.user_id === session.user.id
       }
     }))
@@ -174,6 +186,12 @@ export default function Leaderboard({ session, activeSport }) {
           )}
         </div>
 
+        {view !== 'season' && (
+          <div style={s.penaltyNote}>
+            ⚠️ Unallocated units are deducted once all your games lock
+          </div>
+        )}
+
         <div style={s.colHeaders}>
           <div>Rank</div>
           <div>Player</div>
@@ -187,28 +205,41 @@ export default function Leaderboard({ session, activeSport }) {
             No picks submitted yet — be the first!
           </div>
         ) : entries.map((entry, i) => (
-          <div key={entry.id} style={{...s.row, ...(entry.isYou ? s.rowYou : {})}}>
-            <div style={{...s.rank, ...(i===0?{color:'#C9A84C',fontSize:'1.25rem'}:i===1?{color:'#aaa',fontSize:'1.1rem'}:i===2?{color:'#cd7f32'}:{})}}>
-              {i < 3 ? ranks[i] : i + 1}
-            </div>
-            <div style={s.player}>
-              <div style={{...s.avatar, background: avatarColors[i % avatarColors.length]}}>
-                {entry.profiles?.username?.[0]?.toUpperCase() || '?'}
+          <div key={entry.id}>
+            <div style={{...s.row, ...(entry.isYou ? s.rowYou : {})}}>
+              <div style={{...s.rank, ...(i===0?{color:'#C9A84C',fontSize:'1.25rem'}:i===1?{color:'#aaa',fontSize:'1.1rem'}:i===2?{color:'#cd7f32'}:{})}}>
+                {i < 3 ? ranks[i] : i + 1}
               </div>
-              <div>
-                <div style={s.playerName}>
-                  {entry.profiles?.username || 'Unknown'}
-                  {entry.isYou && <span style={s.youTag}>You</span>}
+              <div style={s.player}>
+                <div style={{...s.avatar, background: avatarColors[i % avatarColors.length]}}>
+                  {entry.profiles?.username?.[0]?.toUpperCase() || '?'}
+                </div>
+                <div>
+                  <div style={s.playerName}>
+                    {entry.profiles?.username || 'Unknown'}
+                    {entry.isYou && <span style={s.youTag}>You</span>}
+                  </div>
                 </div>
               </div>
+              <div style={s.record}>{entry.wins}–{entry.losses}</div>
+              <div style={{...s.netUnits, color: entry.netUnits > 0 ? '#1a7a4a' : entry.netUnits < 0 ? '#c0392b' : '#888580'}}>
+                {entry.netUnits > 0 ? '+' : ''}{entry.netUnits}
+              </div>
+              <div style={s.picksCount}>
+                {view === 'season' ? `${entry.totalPicks}/${totalSessions * 6}` : `${entry.totalPicks}/6`}
+              </div>
             </div>
-            <div style={s.record}>{entry.wins}–{entry.losses}</div>
-            <div style={{...s.netUnits, color: entry.netUnits > 0 ? '#1a7a4a' : entry.netUnits < 0 ? '#c0392b' : '#888580'}}>
-              {entry.netUnits > 0 ? '+' : ''}{entry.netUnits}
-            </div>
-            <div style={s.picksCount}>
-              {view === 'season' ? `${entry.totalPicks}/${totalSessions * 6}` : `${entry.totalPicks}/6`}
-            </div>
+            {entry.penalty < 0 && (
+              <div style={s.penaltyRow}>
+                <div style={{gridColumn:'1/3',display:'flex',alignItems:'center',gap:'6px'}}>
+                  <span style={s.penaltyIcon}>⚠️</span>
+                  <span style={s.penaltyText}>Unallocated unit penalty</span>
+                </div>
+                <div />
+                <div style={s.penaltyAmount}>{entry.penalty}</div>
+                <div style={s.penaltyUnused}>{100 - entry.allocatedUnits} unused</div>
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -221,6 +252,7 @@ const s = {
   toggleBtn:{padding:'6px 16px',borderRadius:'7px',border:'1.5px solid #e2dfd8',background:'#fff',fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.72rem',textTransform:'uppercase',letterSpacing:'1px',cursor:'pointer',color:'#888580'},
   toggleActive:{background:'#4B2E83',borderColor:'#4B2E83',color:'#fff'},
   sessionSelect:{marginLeft:'auto',padding:'5px 10px',borderRadius:'7px',border:'1.5px solid #e2dfd8',background:'#fff',fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.72rem',color:'#4B2E83',cursor:'pointer',outline:'none'},
+  penaltyNote:{padding:'8px 16px',background:'#fff8ed',borderBottom:'1px solid #f0e0b0',fontSize:'0.68rem',fontFamily:"'Barlow Condensed',sans-serif",color:'#b8860b',letterSpacing:'0.5px'},
   empty:{textAlign:'center',padding:'60px 20px',color:'#888580',background:'#fff',border:'2px dashed #e2dfd8',borderRadius:'12px'},
   poolSelector:{background:'#fff',border:'1px solid #e2dfd8',borderRadius:'10px',padding:'12px 16px',marginBottom:'20px',display:'flex',alignItems:'center',gap:'12px',flexWrap:'wrap'},
   poolSelectorLabel:{fontSize:'0.66rem',fontFamily:"'Barlow Condensed',sans-serif",textTransform:'uppercase',letterSpacing:'1.5px',color:'#888580',whiteSpace:'nowrap'},
@@ -243,4 +275,9 @@ const s = {
   record:{fontSize:'0.78rem',color:'#888580',fontFamily:"'Barlow Condensed',sans-serif",fontWeight:600},
   netUnits:{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.92rem'},
   picksCount:{fontSize:'0.78rem',color:'#888580',fontFamily:"'Barlow Condensed',sans-serif"},
+  penaltyRow:{display:'grid',gridTemplateColumns:'44px 1fr 70px 90px 60px',padding:'6px 16px 8px',background:'#fff5f5',borderTop:'1px dashed #f5c6c6',alignItems:'center'},
+  penaltyIcon:{fontSize:'0.75rem'},
+  penaltyText:{fontSize:'0.68rem',fontFamily:"'Barlow Condensed',sans-serif",color:'#c0392b',textTransform:'uppercase',letterSpacing:'0.5px'},
+  penaltyAmount:{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.88rem',color:'#c0392b'},
+  penaltyUnused:{fontSize:'0.68rem',color:'#c0392b',fontFamily:"'Barlow Condensed',sans-serif"},
 }

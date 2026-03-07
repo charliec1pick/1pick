@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
-import Auth from './components/Auth'
+import Landing from './components/Landing'
 import Main from './components/Main'
 
 export default function App() {
@@ -20,7 +20,7 @@ export default function App() {
     return () => subscription.unsubscribe()
   }, [])
 
-  if (loading) return <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',background:'#1a1a1a',color:'#fff',fontFamily:'sans-serif'}}>Loading...</div>
+  if (loading) return <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',background:'#111',color:'#fff',fontFamily:'sans-serif'}}>Loading...</div>
 
-  return session ? <Main session={session} /> : <Auth />
+  return session ? <Main session={session} /> : <Landing />
 }

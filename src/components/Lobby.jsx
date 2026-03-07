@@ -176,7 +176,33 @@ export default function Lobby({ session, profile, activeSport }) {
       )}
 
       <div style={s.sectionTitle}><span>Your Pools</span></div>
-      {loading ? <div style={s.empty}>Loading...</div> :
+{!loading && myPools.some(e => e.friend_pools.commissioner_id === session.user.id) && (
+  <div style={s.commishCard}>
+    <div style={s.commishHeader}>
+      <span style={s.commishCrown}>👑</span>
+      <span style={s.commishTitle}>Commissioner Guide</span>
+    </div>
+    <div style={s.commishBody}>
+      <div style={s.commishRow}>
+        <div style={s.commishStep}>1</div>
+        <div style={s.commishText}><strong>You control the sessions.</strong> When you're ready to start a new round of picks, hit "New Session." Everyone's picks reset and a fresh session begins.</div>
+      </div>
+      <div style={s.commishRow}>
+        <div style={s.commishStep}>2</div>
+        <div style={s.commishText}><strong>Give everyone a heads up.</strong> Let your pool know before ending a session so they have time to finalize picks and check results.</div>
+      </div>
+      <div style={s.commishRow}>
+        <div style={s.commishStep}>3</div>
+        <div style={s.commishText}><strong>Season stats carry over.</strong> All-time records, net units, and past session results are always preserved — only current picks reset.</div>
+      </div>
+      <div style={s.commishRow}>
+        <div style={s.commishStep}>4</div>
+        <div style={s.commishText}><strong>Unallocated unit penalty.</strong> Once all of a player's games lock, any unused units out of 100 are deducted from their score. Remind your pool to use all their units.</div>
+      </div>
+    </div>
+  </div>
+)}
+{loading ? <div style={s.empty}>Loading...</div> :
        myPools.length === 0 ? <div style={s.empty}>No pools yet — create one or enter a code above.</div> :
        myPools.map(entry => (
         <div key={entry.id}>
@@ -191,9 +217,11 @@ export default function Lobby({ session, profile, activeSport }) {
                 {entry.friend_pools.commissioner_id === session.user.id ? '👑 Commissioner' : '✓ Joined'}
               </div>
               {entry.friend_pools.commissioner_id === session.user.id && (
-                <button style={s.resetBtn} onClick={() => setShowResetConfirm(entry.friend_pools.id)}>
-                  New Session
-                </button>
+                <>
+                  <button style={s.resetBtn} onClick={() => setShowResetConfirm(entry.friend_pools.id)}>
+                    New Session
+                  </button>
+                </>
               )}
             </div>
           </div>
@@ -244,4 +272,12 @@ const s = {
   confirmCard:{background:'#fff8f8',border:'1.5px solid rgba(192,57,43,0.3)',borderRadius:'12px',padding:'16px',marginBottom:'10px'},
   confirmTitle:{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.95rem',color:'#c0392b',marginBottom:'6px'},
   confirmText:{fontSize:'0.8rem',color:'#555',lineHeight:1.5},
-}
+  commishCard:{background:'#fdf8ed',border:'1.5px solid #e8d48b',borderRadius:'13px',padding:'18px',marginBottom:'20px'},
+  commishHeader:{display:'flex',alignItems:'center',gap:'8px',marginBottom:'14px'},
+  commishCrown:{fontSize:'1.1rem'},
+  commishTitle:{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.85rem',textTransform:'uppercase',letterSpacing:'1.5px',color:'#b8860b'},
+  commishBody:{display:'flex',flexDirection:'column',gap:'12px'},
+  commishRow:{display:'flex',alignItems:'flex-start',gap:'12px'},
+  commishStep:{width:'22px',height:'22px',borderRadius:'50%',background:'#C9A84C',color:'#fff',fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.72rem',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,marginTop:'1px'},
+  commishText:{fontSize:'0.8rem',color:'#7a6a2a',lineHeight:1.5},
+  }

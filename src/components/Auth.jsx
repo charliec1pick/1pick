@@ -8,6 +8,8 @@ export default function Auth() {
   const [username, setUsername] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [ageConfirmed, setAgeConfirmed] = useState(false)
+  const [tosConfirmed, setTosConfirmed] = useState(false)
 
   async function handleLogin() {
     setLoading(true)
@@ -18,30 +20,30 @@ export default function Auth() {
   }
 
   async function handleSignup() {
-  setLoading(true)
-  setError('')
-  if (!username.trim()) { setError('Username is required'); setLoading(false); return }
+    setLoading(true)
+    setError('')
+    if (!username.trim()) { setError('Username is required'); setLoading(false); return }
+    if (!ageConfirmed) { setError('You must be 18 or older to use 1Pick'); setLoading(false); return }
+    if (!tosConfirmed) { setError('You must agree to the Terms of Service'); setLoading(false); return }
 
-  // Check username not taken
-  const { data: existing } = await supabase
-    .from('profiles')
-    .select('username')
-    .eq('username', username.trim())
+    const { data: existing } = await supabase
+      .from('profiles')
+      .select('username')
+      .eq('username', username.trim())
 
-  if (existing && existing.length > 0) { setError('Username already taken'); setLoading(false); return }
+    if (existing && existing.length > 0) { setError('Username already taken'); setLoading(false); return }
 
-  const { data, error } = await supabase.auth.signUp({ email, password })
-  if (error) { setError(error.message); setLoading(false); return }
+    const { data, error } = await supabase.auth.signUp({ email, password })
+    if (error) { setError(error.message); setLoading(false); return }
 
-  // Wait a moment for auth to settle then create profile
-  setTimeout(async () => {
-    await supabase.from('profiles').insert({
-      id: data.user.id,
-      username: username.trim()
-    })
-    setLoading(false)
-  }, 1000)
-}
+    setTimeout(async () => {
+      await supabase.from('profiles').insert({
+        id: data.user.id,
+        username: username.trim()
+      })
+      setLoading(false)
+    }, 1000)
+  }
 
   return (
     <div style={styles.screen}>
@@ -73,9 +75,23 @@ export default function Auth() {
             onKeyDown={e=>e.key==='Enter'&&(mode==='login'?handleLogin():handleSignup())} />
         </div>
 
+        {mode === 'signup' && (
+          <div style={styles.checkboxGroup}>
+            <label style={styles.checkboxRow}>
+              <input type="checkbox" checked={ageConfirmed} onChange={e=>setAgeConfirmed(e.target.checked)} style={styles.checkbox} />
+              <span style={styles.checkboxLabel}>I confirm I am <strong style={{color:'#fff'}}>18 years of age or older</strong></span>
+            </label>
+            <label style={styles.checkboxRow}>
+              <input type="checkbox" checked={tosConfirmed} onChange={e=>setTosConfirmed(e.target.checked)} style={styles.checkbox} />
+              <span style={styles.checkboxLabel}>I agree to the <span style={styles.link}>Terms of Service</span> and <span style={styles.link}>Privacy Policy</span></span>
+            </label>
+          </div>
+        )}
+
         {error && <div style={styles.error}>{error}</div>}
 
-        <button style={styles.btn} onClick={mode==='login'?handleLogin:handleSignup} disabled={loading}>
+        <button style={{...styles.btn, opacity: mode==='signup' && (!ageConfirmed || !tosConfirmed) ? 0.5 : 1}}
+          onClick={mode==='login'?handleLogin:handleSignup} disabled={loading}>
           {loading ? 'Loading...' : mode==='login' ? 'Sign In →' : 'Create Account →'}
         </button>
 
@@ -96,10 +112,14 @@ const styles = {
   valuePropGrid:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'8px',marginBottom:'28px'},
   vp:{background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.07)',borderRadius:'10px',padding:'12px',textAlign:'center'},
   vpLabel:{fontSize:'0.7rem',fontFamily:"'Barlow Condensed', sans-serif",color:'rgba(255,255,255,0.45)',textTransform:'uppercase',letterSpacing:'1px',marginTop:'4px'},
-  title:{fontFamily:"'Barlow Condensed', sans-serif",fontWeight:700,fontSize:'1rem',textTransform:'uppercase',letterSpacing:'2px',color:'#fff',marginBottom:'4px'},
+  title:{fontFamily:"'Barlow Condensed', sans-serif",fontWeight:700,fontSize:'1rem',textTransform:'uppercase',letterSpacing:'2px',color:'#fff',marginBottom:'16px'},
   field:{marginBottom:'14px'},
   label:{display:'block',fontSize:'0.68rem',fontFamily:"'Barlow Condensed', sans-serif",textTransform:'uppercase',letterSpacing:'1.5px',color:'rgba(255,255,255,0.4)',marginBottom:'5px'},
   input:{width:'100%',background:'rgba(255,255,255,0.07)',border:'1px solid rgba(255,255,255,0.12)',borderRadius:'10px',padding:'12px 16px',color:'#fff',fontFamily:"'Barlow', sans-serif",fontSize:'0.9rem',outline:'none',boxSizing:'border-box'},
+  checkboxGroup:{marginBottom:'16px',display:'flex',flexDirection:'column',gap:'10px'},
+  checkboxRow:{display:'flex',alignItems:'flex-start',gap:'10px',cursor:'pointer'},
+  checkbox:{marginTop:'2px',accentColor:'#4B2E83',width:'15px',height:'15px',flexShrink:0,cursor:'pointer'},
+  checkboxLabel:{fontSize:'0.78rem',color:'rgba(255,255,255,0.45)',lineHeight:1.4},
   error:{background:'rgba(192,57,43,0.15)',border:'1px solid rgba(192,57,43,0.4)',borderRadius:'8px',padding:'10px 14px',color:'#e74c3c',fontSize:'0.82rem',marginBottom:'12px'},
   btn:{width:'100%',padding:'14px',background:'#4B2E83',border:'none',borderRadius:'10px',color:'#fff',fontFamily:"'Barlow Condensed', sans-serif",fontWeight:700,fontSize:'1rem',letterSpacing:'2px',textTransform:'uppercase',cursor:'pointer',marginTop:'6px'},
   switch:{textAlign:'center',marginTop:'18px',fontSize:'0.8rem',color:'rgba(255,255,255,0.38)'},
