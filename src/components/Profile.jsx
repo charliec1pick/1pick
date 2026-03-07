@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../supabase'
 
 const PICK_CATS = [
@@ -18,11 +18,13 @@ export default function Profile({ session, profile, setProfile }) {
   const [stats, setStats] = useState({ wins: 0, losses: 0, netUnits: 0, poolsEntered: 0 })
   const [catStats, setCatStats] = useState([])
   const [selectedSport, setSelectedSport] = useState('all')
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const fileInputRef = useRef(null)
 
   useEffect(() => { loadStats() }, [profile])
   useEffect(() => { loadStats() }, [selectedSport])
 
-async function loadStats() {
+  async function loadStats() {
     const { data: picks } = await supabase
       .from('picks')
       .select('*, pool_entries(friend_pools(sport))')
@@ -30,10 +32,10 @@ async function loadStats() {
 
     if (!picks) return
 
-    const filteredPicks = (selectedSport === 'all' 
-      ? picks 
+    const filteredPicks = (selectedSport === 'all'
+      ? picks
       : picks.filter(p => p.pool_entries?.friend_pools?.sport === selectedSport)
-      ).filter(p => p.category !== 'unallocated-penalty')
+    ).filter(p => p.category !== 'unallocated-penalty')
 
     const wins = filteredPicks.filter(p => p.result === 'win').length
     const losses = filteredPicks.filter(p => p.result === 'loss').length
@@ -48,8 +50,8 @@ async function loadStats() {
       .eq('user_id', session.user.id)
 
     const uniquePools = new Set(
-      (selectedSport === 'all' 
-        ? entries 
+      (selectedSport === 'all'
+        ? entries
         : entries?.filter(e => e.friend_pools?.sport === selectedSport)
       )?.map(e => e.friend_pool_id)
     )
@@ -68,6 +70,31 @@ async function loadStats() {
       return { ...cat, wins: catWins, losses: catLosses, netUnits: catNet, total: catPicks.length }
     })
     setCatStats(cats)
+  }
+
+  async function handleAvatarUpload(e) {
+    const file = e.target.files[0]
+    if (!file) return
+    setUploadingAvatar(true)
+
+    const ext = file.name.split('.').pop()
+    const path = `${session.user.id}/avatar.${ext}`
+
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(path, file, { upsert: true })
+
+    if (uploadError) { setUploadingAvatar(false); return }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('avatars')
+      .getPublicUrl(path)
+
+    const cacheBusted = `${publicUrl}?t=${Date.now()}`
+
+    await supabase.from('profiles').update({ avatar_url: cacheBusted }).eq('id', session.user.id)
+    setProfile({ ...profile, avatar_url: cacheBusted })
+    setUploadingAvatar(false)
   }
 
   async function saveProfile() {
@@ -92,12 +119,20 @@ async function loadStats() {
 
   return (
     <div>
-      {/* Profile Header */}
       <div style={s.header}>
         <div style={s.headerTop}>
-          <div style={s.avatar}>
-            {profile?.username?.[0]?.toUpperCase() || '?'}
+
+          {/* Tappable avatar with upload */}
+          <div style={{position:'relative',flexShrink:0}} onClick={() => fileInputRef.current.click()}>
+            {profile?.avatar_url ? (
+              <img src={profile.avatar_url} alt="avatar" style={s.avatarImg} />
+            ) : (
+              <div style={s.avatar}>{profile?.username?.[0]?.toUpperCase() || '?'}</div>
+            )}
+            <div style={s.avatarOverlay}>{uploadingAvatar ? '⏳' : '📷'}</div>
+            <input ref={fileInputRef} type="file" accept="image/*" style={{display:'none'}} onChange={handleAvatarUpload} />
           </div>
+
           {!editing ? (
             <div style={{flex:1}}>
               <div style={s.username}>{profile?.username}</div>
@@ -125,7 +160,6 @@ async function loadStats() {
         </div>
       </div>
 
-      {/* Stats */}
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'14px',flexWrap:'wrap',gap:'8px'}}>
         <div style={s.sectionTitle}><span>All-Time Stats</span></div>
         <div style={{display:'flex',gap:'6px',flexWrap:'wrap'}}>
@@ -138,30 +172,14 @@ async function loadStats() {
           ))}
         </div>
       </div>
+
       <div style={s.statsGrid}>
-        <div style={s.statCard}>
-          <div style={s.statLabel}>Total Picks Made</div>
-          <div style={s.statVal}>{allPicks.length}</div>
-          <div style={s.statSub}>Across all pools</div>
-        </div>
-        <div style={s.statCard}>
-          <div style={s.statLabel}>Win Rate</div>
-          <div style={s.statVal}>{winPct}%</div>
-          <div style={s.statSub}>{stats.wins}W – {stats.losses}L</div>
-        </div>
-        <div style={s.statCard}>
-          <div style={s.statLabel}>Net Units</div>
-          <div style={{...s.statVal, color: stats.netUnits >= 0 ? '#1a7a4a' : '#c0392b'}}>{stats.netUnits >= 0 ? '+' : ''}{stats.netUnits}</div>
-          <div style={s.statSub}>All-time</div>
-        </div>
-        <div style={s.statCard}>
-          <div style={s.statLabel}>Pools Entered</div>
-          <div style={s.statVal}>{stats.poolsEntered}</div>
-          <div style={s.statSub}>Total pools joined</div>
-        </div>
+        <div style={s.statCard}><div style={s.statLabel}>Total Picks Made</div><div style={s.statVal}>{allPicks.length}</div><div style={s.statSub}>Across all pools</div></div>
+        <div style={s.statCard}><div style={s.statLabel}>Win Rate</div><div style={s.statVal}>{winPct}%</div><div style={s.statSub}>{stats.wins}W – {stats.losses}L</div></div>
+        <div style={s.statCard}><div style={s.statLabel}>Net Units</div><div style={{...s.statVal, color: stats.netUnits >= 0 ? '#1a7a4a' : '#c0392b'}}>{stats.netUnits >= 0 ? '+' : ''}{stats.netUnits}</div><div style={s.statSub}>All-time</div></div>
+        <div style={s.statCard}><div style={s.statLabel}>Pools Entered</div><div style={s.statVal}>{stats.poolsEntered}</div><div style={s.statSub}>Total pools joined</div></div>
       </div>
 
-      {/* Category Breakdown */}
       <div style={s.sectionTitle}><span>Record by Category</span></div>
       <div style={s.catTable}>
         <div style={s.catHeader}>
@@ -185,11 +203,8 @@ async function loadStats() {
         ))}
       </div>
 
-      {/* Sign Out */}
       <div style={{textAlign:'center',marginTop:'32px'}}>
-        <button style={s.signOutBtn} onClick={() => supabase.auth.signOut({ scope: 'local' })}>
-          Sign Out
-        </button>
+        <button style={s.signOutBtn} onClick={() => supabase.auth.signOut({ scope: 'local' })}>Sign Out</button>
       </div>
     </div>
   )
@@ -199,6 +214,8 @@ const s = {
   header:{background:'linear-gradient(135deg,#4B2E83 0%,#2d1a5a 100%)',borderRadius:'18px',padding:'26px',marginBottom:'22px',boxShadow:'0 4px 20px rgba(75,46,131,0.3)'},
   headerTop:{display:'flex',alignItems:'flex-start',gap:'18px',flexWrap:'wrap',marginBottom:'18px'},
   avatar:{width:'62px',height:'62px',borderRadius:'50%',background:'rgba(255,255,255,0.15)',border:'2px solid rgba(255,255,255,0.28)',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'1.3rem',color:'#fff',flexShrink:0},
+  avatarImg:{width:'62px',height:'62px',borderRadius:'50%',objectFit:'cover',border:'2px solid rgba(255,255,255,0.28)',display:'block'},
+  avatarOverlay:{position:'absolute',bottom:0,right:0,background:'rgba(0,0,0,0.55)',borderRadius:'50%',width:'20px',height:'20px',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'0.65rem',cursor:'pointer'},
   username:{fontFamily:"'Playfair Display',serif",fontWeight:900,fontSize:'1.45rem',color:'#fff',marginBottom:'2px'},
   handle:{fontFamily:"'Barlow Condensed',sans-serif",fontSize:'0.75rem',color:'rgba(255,255,255,0.45)',letterSpacing:'1px',marginBottom:'10px'},
   editBtn:{background:'rgba(255,255,255,0.12)',border:'1px solid rgba(255,255,255,0.22)',borderRadius:'7px',padding:'7px 14px',color:'rgba(255,255,255,0.75)',fontFamily:"'Barlow Condensed',sans-serif",fontSize:'0.75rem',fontWeight:700,letterSpacing:'1px',textTransform:'uppercase',cursor:'pointer'},

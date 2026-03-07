@@ -98,9 +98,11 @@ export default function UserProfileModal({ userId, onClose }) {
               <div style={s.header}>
                 <button style={s.closeBtn} onClick={onClose}>✕</button>
                 <div style={s.headerTop}>
-                  <div style={s.avatar}>
-                    {profile?.username?.[0]?.toUpperCase() || '?'}
-                  </div>
+                  {profile?.avatar_url ? (
+                    <img src={profile.avatar_url} alt="avatar" style={{...s.avatar, objectFit:'cover'}} />
+                  ) : (
+                    <div style={s.avatar}>{profile?.username?.[0]?.toUpperCase() || '?'}</div>
+                  )}
                   <div style={{flex:1}}>
                     <div style={s.username}>{profile?.username}</div>
                     <div style={s.handleText}>@{profile?.username?.toLowerCase()} · Member since {new Date(profile?.created_at).getFullYear()}</div>

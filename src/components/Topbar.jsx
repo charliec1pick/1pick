@@ -1,4 +1,4 @@
-import { } from '../supabase'
+import { supabase } from '../supabase'
 
 export default function Topbar({ profile, onAvatarClick }) {
   return (
@@ -11,7 +11,11 @@ export default function Topbar({ profile, onAvatarClick }) {
       </div>
       <div style={s.right}>
         <div style={s.userChip} onClick={onAvatarClick}>
-          <div style={s.avatar}>{profile?.username?.[0]?.toUpperCase() || '?'}</div>
+          {profile?.avatar_url ? (
+            <img src={profile.avatar_url} alt="avatar" style={s.avatarImg} />
+          ) : (
+            <div style={s.avatar}>{profile?.username?.[0]?.toUpperCase() || '?'}</div>
+          )}
           <div style={s.userName}>{profile?.username || 'Loading...'}</div>
         </div>
       </div>
@@ -27,5 +31,6 @@ const s = {
   right:{display:'flex',alignItems:'center',gap:'10px'},
   userChip:{display:'flex',alignItems:'center',gap:'8px',background:'rgba(255,255,255,0.07)',border:'1px solid rgba(255,255,255,0.12)',borderRadius:'20px',padding:'5px 12px 5px 5px',cursor:'pointer'},
   avatar:{width:'26px',height:'26px',borderRadius:'50%',background:'#4B2E83',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'0.72rem',fontWeight:700,color:'#fff',fontFamily:"'Barlow Condensed',sans-serif"},
+  avatarImg:{width:'26px',height:'26px',borderRadius:'50%',objectFit:'cover',display:'block'},
   userName:{fontSize:'0.75rem',fontFamily:"'Barlow Condensed',sans-serif",fontWeight:600,color:'rgba(255,255,255,0.65)'},
 }

@@ -50,6 +50,7 @@ export default function Auth() {
       <div style={styles.box}>
         <div style={styles.logo}><em style={{color:'#C9A84C'}}>1</em>Pick</div>
         <div style={styles.tagline}>Beat the field. Every week.</div>
+        <div style={styles.ageBadge}>🔞 Must be 18+ to play</div>
 
         <div style={styles.valuePropGrid}>
           {[['🎯','6 Picks / Week'],['💰','Friend Pools'],['🏆','Season Standings'],['🔒','Odds Lock Live']].map(([icon,label])=>(
@@ -124,4 +125,5 @@ const styles = {
   btn:{width:'100%',padding:'14px',background:'#4B2E83',border:'none',borderRadius:'10px',color:'#fff',fontFamily:"'Barlow Condensed', sans-serif",fontWeight:700,fontSize:'1rem',letterSpacing:'2px',textTransform:'uppercase',cursor:'pointer',marginTop:'6px'},
   switch:{textAlign:'center',marginTop:'18px',fontSize:'0.8rem',color:'rgba(255,255,255,0.38)'},
   link:{color:'#C9A84C',cursor:'pointer',fontWeight:600},
+  ageBadge:{textAlign:'center',fontSize:'0.68rem',fontFamily:"'Barlow Condensed',sans-serif",textTransform:'uppercase',letterSpacing:'2px',color:'#C9A84C',background:'rgba(201,168,76,0.1)',border:'1px solid rgba(201,168,76,0.2)',borderRadius:'6px',padding:'5px 12px',marginBottom:'20px'},
 }

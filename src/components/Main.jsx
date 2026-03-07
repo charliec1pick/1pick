@@ -70,6 +70,9 @@ export default function Main({ session }) {
           {activeTab === 'Profile' && <Profile session={session} profile={profile} setProfile={setProfile} />}
         </div>
       </div>
+      <div style={s.oddsFooter}>
+        Odds data provided by <a href="https://the-odds-api.com" target="_blank" rel="noopener noreferrer" style={{color:'#C9A84C',textDecoration:'none'}}>The Odds API</a>
+      </div>
     </div>
   )
 }
@@ -84,4 +87,5 @@ const s = {
   tab:{flex:1,padding:'9px 8px',borderRadius:'7px',fontSize:'0.7rem',fontFamily:"'Barlow Condensed',sans-serif",textTransform:'uppercase',letterSpacing:'1.5px',fontWeight:700,cursor:'pointer',color:'#888580',border:'none',background:'none',textAlign:'center'},
   tabActive:{background:'#4B2E83',color:'#fff',boxShadow:'0 2px 8px rgba(75,46,131,0.3)'},
   placeholder:{textAlign:'center',padding:'60px 20px',color:'#888580',fontSize:'1rem'},
+  oddsFooter:{textAlign:'center',padding:'12px 16px 28px',fontSize:'0.62rem',fontFamily:"'Barlow Condensed',sans-serif",color:'#aaa',letterSpacing:'1px'},
 }
