@@ -377,7 +377,7 @@ const s = {
   formCard:{background:'#fff',border:'1px solid #e2dfd8',borderRadius:'14px',padding:'22px',marginBottom:'20px'},
   formTitle:{fontFamily:"'Playfair Display',serif",fontWeight:700,fontSize:'1.1rem',marginBottom:'16px'},
   field:{marginBottom:'12px'},
-  dateRow:{display:'flex',gap:'12px',marginBottom:'8px'},
+  dateRow:{display:'flex',flexDirection:'column',gap:'8px',marginBottom:'8px'},
   dateHint:{fontSize:'0.7rem',color:'#888580',marginBottom:'12px'},
   optional:{color:'#aaa',fontWeight:400,fontSize:'0.6rem'},
   label:{display:'block',fontSize:'0.66rem',fontFamily:"'Barlow Condensed',sans-serif",textTransform:'uppercase',letterSpacing:'1.5px',color:'#888580',marginBottom:'5px'},
