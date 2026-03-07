@@ -22,6 +22,7 @@ export default function Picks({ session, activeSport }) {
   const [selectedSession, setSelectedSession] = useState(null)
   const [totalSessions, setTotalSessions] = useState(1)
   const [viewingPastSession, setViewingPastSession] = useState(false)
+  const [saving, setSaving] = useState(false)
 
   const totalUnits = units['ml-fav'] + units['ml-dog'] + units['sp-fav'] + units['sp-dog'] + units['tot-ov'] + units['tot-un']
   const remaining = 100 - totalUnits
@@ -106,32 +107,36 @@ export default function Picks({ session, activeSport }) {
     }
   }
 
-  async function savePick(catId, gameId, team, lockedOdds, homeTeam, awayTeam) {
-    if (!activePoolEntry) return
-    if (viewingPastSession) return
-    const game = games.find(g => g.id === gameId)
-    if (game?.started) return
-    const { data: existingData } = await supabase.from('picks').select('id').eq('pool_entry_id', activePoolEntry.id).eq('category', catId)
-    const existing = existingData?.[0] || null
-    if (existing) {
-      await supabase.from('picks').update({
-        game_id: gameId, team, locked_odds: lockedOdds,
-        home_team: homeTeam, away_team: awayTeam,
-        units: units[catId], updated_at: new Date().toISOString()
-      }).eq('id', existing.id)
-    } else {
-      await supabase.from('picks').insert({
-        user_id: session.user.id,
-        pool_entry_id: activePoolEntry.id,
-        category: catId, game_id: gameId,
-        team, locked_odds: lockedOdds,
-        home_team: homeTeam, away_team: awayTeam,
-        units: units[catId]
-      })
-    }
-    setPicks(prev => ({ ...prev, [catId]: { gameId, team, lockedOdds, homeTeam, awayTeam } }))
-    setOpenModal(null)
+async function savePick(catId, gameId, team, lockedOdds, homeTeam, awayTeam) {
+  if (!activePoolEntry) return
+  if (viewingPastSession) return
+  if (saving) return
+  const game = games.find(g => g.id === gameId)
+  if (game?.started) return
+
+  setSaving(true)
+  const { data: existingData } = await supabase.from('picks').select('id').eq('pool_entry_id', activePoolEntry.id).eq('category', catId)
+  const existing = existingData?.[0] || null
+  if (existing) {
+    await supabase.from('picks').update({
+      game_id: gameId, team, locked_odds: lockedOdds,
+      home_team: homeTeam, away_team: awayTeam,
+      units: units[catId], updated_at: new Date().toISOString()
+    }).eq('id', existing.id)
+  } else {
+    await supabase.from('picks').insert({
+      user_id: session.user.id,
+      pool_entry_id: activePoolEntry.id,
+      category: catId, game_id: gameId,
+      team, locked_odds: lockedOdds,
+      home_team: homeTeam, away_team: awayTeam,
+      units: units[catId]
+    })
   }
+  setPicks(prev => ({ ...prev, [catId]: { gameId, team, lockedOdds, homeTeam, awayTeam } }))
+  setOpenModal(null)
+  setSaving(false)
+}
 
   async function increment(catId) {
     if (viewingPastSession) return
@@ -365,7 +370,7 @@ export default function Picks({ session, activeSport }) {
                 const isSelected = picks[openModal]?.gameId === game.id
                 return (
                   <div key={game.id}
-                    style={{ ...s.modalGame, borderColor: isSelected ? PICK_CATS.find(c => c.id === openModal)?.color : '#e2dfd8', background: isSelected ? '#f0eaf9' : '#fff', opacity: game.started ? 0.45 : 1, cursor: game.started ? 'not-allowed' : 'pointer' }}
+                    style={{ ...s.modalGame, borderColor: isSelected ? PICK_CATS.find(c => c.id === openModal)?.color : '#e2dfd8', background: isSelected ? '#f0eaf9' : '#fff', opacity: game.started ? 0.45 : saving ? 0.6 : 1, cursor: game.started ? 'not-allowed' : saving ? 'wait' : 'pointer' }}
                     onClick={() => !game.started && savePick(openModal, game.id, gameOdds.team, gameOdds.odds, game.home, game.away)}>
                     <div style={s.modalGameHeader}>
                       <span>{game.away} @ {game.home}</span>
