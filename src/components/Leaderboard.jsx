@@ -207,7 +207,7 @@ export default function Leaderboard({ session, activeSport }) {
               {entry.netUnits > 0 ? '+' : ''}{entry.netUnits}
             </div>
             <div style={s.picksCount}>
-              {entry.totalPicks}/6
+              {view === 'season' ? `${entry.totalPicks}/${totalSessions * 6}` : `${entry.totalPicks}/6`}
             </div>
           </div>
         ))}

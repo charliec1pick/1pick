@@ -17,44 +17,53 @@ export default function Profile({ session, profile, setProfile }) {
   const [saving, setSaving] = useState(false)
   const [stats, setStats] = useState({ wins: 0, losses: 0, netUnits: 0, poolsEntered: 0 })
   const [catStats, setCatStats] = useState([])
+  const [selectedSport, setSelectedSport] = useState('all')
 
   useEffect(() => { loadStats() }, [profile])
+  useEffect(() => { loadStats() }, [selectedSport])
 
-  async function loadStats() {
-    // Load all picks
+async function loadStats() {
     const { data: picks } = await supabase
       .from('picks')
-      .select('*')
+      .select('*, pool_entries(friend_pools(sport))')
       .eq('user_id', session.user.id)
 
     if (!picks) return
 
-    const wins = picks.filter(p => p.result === 'win').length
-    const losses = picks.filter(p => p.result === 'loss').length
-    const netUnits = allPicks.reduce((sum, p) => {
-  if (p.result === 'win' || p.result === 'loss') return sum + (p.payout_units || 0)
-  return sum
-}, 0)
+    const filteredPicks = selectedSport === 'all' 
+      ? picks 
+      : picks.filter(p => p.pool_entries?.friend_pools?.sport === selectedSport)
 
-    // Load pools entered
+    const wins = filteredPicks.filter(p => p.result === 'win').length
+    const losses = filteredPicks.filter(p => p.result === 'loss').length
+    const netUnits = parseFloat(filteredPicks.reduce((sum, p) => {
+      if (p.result === 'win' || p.result === 'loss') return sum + (p.payout_units || 0)
+      return sum
+    }, 0).toFixed(1))
+
     const { data: entries } = await supabase
       .from('pool_entries')
-      .select('id')
+      .select('id, friend_pool_id, friend_pools(sport)')
       .eq('user_id', session.user.id)
 
-    setStats({ wins, losses, netUnits, poolsEntered: entries?.length || 0 })
-    setAllPicks(picks)
+    const uniquePools = new Set(
+      (selectedSport === 'all' 
+        ? entries 
+        : entries?.filter(e => e.friend_pools?.sport === selectedSport)
+      )?.map(e => e.friend_pool_id)
+    )
 
-    // Cat stats
+    setStats({ wins, losses, netUnits, poolsEntered: uniquePools.size })
+    setAllPicks(filteredPicks)
+
     const cats = PICK_CATS.map(cat => {
-      const catPicks = picks.filter(p => p.category === cat.id)
+      const catPicks = filteredPicks.filter(p => p.category === cat.id)
       const catWins = catPicks.filter(p => p.result === 'win').length
       const catLosses = catPicks.filter(p => p.result === 'loss').length
-      const catNet = catPicks.reduce((sum, p) => {
-        if (p.result === 'win') return sum + p.units
-        if (p.result === 'loss') return sum - p.units
+      const catNet = parseFloat(catPicks.reduce((sum, p) => {
+        if (p.result === 'win' || p.result === 'loss') return sum + (p.payout_units || 0)
         return sum
-      }, 0)
+      }, 0).toFixed(1))
       return { ...cat, wins: catWins, losses: catLosses, netUnits: catNet, total: catPicks.length }
     })
     setCatStats(cats)
@@ -116,7 +125,18 @@ export default function Profile({ session, profile, setProfile }) {
       </div>
 
       {/* Stats */}
-      <div style={s.sectionTitle}><span>All-Time Stats</span></div>
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'14px',flexWrap:'wrap',gap:'8px'}}>
+        <div style={s.sectionTitle}><span>All-Time Stats</span></div>
+        <div style={{display:'flex',gap:'6px',flexWrap:'wrap'}}>
+          {['all','nfl','cbb','nba','cfb','mlb','nhl'].map(sport => (
+            <button key={sport}
+              style={{...s.sportBtn, ...(selectedSport === sport ? s.sportBtnActive : {})}}
+              onClick={() => setSelectedSport(sport)}>
+              {sport === 'all' ? 'All' : sport.toUpperCase()}
+            </button>
+          ))}
+        </div>
+      </div>
       <div style={s.statsGrid}>
         <div style={s.statCard}>
           <div style={s.statLabel}>Total Picks Made</div>
@@ -207,4 +227,6 @@ const s = {
   catNet:{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.88rem'},
   catTotal:{fontSize:'0.78rem',color:'#888580'},
   signOutBtn:{padding:'10px 28px',background:'#f9f8f6',border:'1.5px solid #e2dfd8',borderRadius:'9px',color:'#888580',fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.85rem',textTransform:'uppercase',letterSpacing:'1px',cursor:'pointer'},
+  sportBtn:{padding:'4px 10px',borderRadius:'6px',border:'1.5px solid #e2dfd8',background:'#fff',fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.65rem',textTransform:'uppercase',letterSpacing:'1px',cursor:'pointer',color:'#888580'},
+  sportBtnActive:{background:'#4B2E83',borderColor:'#4B2E83',color:'#fff'},
 }
