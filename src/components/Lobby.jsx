@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../supabase'
 
 export default function Lobby({ session, profile, activeSport }) {
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(null)
+  const [deleting, setDeleting] = useState(false)
   const [myPools, setMyPools] = useState([])
   const [loading, setLoading] = useState(true)
   const [showCreate, setShowCreate] = useState(false)
@@ -21,25 +23,25 @@ export default function Lobby({ session, profile, activeSport }) {
   useEffect(() => { loadMyPools() }, [activeSport])
 
   async function loadMyPools() {
-    setLoading(true)
-    const { data: allEntries } = await supabase
-      .from('pool_entries')
-      .select('*, friend_pools(*)')
-      .eq('user_id', session.user.id)
+  setLoading(true)
+  const { data: allEntries } = await supabase
+    .from('pool_entries')
+    .select('*, friend_pools(*)')
+    .eq('user_id', session.user.id)
 
-    if (allEntries) {
-      const currentEntries = allEntries.filter(entry => {
-        const pool = entry.friend_pools
-        if (!pool) return false
-        if (pool.sport !== activeSport) return false
-        return entry.period === (pool.current_period || 1)
-      })
-      setMyPools(currentEntries)
-    } else {
-      setMyPools([])
-    }
-    setLoading(false)
+  if (allEntries) {
+    const currentEntries = allEntries.filter(entry => {
+      const pool = entry.friend_pools
+      if (!pool) return false
+      if (pool.sport !== activeSport) return false
+      return entry.period === (pool.current_period || 1)
+    })
+    setMyPools(currentEntries)
+  } else {
+    setMyPools([])
   }
+  setLoading(false)
+}
 
   function generateCode() {
     return Math.random().toString(36).substring(2, 8).toUpperCase()
@@ -98,9 +100,35 @@ export default function Lobby({ session, profile, activeSport }) {
     loadMyPools()
   }
 
+async function deletePool(poolId) {
+  setDeleting(true)
+  
+  const { data: entries, error: entriesError } = await supabase
+    .from('pool_entries')
+    .select('id')
+    .eq('friend_pool_id', poolId)
+
+  console.log('entries to delete:', entries, entriesError)
+
+  if (entries && entries.length > 0) {
+    const entryIds = entries.map(e => e.id)
+    const { error: picksError } = await supabase.from('picks').delete().in('pool_entry_id', entryIds)
+    console.log('picks delete error:', picksError)
+  }
+
+  const { error: entriesDeleteError } = await supabase.from('pool_entries').delete().eq('friend_pool_id', poolId)
+  console.log('entries delete error:', entriesDeleteError)
+
+  const { error: poolDeleteError } = await supabase.from('friend_pools').delete().eq('id', poolId)
+  console.log('pool delete error:', poolDeleteError)
+
+  setShowDeleteConfirm(null)
+  setDeleting(false)
+  setTimeout(() => loadMyPools(), 300)
+}
+
   async function resetPool(poolId) {
     setResetting(true)
-
     const { data: entries } = await supabase
       .from('pool_entries')
       .select('id, user_id')
@@ -284,6 +312,14 @@ export default function Lobby({ session, profile, activeSport }) {
                   New Session
                 </button>
               )}
+              {entry.friend_pools.commissioner_id === session.user.id && (
+                <div style={{borderTop:'1px solid #e2dfd8', width:'100%', margin:'4px 0'}} />
+              )}
+              {entry.friend_pools.commissioner_id === session.user.id && (
+                <button style={s.deleteBtn} onClick={() => setShowDeleteConfirm(entry.friend_pools.id)}>
+                  Delete Pool
+                </button>
+              )}
             </div>
           </div>
           {showResetConfirm === entry.friend_pools.id && (
@@ -305,6 +341,20 @@ export default function Lobby({ session, profile, activeSport }) {
                 <button style={s.btnCancel} onClick={() => setShowResetConfirm(null)}>Cancel</button>
                 <button style={s.btnConfirm} onClick={() => resetPool(entry.friend_pools.id)} disabled={resetting}>
                   {resetting ? 'Resetting...' : 'Yes, New Session →'}
+                </button>
+              </div>
+            </div>
+          )}
+          {showDeleteConfirm === entry.friend_pools.id && (
+            <div style={s.confirmCard}>
+              <div style={s.confirmTitle}>🗑️ Delete Pool?</div>
+              <div style={s.confirmText}>
+                This will <strong>permanently delete</strong> <strong>{entry.friend_pools.name}</strong> including all picks and session history for every player. This cannot be undone.
+              </div>
+              <div style={{display:'flex',gap:'8px',marginTop:'14px'}}>
+                <button style={s.btnCancel} onClick={() => setShowDeleteConfirm(null)}>Cancel</button>
+                <button style={{...s.btnConfirm, background:'#c0392b'}} onClick={() => deletePool(entry.friend_pools.id)} disabled={deleting}>
+                  {deleting ? 'Deleting...' : 'Yes, Delete Forever →'}
                 </button>
               </div>
             </div>
@@ -355,4 +405,5 @@ const s = {
   commishRow:{display:'flex',alignItems:'flex-start',gap:'12px'},
   commishStep:{width:'22px',height:'22px',borderRadius:'50%',background:'#C9A84C',color:'#fff',fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.72rem',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,marginTop:'1px'},
   commishText:{fontSize:'0.8rem',color:'#7a6a2a',lineHeight:1.5},
+  deleteBtn:{padding:'4px 10px',background:'rgba(192,57,43,0.05)',border:'1px solid rgba(192,57,43,0.2)',borderRadius:'6px',color:'#c0392b',fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.65rem',textTransform:'uppercase',letterSpacing:'1px',cursor:'pointer'},
 }
