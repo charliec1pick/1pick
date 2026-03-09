@@ -38,7 +38,11 @@ export default async function handler(req, res) {
     if (!path) continue
 
     try {
-      const url = `https://site.api.espn.com/apis/site/v2/sports/${path}/scoreboard`
+      const url = sport === 'cbb'
+        ? `https://site.api.espn.com/apis/site/v2/sports/${path}/scoreboard?groups=50&limit=200`
+        : sport === 'cfb'
+        ? `https://site.api.espn.com/apis/site/v2/sports/${path}/scoreboard?groups=80&limit=200`
+        : `https://site.api.espn.com/apis/site/v2/sports/${path}/scoreboard?limit=200`
       const response = await fetch(url)
       const data = await response.json()
       const events = data?.events || []
