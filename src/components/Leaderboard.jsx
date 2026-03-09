@@ -38,26 +38,28 @@ export default function Leaderboard({ session, activeSport }) {
     return () => clearInterval(interval)
   }, [activeSport])
 
-  async function fetchLiveScores() {
-    const sportsToQuery = activeSport === 'multi'
-      ? ['nba', 'cbb', 'nfl', 'cfb', 'mlb', 'nhl']
-      : [activeSport]
-    const { data } = await supabase
-      .from('scores_cache')
-      .select('*')
-      .in('sport', sportsToQuery)
-    if (!data) return
-    const map = {}
-    for (const row of data) {
-      map[`${row.away_team}|${row.home_team}`] = row
-    }
-    setLiveScores(map)
+async function fetchLiveScores() {
+  const sportsToQuery = activeSport === 'multi'
+    ? ['nba', 'cbb', 'nfl', 'cfb', 'mlb', 'nhl']
+    : [activeSport]
+  const { data } = await supabase
+    .from('scores_cache')
+    .select('*')
+    .in('sport', sportsToQuery)
+  if (!data) return
+  const map = {}
+  for (const row of data) {
+    map[`${row.away_team}|${row.home_team}`] = row
   }
+  setLiveScores(map)
+}
 
-  function getLiveScore(pick) {
-    if (!pick?.away_team || !pick?.home_team) return null
-    return liveScores[`${pick.away_team}|${pick.home_team}`] || null
-  }
+function getLiveScore(pick) {
+  if (!pick?.away_team || !pick?.home_team) return null
+  console.log('liveScores keys:', Object.keys(liveScores))
+  console.log('looking for:', `${pick.away_team}|${pick.home_team}`)
+  return liveScores[`${pick.away_team}|${pick.home_team}`] || null
+}
 
   async function loadMyPools() {
     setLoading(true)
