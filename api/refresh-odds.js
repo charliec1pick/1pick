@@ -6,7 +6,7 @@ const supabase = createClient(
 )
 
 // ⚡ Update this list when seasons change — this is the ONLY place that hits the Odds API
-const ACTIVE_SPORTS = ['cbb', 'nba']
+const ACTIVE_SPORTS = ['cbb']
 
 const sportMap = {
   cbb: 'basketball_ncaab',

@@ -420,7 +420,7 @@ if (gameFilter === 'top25') {
           const game = pick ? games.find(g => g.id === pick.gameId) : null
           const locked = viewingPastSession || (!game && !!pick) || game?.started || false
           const catUnits = units[cat.id]
-          const canIncrease = !locked && totalUnits < 100 && catUnits < 40
+          const canIncrease = !locked && totalUnits < 100 && catUnits < (cat.id === 'ml-dog' ? 10 : 40)
           const result = pick?.result
           const resultColor = result === 'win' ? '#1a7a4a' : result === 'loss' ? '#c0392b' : '#888580'
           const resultLabel = result === 'win' ? '✅ Win' : result === 'loss' ? '❌ Loss' : result === 'pending' ? '⏳ Pending' : null
@@ -487,7 +487,7 @@ if (gameFilter === 'top25') {
                   <div style={{ flex: 1, textAlign: 'center' }}>
                     <input
                       style={{ ...s.unitDisplay, color: cat.color, border: '1.5px solid #e2dfd8', borderRadius: '8px', padding: '3px 8px', width: '100%', textAlign: 'center', outline: 'none' }}
-                      type="number" min="1" max="40" value={catUnits}
+                      type="number" min="1" max={cat.id === 'ml-dog' ? 10 : 40}
                       onClick={e => e.stopPropagation()}
                       onKeyDown={e => { e.stopPropagation(); if (['ArrowUp', 'ArrowDown'].includes(e.key)) e.preventDefault() }}
                       onChange={e => { e.stopPropagation(); !locked && setUnitVal(cat.id, e.target.value) }}
