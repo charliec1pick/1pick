@@ -41,65 +41,45 @@ const TOP_25 = [
 
 const CONFERENCES = {
   'ACC': ['Boston College Eagles','California Golden Bears','Clemson Tigers','Duke Blue Devils','Florida State Seminoles','Georgia Tech Yellow Jackets','Louisville Cardinals','Miami Hurricanes','NC State Wolfpack','North Carolina Tar Heels','Notre Dame Fighting Irish','Pittsburgh Panthers','SMU Mustangs','Stanford Cardinal','Syracuse Orange','Virginia Cavaliers','Virginia Tech Hokies','Wake Forest Demon Deacons'],
-  
   'Big Ten': ['Illinois Fighting Illini','Indiana Hoosiers','Iowa Hawkeyes','Maryland Terrapins','Michigan Wolverines','Michigan State Spartans','Minnesota Golden Gophers','Nebraska Cornhuskers','Northwestern Wildcats','Ohio State Buckeyes','Oregon Ducks','Penn State Nittany Lions','Purdue Boilermakers','Rutgers Scarlet Knights','UCLA Bruins','USC Trojans','Washington Huskies','Wisconsin Badgers'],
-  
   'Big 12': ['Arizona Wildcats','Arizona State Sun Devils','Baylor Bears','BYU Cougars','Cincinnati Bearcats','Colorado Buffaloes','Houston Cougars','Iowa State Cyclones','Kansas Jayhawks','Kansas State Wildcats','Oklahoma State Cowboys','TCU Horned Frogs','Texas Tech Red Raiders','UCF Knights','Utah Utes','West Virginia Mountaineers'],
-  
   'SEC': ['Alabama Crimson Tide','Arkansas Razorbacks','Auburn Tigers','Florida Gators','Georgia Bulldogs','Kentucky Wildcats','LSU Tigers','Mississippi State Bulldogs','Missouri Tigers','Oklahoma Sooners','Ole Miss Rebels','South Carolina Gamecocks','Tennessee Volunteers','Texas A&M Aggies','Texas Longhorns','Vanderbilt Commodores'],
-  
   'Big East': ['Butler Bulldogs','Creighton Bluejays','DePaul Blue Demons','Georgetown Hoyas','Marquette Golden Eagles','Providence Friars','Seton Hall Pirates',"St. John's Red Storm",'UConn Huskies','Villanova Wildcats','Xavier Musketeers'],
-  
   'American': ['Charlotte 49ers','East Carolina Pirates','Florida Atlantic Owls','Memphis Tigers','North Texas Mean Green','Rice Owls','South Florida Bulls','Temple Owls','Tulane Green Wave','Tulsa Golden Hurricane','UAB Blazers','UTSA Roadrunners','Wichita State Shockers'],
-  
   'Mountain West': ['Air Force Falcons','Boise State Broncos','Colorado State Rams','Fresno State Bulldogs','Grand Canyon Antelopes','Nevada Wolf Pack','New Mexico Lobos','San Diego State Aztecs','UNLV Rebels','Utah State Aggies','Wyoming Cowboys'],
-  
   'A-10': ['Davidson Wildcats','Dayton Flyers','Duquesne Dukes','Fordham Rams','George Mason Patriots','George Washington Revolutionaries','La Salle Explorers','Loyola Chicago Ramblers','Rhode Island Rams','Richmond Spiders',"Saint Joseph's Hawks",'Saint Louis Billikens','St. Bonaventure Bonnies','VCU Rams'],
-  
   'Sun Belt': ['App State Mountaineers','Arkansas State Red Wolves','Coastal Carolina Chanticleers','Georgia Southern Eagles','Georgia State Panthers','James Madison Dukes',"Louisiana Ragin' Cajuns",'Marshall Thundering Herd','Old Dominion Monarchs','South Alabama Jaguars','Southern Miss Golden Eagles','Texas State Bobcats','Troy Trojans'],
-  
   'MAC': ['Akron Zips','Ball State Cardinals','Bowling Green Falcons','Buffalo Bulls','Central Michigan Chippewas','Eastern Michigan Eagles','Kent State Golden Flashes','Miami (OH) RedHawks','Northern Illinois Huskies','Ohio Bobcats','Toledo Rockets','UMass Minutemen','Western Michigan Broncos'],
-  
   'CUSA': ['Delaware Fightin Blue Hens','Florida International Panthers','Jacksonville State Gamecocks','Liberty Flames','Louisiana Tech Bulldogs','Middle Tennessee Blue Raiders','Missouri State Bears','New Mexico State Aggies','Sam Houston Bearkats','UTEP Miners','Western Kentucky Hilltoppers'],
-  
   'MVC': ['Bradley Braves','Drake Bulldogs','Evansville Purple Aces','Illinois State Redbirds','Indiana State Sycamores','Missouri State Bears','Murray State Racers','Northern Iowa Panthers','Southern Illinois Salukis','Belmont Bruins'],
-  
   'WCC': ['Gonzaga Bulldogs','Loyola Marymount Lions','Oregon State Beavers','Pacific Tigers','Pepperdine Waves','Portland Pilots','San Diego Toreros','San Francisco Dons','Santa Clara Broncos',"Saint Mary's Gaels",'Seattle Redhawks','Washington State Cougars'],
-  
   'Horizon': ['Cleveland State Vikings','Detroit Mercy Titans','Green Bay Phoenix','Illinois Chicago Flames','Milwaukee Panthers','Northern Illinois Huskies','Northern Kentucky Norse','Oakland Golden Grizzlies','Purdue Fort Wayne Mastodons','Wright State Raiders','Youngstown State Penguins'],
-  
   'Ivy League': ['Brown Bears','Columbia Lions','Cornell Big Red','Dartmouth Big Green','Harvard Crimson','Pennsylvania Quakers','Princeton Tigers','Yale Bulldogs'],
-  
   'Patriot': ['Army Black Knights','Boston University Terriers','Bucknell Bison','Colgate Raiders','Holy Cross Crusaders','Lafayette Leopards','Lehigh Mountain Hawks','Loyola Maryland Greyhounds','Navy Midshipmen'],
-  
   'SoCon': ['Chattanooga Mocs','ETSU Buccaneers','Furman Paladins','Mercer Bears','Samford Bulldogs','The Citadel Bulldogs','UNC Greensboro Spartans','VMI Keydets','Western Carolina Catamounts','Wofford Terriers'],
-  
   'CAA': ['Campbell Fighting Camels','Charleston Cougars','Delaware Fightin Blue Hens','Drexel Dragons','Elon Phoenix','Hampton Pirates','Hofstra Pride','Monmouth Hawks','Northeastern Huskies','Stony Brook Seawolves','Towson Tigers','UNC Wilmington Seahawks','William & Mary Tribe'],
-  
   'SWAC': ['Alabama A&M Bulldogs','Alabama State Hornets','Alcorn State Braves','Arkansas-Pine Bluff Golden Lions','Bethune-Cookman Wildcats','Florida A&M Rattlers','Grambling Tigers','Jackson State Tigers','Mississippi Valley State Delta Devils','Prairie View Panthers','Southern Jaguars','Texas Southern Tigers'],
-  
   'MEAC': ['Coppin State Eagles','Delaware State Hornets','Howard Bison','Maryland Eastern Shore Hawks','Morgan State Bears','Norfolk State Spartans','North Carolina A&T Aggies','North Carolina Central Eagles','South Carolina State Bulldogs'],
-  
   'OVC': ['Eastern Illinois Panthers','Lindenwood Lions','Little Rock Trojans','Morehead State Eagles','SIU Edwardsville Cougars','Southeast Missouri State Redhawks','Tennessee State Tigers','UT Martin Skyhawks'],
-  
   'WAC': ['Abilene Christian Wildcats','Chicago State Cougars','Grand Canyon Antelopes','Sam Houston Bearkats','Southern Utah Thunderbirds','Tarleton State Texans','Texas Rio Grande Valley Vaqueros','Utah Tech Trailblazers','Utah Valley Wolverines'],
-  
   'Big South': ['Campbell Fighting Camels','Charleston Southern Buccaneers','Gardner-Webb Runnin Bulldogs','High Point Panthers','Longwood Lancers','Presbyterian Blue Hose','Radford Highlanders','UNC Asheville Bulldogs','Winthrop Eagles'],
-  
   'NEC': ['Bryant Bulldogs','Central Connecticut Blue Devils','Fairleigh Dickinson Knights','LIU Sharks','Merrimack Warriors',"Mount St. Mary's Mountaineers",'New Haven Nighthawks','Sacred Heart Pioneers','Saint Francis Red Flash','Wagner Seahawks'],
-  
   'MAAC': ['Canisius Golden Griffins','Fairfield Stags','Iona Gaels','Manhattan Jaspers','Marist Red Foxes','Niagara Purple Eagles','Quinnipiac Bobcats','Rider Broncs','Sacred Heart Pioneers','Siena Saints',"Saint Peter's Peacocks"],
-  
   'Big West': ['Cal Poly Mustangs','Cal State Fullerton Titans','Hawaii Rainbow Warriors','Long Beach State Beach','UC Davis Aggies','UC Irvine Anteaters','UC Riverside Highlanders','UC San Diego Tritons','UC Santa Barbara Gauchos'],
-  
   'Summit': ['Denver Pioneers','Kansas City Roos','North Dakota Fighting Hawks','North Dakota State Bison','Omaha Mavericks','Oral Roberts Golden Eagles','South Dakota Coyotes','South Dakota State Jackrabbits'],
-  
   'America East': ['Binghamton Bearcats','Bryant Bulldogs','Maine Black Bears','New Hampshire Wildcats','NJIT Highlanders','UAlbany Great Danes','UMBC Retrievers','UMass Lowell River Hawks','Vermont Catamounts'],
-  
   'Big Sky': ['Eastern Washington Eagles','Idaho State Bengals','Idaho Vandals','Montana Grizzlies','Montana State Bobcats','Northern Arizona Lumberjacks','Northern Colorado Bears','Portland State Vikings','Sacramento State Hornets','Weber State Wildcats'],
-  
   'ASUN': ['Austin Peay Governors','Bellarmine Knights','Central Arkansas Bears','Eastern Kentucky Colonels','Florida Gulf Coast Eagles','Jacksonville Dolphins','Lipscomb Bisons','North Alabama Lions','North Florida Ospreys','Queens University Royals','Stetson Hatters','West Georgia Wolves'],
 }
+
+// Helper: check if a game is started using ESPN scores_cache status first, then commence_time as fallback
+function isGameStarted(game, liveScores) {
+  if (!game) return false
+  const scoreRow = liveScores[`${game.away}|${game.home}`]
+  if (scoreRow) return scoreRow.status === 'in' || scoreRow.status === 'post'
+  return Date.now() >= new Date(game.commence_time).getTime()
+}
+
 export default function Picks({ session, activeSport }) {
   const [myPools, setMyPools] = useState([])
   const [allPoolEntries, setAllPoolEntries] = useState([])
@@ -121,7 +101,7 @@ export default function Picks({ session, activeSport }) {
 
   useEffect(() => { loadMyPools() }, [activeSport])
 
-  // Poll scores_cache every 60s for live score updates
+  // Poll scores_cache every 60s for live score updates + lock status
   useEffect(() => {
     fetchLiveScores()
     const interval = setInterval(fetchLiveScores, 60_000)
@@ -141,16 +121,14 @@ export default function Picks({ session, activeSport }) {
     if (!data) return
     const map = {}
     for (const row of data) {
-      const key = `${row.away_team}|${row.home_team}`
-      map[key] = row
+      map[`${row.away_team}|${row.home_team}`] = row
     }
     setLiveScores(map)
   }
 
   function getLiveScore(pick) {
     if (!pick?.awayTeam || !pick?.homeTeam) return null
-    const key = `${pick.awayTeam}|${pick.homeTeam}`
-    return liveScores[key] || null
+    return liveScores[`${pick.awayTeam}|${pick.homeTeam}`] || null
   }
 
   async function loadMyPools() {
@@ -230,7 +208,7 @@ export default function Picks({ session, activeSport }) {
     if (viewingPastSession) return
     if (saving) return
     const game = games.find(g => g.id === gameId)
-    if (game?.started) return
+    if (isGameStarted(game, liveScores)) return
     setSaving(true)
     const { data: existingData } = await supabase.from('picks').select('id').eq('pool_entry_id', activePoolEntry.id).eq('category', catId)
     const existing = existingData?.[0] || null
@@ -259,7 +237,7 @@ export default function Picks({ session, activeSport }) {
     if (viewingPastSession) return
     const pick = picks[catId]
     const game = pick ? games.find(g => g.id === pick.gameId) : null
-    const locked = !game && !!pick ? true : game?.started || false
+    const locked = !game && !!pick ? true : isGameStarted(game, liveScores)
     if (locked) return
     const current = units[catId]
     if (totalUnits >= 100) return
@@ -277,7 +255,7 @@ export default function Picks({ session, activeSport }) {
     if (viewingPastSession) return
     const pick = picks[catId]
     const game = pick ? games.find(g => g.id === pick.gameId) : null
-    const locked = !game && !!pick ? true : game?.started || false
+    const locked = !game && !!pick ? true : isGameStarted(game, liveScores)
     if (locked) return
     const current = units[catId]
     if (current <= 1) return
@@ -294,7 +272,7 @@ export default function Picks({ session, activeSport }) {
     if (viewingPastSession) return
     const pick = picks[catId]
     const game = pick ? games.find(g => g.id === pick.gameId) : null
-    const locked = !game && !!pick ? true : game?.started || false
+    const locked = !game && !!pick ? true : isGameStarted(game, liveScores)
     if (locked) return
     const newVal = Math.max(1, Math.min(40, parseInt(val) || 1))
     const otherTotal = totalUnits - units[catId]
@@ -309,7 +287,6 @@ export default function Picks({ session, activeSport }) {
 
   function filterGames(gameList) {
     let filtered = gameList
-    // Date window filter
     const pool = activePoolEntry?.friend_pools
     if (pool?.session_start && pool?.session_end) {
       filtered = filtered.filter(g => {
@@ -317,18 +294,16 @@ export default function Picks({ session, activeSport }) {
         return gameDate >= pool.session_start && gameDate <= pool.session_end
       })
     }
-    // Conference / Top 25 filter
-if (gameFilter === 'top25') {
-  filtered = filtered.filter(g =>
-    TOP_25.some(t => g.home === t.name || g.away === t.name)
-  )
-} else if (gameFilter !== 'all' && CONFERENCES[gameFilter]) {
-  const teams = CONFERENCES[gameFilter]
-  filtered = filtered.filter(g =>
-    teams.some(t => g.home === t || g.away === t)
-  )
-}
-    // Search filter
+    if (gameFilter === 'top25') {
+      filtered = filtered.filter(g =>
+        TOP_25.some(t => g.home === t.name || g.away === t.name)
+      )
+    } else if (gameFilter !== 'all' && CONFERENCES[gameFilter]) {
+      const teams = CONFERENCES[gameFilter]
+      filtered = filtered.filter(g =>
+        teams.some(t => g.home === t || g.away === t)
+      )
+    }
     if (gameSearch.trim()) {
       const q = gameSearch.toLowerCase()
       filtered = filtered.filter(g =>
@@ -418,7 +393,8 @@ if (gameFilter === 'top25') {
         {PICK_CATS.map(cat => {
           const pick = picks[cat.id]
           const game = pick ? games.find(g => g.id === pick.gameId) : null
-          const locked = viewingPastSession || (!game && !!pick) || game?.started || false
+          const gameStarted = isGameStarted(game, liveScores)
+          const locked = viewingPastSession || (!game && !!pick) || gameStarted || false
           const catUnits = units[cat.id]
           const canIncrease = !locked && totalUnits < 100 && catUnits < (cat.id === 'ml-dog' ? 10 : 40)
           const result = pick?.result
@@ -446,7 +422,6 @@ if (gameFilter === 'top25') {
                       {game ? `${game.away} @ ${game.home}` : pick.awayTeam && pick.homeTeam ? `${pick.awayTeam} @ ${pick.homeTeam}` : ''}
                     </div>
 
-                    {/* Live / Final score display */}
                     {liveScore && (isLive || isFinal) && (
                       <div style={s.liveScoreBox}>
                         <div style={s.liveScoreRow}>
@@ -523,7 +498,6 @@ if (gameFilter === 'top25') {
               <button style={s.modalClose} onClick={() => setOpenModal(null)}>✕</button>
             </div>
 
-            {/* Filter bar */}
             <div style={s.filterBar}>
               <select
                 style={s.filterSelect}
@@ -559,10 +533,11 @@ if (gameFilter === 'top25') {
                   const gameOdds = odds[game.id]?.[openModal]
                   if (!gameOdds) return null
                   const isSelected = picks[openModal]?.gameId === game.id
+                  const started = isGameStarted(game, liveScores)
                   return (
                     <div key={game.id}
-                      style={{ ...s.modalGame, borderColor: isSelected ? PICK_CATS.find(c => c.id === openModal)?.color : '#e2dfd8', background: isSelected ? '#f0eaf9' : '#fff', opacity: game.started ? 0.45 : saving ? 0.6 : 1, cursor: game.started ? 'not-allowed' : saving ? 'wait' : 'pointer' }}
-                      onClick={() => !game.started && savePick(openModal, game.id, gameOdds.team, gameOdds.odds, game.home, game.away)}>
+                      style={{ ...s.modalGame, borderColor: isSelected ? PICK_CATS.find(c => c.id === openModal)?.color : '#e2dfd8', background: isSelected ? '#f0eaf9' : '#fff', opacity: started ? 0.45 : saving ? 0.6 : 1, cursor: started ? 'not-allowed' : saving ? 'wait' : 'pointer' }}
+                      onClick={() => !started && !saving && savePick(openModal, game.id, gameOdds.team, gameOdds.odds, game.home, game.away)}>
                       <div style={s.modalGameHeader}>
                         <span>
                           {(() => {
@@ -575,7 +550,9 @@ if (gameFilter === 'top25') {
                             )
                           })()}
                         </span>
-                        <span style={{ color: game.started ? '#c0392b' : '#888580' }}>{game.started ? '🔒 In Progress' : game.time}</span>
+                        <span style={{ color: started ? '#c0392b' : '#888580' }}>
+                          {started ? '🔒 In Progress' : game.time}
+                        </span>
                       </div>
                       <div style={{ padding: '12px 14px' }}>
                         <div style={s.modalPickName}>{gameOdds.team}</div>
