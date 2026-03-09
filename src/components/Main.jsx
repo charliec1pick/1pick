@@ -13,6 +13,7 @@ const SPORTS = [
   {id:'nba', label:'NBA', color:'#c9082a'},
   {id:'mlb', label:'MLB', color:'#002d72'},
   {id:'nhl', label:'NHL', color:'#000099'},
+  {id:'multi', label:'Multi', color:'#6b47b8'},
 ]
 
 const TABS = ['Lobby', 'My Picks', 'Leaderboard', 'Profile']

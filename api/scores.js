@@ -5,47 +5,25 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY
 )
 
-const sportMap = {
-  cbb: 'basketball_ncaab',
-  nba: 'basketball_nba',
-  nfl: 'americanfootball_nfl',
-  cfb: 'americanfootball_ncaaf',
-  mlb: 'baseball_mlb',
-  nhl: 'icehockey_nhl',
+function determineWinner(homeTeam, awayTeam, homeScore, awayScore) {
+  if (homeScore === awayScore) return 'draw'
+  return homeScore > awayScore ? homeTeam : awayTeam
 }
 
-function determineWinner(game) {
-  if (!game.scores) return null
-  if (!game.completed) return null
-  const home = game.scores.find(s => s.name === game.home_team)
-  const away = game.scores.find(s => s.name === game.away_team)
-  if (!home || !away) return null
-  const homeScore = parseFloat(home.score)
-  const awayScore = parseFloat(away.score)
-  if (isNaN(homeScore) || isNaN(awayScore)) return null
-  if (homeScore === 0 && awayScore === 0) return null
-  if (homeScore > awayScore) return game.home_team
-  if (awayScore > homeScore) return game.away_team
-  return 'draw'
-}
-
-function checkPickResult(pick, game, winner) {
-  if (!winner || winner === 'draw') return 'pending'
+function checkPickResult(pick, homeTeam, awayTeam, homeScore, awayScore) {
+  const winner = determineWinner(homeTeam, awayTeam, homeScore, awayScore)
 
   if (pick.category === 'ml-fav' || pick.category === 'ml-dog') {
-    const won = pick.team === winner
-    if (!won) return 'loss'
-    return 'win'
+    if (winner === 'draw') return 'pending'
+    return pick.team === winner ? 'win' : 'loss'
   }
 
   if (pick.category === 'tot-ov' || pick.category === 'tot-un') {
     const match = pick.team.match(/(\d+\.?\d*)/)
     if (!match) return 'pending'
     const total = parseFloat(match[1])
-    const homeScore = parseFloat(game.scores.find(s => s.name === game.home_team)?.score || 0)
-    const awayScore = parseFloat(game.scores.find(s => s.name === game.away_team)?.score || 0)
     const combined = homeScore + awayScore
-    if (combined === total) return 'pending'
+    if (combined === total) return 'pending' // exact push
     if (pick.category === 'tot-ov') return combined > total ? 'win' : 'loss'
     if (pick.category === 'tot-un') return combined < total ? 'win' : 'loss'
   }
@@ -54,71 +32,86 @@ function checkPickResult(pick, game, winner) {
     const match = pick.team.match(/([+-]?\d+\.?\d*)$/)
     if (!match) return 'pending'
     const spread = parseFloat(match[1])
-    const homeScore = parseFloat(game.scores.find(s => s.name === game.home_team)?.score || 0)
-    const awayScore = parseFloat(game.scores.find(s => s.name === game.away_team)?.score || 0)
     const teamName = pick.team.replace(/[+-]?\d+\.?\d*$/, '').trim()
-    const isHome = game.home_team.includes(teamName) || teamName.includes(game.home_team.split(' ').pop())
+    const isHome =
+      homeTeam.includes(teamName) ||
+      teamName.includes(homeTeam.split(' ').pop())
     const teamScore = isHome ? homeScore : awayScore
     const oppScore = isHome ? awayScore : homeScore
-    const margin = (teamScore + spread) - oppScore
-    if (margin === 0) return 'pending'
+    const margin = teamScore + spread - oppScore
+    if (margin === 0) return 'pending' // exact push
     return margin > 0 ? 'win' : 'loss'
   }
 
   return 'pending'
 }
 
+function calcPayout(units, lockedOdds, result) {
+  if (result !== 'win') return -units
+  const odds = parseFloat(lockedOdds)
+  if (odds < 0) return parseFloat((units / (Math.abs(odds) / 100)).toFixed(1))
+  return parseFloat((units * (odds / 100)).toFixed(1))
+}
+
+// Match a pick's home_team/away_team to a scores_cache row
+// ESPN team names should match since odds_cache also stores displayName-style names
+function teamsMatch(pick, scoreRow) {
+  const normalize = s => s?.toLowerCase().trim()
+  return (
+    normalize(pick.home_team) === normalize(scoreRow.home_team) &&
+    normalize(pick.away_team) === normalize(scoreRow.away_team)
+  )
+}
+
 export default async function handler(req, res) {
-  const sports = ['cbb', 'nba'] //update as seasons change
+  // Fetch all completed games from scores_cache
+  const { data: completedGames, error: scoresError } = await supabase
+    .from('scores_cache')
+    .select('*')
+    .eq('status', 'post')
+
+  if (scoresError || !completedGames?.length) {
+    return res.status(200).json({ updated: 0, message: 'No completed games found' })
+  }
+
+  // Fetch all pending picks that have home_team/away_team stored
+  const { data: pendingPicks, error: picksError } = await supabase
+    .from('picks')
+    .select('*')
+    .eq('result', 'pending')
+    .neq('category', 'unallocated-penalty')
+
+  if (picksError || !pendingPicks?.length) {
+    return res.status(200).json({ updated: 0, message: 'No pending picks found' })
+  }
+
   let totalUpdated = 0
 
-  for (const sport of sports) {
-    const sportKey = sportMap[sport]
-    try {
-      const response = await fetch(
-        `https://api.the-odds-api.com/v4/sports/${sportKey}/scores/?apiKey=${process.env.ODDS_API_KEY}&daysFrom=2`
-      )
-      const games = await response.json()
-      if (!Array.isArray(games)) continue
+  for (const pick of pendingPicks) {
+    // Try to match by game_id first (Odds API ID stored in scores_cache if we ever add it)
+    // Fall back to team name matching
+    const scoreRow = completedGames.find(g => teamsMatch(pick, g))
+    if (!scoreRow) continue
 
-      const completedGames = games.filter(g => g.completed)
+    const result = checkPickResult(
+      pick,
+      scoreRow.home_team,
+      scoreRow.away_team,
+      scoreRow.home_score,
+      scoreRow.away_score
+    )
 
-      for (const game of completedGames) {
-        const winner = determineWinner(game)
-        if (!winner) continue
-
-        const { data: picks } = await supabase
-          .from('picks')
-          .select('*')
-          .eq('game_id', game.id)
-          .eq('result', 'pending')
-
-        if (!picks || picks.length === 0) continue
-
-        for (const pick of picks) {
-  const result = checkPickResult(pick, game, winner)
-  if (result !== 'pending') {
-    let payoutUnits = 0
-    if (result === 'win') {
-      const odds = parseFloat(pick.locked_odds)
-      if (odds < 0) {
-        payoutUnits = parseFloat((pick.units / (Math.abs(odds) / 100)).toFixed(1))
-      } else {
-        payoutUnits = parseFloat((pick.units * (odds / 100)).toFixed(1))
-      }
-    } else {
-      payoutUnits = -pick.units
-    }
-    await supabase
-      .from('picks')
-      .update({ result, payout_units: payoutUnits, updated_at: new Date().toISOString() })
-      .eq('id', pick.id)
-    totalUpdated++
-  }
-}
-      }
-    } catch (err) {
-      console.error(`Error processing ${sport}:`, err)
+    if (result !== 'pending') {
+      const payoutUnits = calcPayout(pick.units, pick.locked_odds, result)
+      await supabase
+        .from('picks')
+        .update({
+          result,
+          payout_units: payoutUnits,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', pick.id)
+      totalUpdated++
     }
   }
 

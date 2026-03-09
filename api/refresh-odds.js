@@ -5,6 +5,9 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY
 )
 
+// ⚡ Update this list when seasons change — this is the ONLY place that hits the Odds API
+const ACTIVE_SPORTS = ['cbb', 'nba']
+
 const sportMap = {
   cbb: 'basketball_ncaab',
   nba: 'basketball_nba',
@@ -15,10 +18,9 @@ const sportMap = {
 }
 
 export default async function handler(req, res) {
-  const sports = ['cbb', 'nba']// update as seasons change
   let refreshed = []
 
-  for (const sport of sports) {
+  for (const sport of ACTIVE_SPORTS) {
     const sportKey = sportMap[sport]
     try {
       const response = await fetch(
@@ -39,5 +41,5 @@ export default async function handler(req, res) {
     }
   }
 
-  res.status(200).json({ refreshed })
+  res.status(200).json({ refreshed, totalCalls: refreshed.length })
 }

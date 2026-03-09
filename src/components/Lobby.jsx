@@ -88,7 +88,13 @@ export default function Lobby({ session, profile, activeSport }) {
       .eq('invite_code', joinCode.trim().toUpperCase())
       .single()
     if (!pool) { setError('Pool not found — check your code'); setJoining(false); return }
-    if (pool.sport !== activeSport) { setError(`This is a ${pool.sport.toUpperCase()} pool — switch to ${pool.sport.toUpperCase()} to join`); setJoining(false); return }
+    if (pool.sport !== activeSport) {
+      const label = pool.sport === 'multi' ? 'Multi-Sport' : pool.sport.toUpperCase()
+      const tabLabel = pool.sport === 'multi' ? 'Multi' : pool.sport.toUpperCase()
+      setError(`This is a ${label} pool — switch to the ${tabLabel} tab to join`)
+      setJoining(false)
+      return
+    }
     const currentPeriod = pool.current_period || 1
     const { error: entryError } = await supabase
       .from('pool_entries')
@@ -201,7 +207,14 @@ async function deletePool(poolId) {
       <div style={s.hero}>
         <div style={s.heroLabel}>Friend Pools</div>
         <div style={s.heroTitle}>Play Against <em style={{fontStyle:'normal',color:'#C9A84C'}}>Your Crew</em></div>
-        <div style={s.heroSub}>Create a private pool and invite friends with a code. Same picks, same rules — bragging rights on the line.</div>
+        {activeSport === 'multi' ? (
+          <>
+            <div style={s.multiBadge}>🌐 Multi-Sport Pool — Pick from any sport</div>
+            <div style={s.heroSub}>All 6 pick categories, but your games can come from NFL, CFB, NBA, CBB, MLB, or NHL — all in one pool.</div>
+          </>
+        ) : (
+          <div style={s.heroSub}>Create a private pool and invite friends with a code. Same picks, same rules — bragging rights on the line.</div>
+        )}
         <div style={s.heroButtons}>
           <button style={s.btnCreate} onClick={() => { setShowCreate(true); setShowJoin(false); setError('') }}>+ Create Pool</button>
           <button style={s.btnJoin} onClick={() => { setShowJoin(true); setShowCreate(false); setError('') }}>Enter Code</button>
@@ -297,7 +310,7 @@ async function deletePool(poolId) {
             <div style={s.poolInfo}>
               <div style={s.poolName}>{entry.friend_pools.name}</div>
               <div style={s.poolMeta}>
-                Code: <strong>{entry.friend_pools.invite_code}</strong> · {entry.friend_pools.sport.toUpperCase()} · Session {entry.friend_pools.current_period || 1}
+                Code: <strong>{entry.friend_pools.invite_code}</strong> · {entry.friend_pools.sport === 'multi' ? '🌐 Multi-Sport' : entry.friend_pools.sport.toUpperCase()} · Session {entry.friend_pools.current_period || 1}
                 {entry.friend_pools.session_start && entry.friend_pools.session_end && (
                   <span> · 📅 {entry.friend_pools.session_start} → {entry.friend_pools.session_end}</span>
                 )}
@@ -406,4 +419,5 @@ const s = {
   commishStep:{width:'22px',height:'22px',borderRadius:'50%',background:'#C9A84C',color:'#fff',fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.72rem',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,marginTop:'1px'},
   commishText:{fontSize:'0.8rem',color:'#7a6a2a',lineHeight:1.5},
   deleteBtn:{padding:'4px 10px',background:'rgba(192,57,43,0.05)',border:'1px solid rgba(192,57,43,0.2)',borderRadius:'6px',color:'#c0392b',fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.65rem',textTransform:'uppercase',letterSpacing:'1px',cursor:'pointer'},
+  multiBadge:{display:'inline-block',background:'rgba(107,71,184,0.12)',border:'1px solid rgba(107,71,184,0.3)',borderRadius:'20px',padding:'5px 14px',fontSize:'0.72rem',fontFamily:"'Barlow Condensed',sans-serif",textTransform:'uppercase',letterSpacing:'1.5px',color:'#a07ee0',marginBottom:'10px'},
 }

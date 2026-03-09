@@ -26,9 +26,38 @@ export default function Leaderboard({ session, activeSport }) {
   const [loadingPicks, setLoadingPicks] = useState(false)
 
   const { games } = useOdds(activeSport)
+  const [liveScores, setLiveScores] = useState({}) // keyed by "away_team|home_team"
 
   useEffect(() => { loadMyPools() }, [activeSport])
   useEffect(() => { if (activePool) loadLeaderboard(activePool.id) }, [view, selectedSession])
+
+  // Poll scores_cache every 60s
+  useEffect(() => {
+    fetchLiveScores()
+    const interval = setInterval(fetchLiveScores, 60_000)
+    return () => clearInterval(interval)
+  }, [activeSport])
+
+  async function fetchLiveScores() {
+    const sportsToQuery = activeSport === 'multi'
+      ? ['nba', 'cbb', 'nfl', 'cfb', 'mlb', 'nhl']
+      : [activeSport]
+    const { data } = await supabase
+      .from('scores_cache')
+      .select('*')
+      .in('sport', sportsToQuery)
+    if (!data) return
+    const map = {}
+    for (const row of data) {
+      map[`${row.away_team}|${row.home_team}`] = row
+    }
+    setLiveScores(map)
+  }
+
+  function getLiveScore(pick) {
+    if (!pick?.away_team || !pick?.home_team) return null
+    return liveScores[`${pick.away_team}|${pick.home_team}`] || null
+  }
 
   async function loadMyPools() {
     setLoading(true)
@@ -288,10 +317,20 @@ export default function Leaderboard({ session, activeSport }) {
                       const game = pick ? games.find(g => g.id === pick.game_id) : null
                       const isLocked = pick && (game?.started || !game)
                       const resultColor = pick?.result === 'win' ? '#1a7a4a' : pick?.result === 'loss' ? '#c0392b' : '#888580'
+                      const liveScore = pick ? getLiveScore(pick) : null
+                      const isLive = liveScore?.status === 'in'
+                      const isFinal = liveScore?.status === 'post'
 
                       return (
-                        <div key={cat.id} style={s.pickChip}>
-                          <div style={{...s.pickChipCat, background: cat.color}}>{cat.label}</div>
+                        <div key={cat.id} style={{
+                          ...s.pickChip,
+                          borderColor: isLive ? '#e05c00' : pick?.result === 'win' ? '#1a7a4a' : pick?.result === 'loss' ? '#c0392b' : '#e2dfd8'
+                        }}>
+                          <div style={{...s.pickChipCat, background: isLive ? '#e05c00' : cat.color}}>
+                            <span>{cat.label}</span>
+                            {isLive && <span style={{marginLeft:'6px',fontSize:'0.55rem',letterSpacing:'1px'}}>🔴 LIVE</span>}
+                            {isFinal && !pick?.result && <span style={{marginLeft:'6px',fontSize:'0.55rem'}}>Final</span>}
+                          </div>
                           <div style={{
                             ...s.pickChipBody,
                             filter: pick && !isLocked ? 'blur(4px)' : 'none',
@@ -303,6 +342,24 @@ export default function Leaderboard({ session, activeSport }) {
                                 <div style={s.pickChipMeta}>
                                   {pick.away_team && pick.home_team ? `${pick.away_team} @ ${pick.home_team}` : ''}
                                 </div>
+
+                                {/* Live / Final score */}
+                                {liveScore && (isLive || isFinal) && (
+                                  <div style={s.chipScoreBox}>
+                                    <div style={s.chipScoreRow}>
+                                      <span style={s.chipScoreTeam}>{liveScore.away_team.split(' ').pop()}</span>
+                                      <span style={s.chipScoreNum}>{liveScore.away_score}</span>
+                                    </div>
+                                    <div style={s.chipScoreRow}>
+                                      <span style={s.chipScoreTeam}>{liveScore.home_team.split(' ').pop()}</span>
+                                      <span style={s.chipScoreNum}>{liveScore.home_score}</span>
+                                    </div>
+                                    <div style={s.chipScoreStatus}>
+                                      {isLive ? `${liveScore.clock} · ${liveScore.period}` : `Final${liveScore.period === 'OT' ? ' (OT)' : ''}`}
+                                    </div>
+                                  </div>
+                                )}
+
                                 <div style={{display:'flex', alignItems:'center', gap:'6px', marginTop:'4px', flexWrap:'wrap'}}>
                                   <span style={s.pickChipOdds}>{pick.locked_odds}</span>
                                   <span style={s.pickChipUnits}>{pick.units}u</span>
@@ -310,6 +367,9 @@ export default function Leaderboard({ session, activeSport }) {
                                     <span style={{...s.pickChipResult, color: resultColor}}>
                                       {pick.result === 'win' ? `✅ +${pick.payout_units}` : `❌ ${pick.payout_units}`}
                                     </span>
+                                  )}
+                                  {pick.result === 'pending' && (isLive || isFinal) && (
+                                    <span style={{...s.pickChipResult, color: '#888580'}}>⏳</span>
                                   )}
                                 </div>
                               </>
@@ -384,4 +444,9 @@ const s = {
   pickChipResult:{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.7rem'},
   pickChipEmpty:{fontSize:'0.75rem',color:'#ccc',fontStyle:'italic'},
   pickChipLockMsg:{padding:'3px 10px',background:'#f0f0f0',fontSize:'0.6rem',color:'#aaa',fontFamily:"'Barlow Condensed',sans-serif",textAlign:'center'},
+  chipScoreBox:{background:'#f9f8f6',border:'1px solid #e2dfd8',borderRadius:'6px',padding:'5px 8px',margin:'5px 0 3px',fontSize:'0.72rem'},
+  chipScoreRow:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'1px'},
+  chipScoreTeam:{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:600,fontSize:'0.68rem',color:'#333'},
+  chipScoreNum:{fontFamily:"'Playfair Display',serif",fontWeight:900,fontSize:'0.9rem',color:'#1a1a1a',marginLeft:'6px'},
+  chipScoreStatus:{fontFamily:"'Barlow Condensed',sans-serif",fontSize:'0.58rem',textTransform:'uppercase',letterSpacing:'1px',color:'#e05c00',fontWeight:700,marginTop:'3px',textAlign:'center'},
 }

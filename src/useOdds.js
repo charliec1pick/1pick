@@ -1,19 +1,34 @@
 import { useState, useEffect } from 'react'
+import { supabase } from './supabase'
 
-function parseOddsData(rawGames) {
+const SPORT_LABELS = {
+  nfl: 'NFL', cfb: 'CFB', cbb: 'CBB', nba: 'NBA', mlb: 'MLB', nhl: 'NHL',
+}
+
+// Only active sports — update this as seasons change
+const ACTIVE_SPORTS = ['cbb', 'nba']
+
+// Module-level client cache so switching tabs doesn't re-query Supabase
+const clientCache = {}
+
+function parseOddsData(rawGames, sportId) {
   const games = []
   const odds = {}
 
   rawGames.forEach(game => {
     const commenced = new Date(game.commence_time)
-    const now = new Date()
     const started = Date.now() >= new Date(game.commence_time).getTime()
 
     games.push({
       id: game.id,
       home: game.home_team,
       away: game.away_team,
-      time: commenced.toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }),
+      sport: sportId,
+      sportLabel: SPORT_LABELS[sportId] || sportId.toUpperCase(),
+      time: commenced.toLocaleString('en-US', {
+        weekday: 'short', month: 'short', day: 'numeric',
+        hour: 'numeric', minute: '2-digit'
+      }),
       started,
       commence_time: game.commence_time,
     })
@@ -51,6 +66,23 @@ function parseOddsData(rawGames) {
   return { games, odds }
 }
 
+async function fetchFromCache(sport) {
+  // Return client-side cache if available (persists for the session)
+  if (clientCache[sport]) return clientCache[sport]
+
+  const { data, error } = await supabase
+    .from('odds_cache')
+    .select('data')
+    .eq('sport', sport)
+    .single()
+
+  if (error || !data?.data) return null
+
+  const parsed = parseOddsData(data.data, sport)
+  clientCache[sport] = parsed
+  return parsed
+}
+
 export function useOdds(activeSport) {
   const [games, setGames] = useState([])
   const [odds, setOdds] = useState({})
@@ -58,27 +90,56 @@ export function useOdds(activeSport) {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    async function fetchOdds() {
+    async function loadOdds() {
       setLoading(true)
       setError(null)
+
       try {
-        const baseUrl = ''
-        const res = await fetch(`${baseUrl}/api/odds?sport=${activeSport}`)
-        const data = await res.json()
-        if (!Array.isArray(data) || data.length === 0) {
-          setGames([])
-          setOdds({})
+        if (activeSport === 'multi') {
+          // Only fetch active sports, not all 6
+          const results = await Promise.all(
+            ACTIVE_SPORTS.map(sport => fetchFromCache(sport))
+          )
+
+          const allGames = []
+          const allOdds = {}
+
+          results.forEach(result => {
+            if (result) {
+              allGames.push(...result.games)
+              Object.assign(allOdds, result.odds)
+            }
+          })
+
+          allGames.sort((a, b) => new Date(a.commence_time) - new Date(b.commence_time))
+          setGames(allGames)
+          setOdds(allOdds)
         } else {
-          const parsed = parseOddsData(data)
-          setGames(parsed.games)
-          setOdds(parsed.odds)
+          // Inactive sport — don't even query
+          if (!ACTIVE_SPORTS.includes(activeSport)) {
+            setGames([])
+            setOdds({})
+            setLoading(false)
+            return
+          }
+
+          const result = await fetchFromCache(activeSport)
+          if (!result) {
+            setGames([])
+            setOdds({})
+          } else {
+            setGames(result.games)
+            setOdds(result.odds)
+          }
         }
       } catch (err) {
         setError('Failed to load odds')
       }
+
       setLoading(false)
     }
-    fetchOdds()
+
+    loadOdds()
   }, [activeSport])
 
   return { games, odds, loading, error }

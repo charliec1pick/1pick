@@ -5,7 +5,8 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY
 )
 
-const CACHE_HOURS = 4
+// Update this list as sports seasons change
+const ACTIVE_SPORTS = ['cbb', 'nba']
 
 const sportMap = {
   cbb: 'basketball_ncaab',
@@ -21,21 +22,17 @@ export default async function handler(req, res) {
   const sportKey = sportMap[sport]
   if (!sportKey) return res.status(400).json({ error: 'Invalid sport' })
 
-  try {
+  // Block calls for inactive sports — return cached data or empty
+  if (!ACTIVE_SPORTS.includes(sport)) {
     const { data: cached } = await supabase
       .from('odds_cache')
-      .select('*')
+      .select('data')
       .eq('sport', sport)
       .single()
+    return res.status(200).json(cached?.data || [])
+  }
 
-    if (cached) {
-      const fetchedAt = new Date(cached.fetched_at)
-      const ageHours = (Date.now() - fetchedAt.getTime()) / (1000 * 60 * 60)
-      if (ageHours < CACHE_HOURS) {
-        return res.status(200).json(cached.data)
-      }
-    }
-
+  try {
     const response = await fetch(
       `https://api.the-odds-api.com/v4/sports/${sportKey}/odds/?apiKey=${process.env.ODDS_API_KEY}&regions=us&markets=h2h,spreads,totals&oddsFormat=american`
     )
