@@ -30,13 +30,6 @@ function getPeriodLabel(sport, period) {
 }
 
 export default async function handler(req, res) {
-  // Only run between 10am - 1am ET (14:00 - 06:00 UTC)
-  const hour = new Date().getUTCHours()
-  const isGameTime = hour >= 14 || hour < 6
-  if (!isGameTime) {
-    return res.status(200).json({ skipped: true, reason: 'outside game hours' })
-  }
-
   let totalUpserted = 0
   const errors = []
 
@@ -59,7 +52,7 @@ export default async function handler(req, res) {
         const awayTeam = comp.competitors?.find(c => c.homeAway === 'away')
         if (!homeTeam || !awayTeam) continue
 
-        const gameDate = event.date?.split('T')[0]
+        const gameDate = event.date?.split('T')[0] // "2025-03-08"
         const period = comp.status?.period || 0
         const clock = comp.status?.displayClock || ''
 
@@ -70,7 +63,7 @@ export default async function handler(req, res) {
           away_team: awayTeam.team.displayName,
           home_score: parseInt(homeTeam.score || 0),
           away_score: parseInt(awayTeam.score || 0),
-          status: status?.state || 'pre',
+          status: status?.state || 'pre', // 'pre' | 'in' | 'post'
           status_detail: status?.shortDetail || '',
           clock,
           period: period > 0 ? getPeriodLabel(sport, period) : '',
