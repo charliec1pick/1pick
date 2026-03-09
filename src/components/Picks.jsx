@@ -72,11 +72,32 @@ const CONFERENCES = {
   'ASUN': ['Austin Peay Governors','Bellarmine Knights','Central Arkansas Bears','Eastern Kentucky Colonels','Florida Gulf Coast Eagles','Jacksonville Dolphins','Lipscomb Bisons','North Alabama Lions','North Florida Ospreys','Queens University Royals','Stetson Hatters','West Georgia Wolves'],
 }
 
-// Helper: check if a game is started using ESPN scores_cache status first, then commence_time as fallback
+// Normalize a team name for fuzzy matching: lowercase, strip punctuation, collapse spaces
+function normalizeTeam(name) {
+  return (name || '').toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim()
+}
+
+// Helper: check if a game is started using ESPN scores_cache status first, then commence_time as fallback.
+// Uses normalized fuzzy matching so ESPN display names don't need to exactly match Odds API names.
 function isGameStarted(game, liveScores) {
   if (!game) return false
-  const scoreRow = liveScores[`${game.away}|${game.home}`]
-  if (scoreRow) return scoreRow.status === 'in' || scoreRow.status === 'post'
+  // Try exact key first
+  const exactRow = liveScores[`${game.away}|${game.home}`]
+  if (exactRow) return exactRow.status === 'in' || exactRow.status === 'post'
+  // Fuzzy match: look for a scores_cache row where both team names contain the last word of the odds name
+  const normAway = normalizeTeam(game.away)
+  const normHome = normalizeTeam(game.home)
+  for (const row of Object.values(liveScores)) {
+    const rowAway = normalizeTeam(row.away_team)
+    const rowHome = normalizeTeam(row.home_team)
+    if (
+      (rowAway.includes(normAway) || normAway.includes(rowAway)) &&
+      (rowHome.includes(normHome) || normHome.includes(rowHome))
+    ) {
+      return row.status === 'in' || row.status === 'post'
+    }
+  }
+  // Fall back to commence_time comparison
   return Date.now() >= new Date(game.commence_time).getTime()
 }
 
@@ -128,7 +149,21 @@ export default function Picks({ session, activeSport }) {
 
   function getLiveScore(pick) {
     if (!pick?.awayTeam || !pick?.homeTeam) return null
-    return liveScores[`${pick.awayTeam}|${pick.homeTeam}`] || null
+    const exact = liveScores[`${pick.awayTeam}|${pick.homeTeam}`]
+    if (exact) return exact
+    const normAway = normalizeTeam(pick.awayTeam)
+    const normHome = normalizeTeam(pick.homeTeam)
+    for (const row of Object.values(liveScores)) {
+      const rowAway = normalizeTeam(row.away_team)
+      const rowHome = normalizeTeam(row.home_team)
+      if (
+        (rowAway.includes(normAway) || normAway.includes(rowAway)) &&
+        (rowHome.includes(normHome) || normHome.includes(rowHome))
+      ) {
+        return row
+      }
+    }
+    return null
   }
 
   async function loadMyPools() {
@@ -210,12 +245,14 @@ export default function Picks({ session, activeSport }) {
     const game = games.find(g => g.id === gameId)
     if (isGameStarted(game, liveScores)) return
     setSaving(true)
+    const commenceTime = game?.commence_time || null
     const { data: existingData } = await supabase.from('picks').select('id').eq('pool_entry_id', activePoolEntry.id).eq('category', catId)
     const existing = existingData?.[0] || null
     if (existing) {
       await supabase.from('picks').update({
         game_id: gameId, team, locked_odds: lockedOdds,
         home_team: homeTeam, away_team: awayTeam,
+        commence_time: commenceTime,
         units: units[catId], updated_at: new Date().toISOString()
       }).eq('id', existing.id)
     } else {
@@ -225,6 +262,7 @@ export default function Picks({ session, activeSport }) {
         category: catId, game_id: gameId,
         team, locked_odds: lockedOdds,
         home_team: homeTeam, away_team: awayTeam,
+        commence_time: commenceTime,
         units: units[catId]
       })
     }
@@ -290,7 +328,7 @@ export default function Picks({ session, activeSport }) {
     const pool = activePoolEntry?.friend_pools
     if (pool?.session_start && pool?.session_end) {
       filtered = filtered.filter(g => {
-        const gameDate = g.commence_time.split('T')[0]
+        const gameDate = new Date(g.commence_time).toLocaleDateString('en-CA', { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone })
         return gameDate >= pool.session_start && gameDate <= pool.session_end
       })
     }

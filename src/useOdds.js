@@ -17,7 +17,6 @@ function parseOddsData(rawGames, sportId) {
 
   rawGames.forEach(game => {
     const commenced = new Date(game.commence_time)
-    const started = Date.now() >= new Date(game.commence_time).getTime()
 
     games.push({
       id: game.id,
@@ -27,38 +26,51 @@ function parseOddsData(rawGames, sportId) {
       sportLabel: SPORT_LABELS[sportId] || sportId.toUpperCase(),
       time: commenced.toLocaleString('en-US', {
         weekday: 'short', month: 'short', day: 'numeric',
-        hour: 'numeric', minute: '2-digit'
+        hour: 'numeric', minute: '2-digit',
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       }),
-      started,
       commence_time: game.commence_time,
     })
 
     const gameOdds = {}
-    const bookmaker = game.bookmakers?.[0]
-    if (!bookmaker) return
+    const bookmakers = game.bookmakers || []
+    if (!bookmakers.length) return
 
-    bookmaker.markets.forEach(market => {
-      if (market.key === 'h2h') {
-        const sorted = [...market.outcomes].sort((a, b) => a.price - b.price)
-        const fav = sorted[0]
-        const dog = sorted[sorted.length - 1]
-        gameOdds['ml-fav'] = { team: fav.name, odds: fav.price > 0 ? `+${fav.price}` : `${fav.price}` }
-        gameOdds['ml-dog'] = { team: dog.name, odds: dog.price > 0 ? `+${dog.price}` : `${dog.price}` }
+    // For each market type, find the first bookmaker that offers it.
+    // This ensures we don't miss a market just because bookmakers[0] doesn't carry it.
+    function findMarket(key) {
+      for (const bk of bookmakers) {
+        const m = bk.markets.find(m => m.key === key)
+        if (m) return m
       }
-      if (market.key === 'spreads') {
-        const sorted = [...market.outcomes].sort((a, b) => a.point - b.point)
-        const fav = sorted[0]
-        const dog = sorted[sorted.length - 1]
-        gameOdds['sp-fav'] = { team: `${fav.name} ${fav.point}`, odds: fav.price > 0 ? `+${fav.price}` : `${fav.price}` }
-        gameOdds['sp-dog'] = { team: `${dog.name} +${dog.point}`, odds: dog.price > 0 ? `+${dog.price}` : `${dog.price}` }
-      }
-      if (market.key === 'totals') {
-        const over = market.outcomes.find(o => o.name === 'Over')
-        const under = market.outcomes.find(o => o.name === 'Under')
-        if (over) gameOdds['tot-ov'] = { team: `Over ${over.point}`, odds: over.price > 0 ? `+${over.price}` : `${over.price}` }
-        if (under) gameOdds['tot-un'] = { team: `Under ${under.point}`, odds: under.price > 0 ? `+${under.price}` : `${under.price}` }
-      }
-    })
+      return null
+    }
+
+    const h2h = findMarket('h2h')
+    if (h2h) {
+      const sorted = [...h2h.outcomes].sort((a, b) => a.price - b.price)
+      const fav = sorted[0]
+      const dog = sorted[sorted.length - 1]
+      gameOdds['ml-fav'] = { team: fav.name, odds: fav.price > 0 ? `+${fav.price}` : `${fav.price}` }
+      gameOdds['ml-dog'] = { team: dog.name, odds: dog.price > 0 ? `+${dog.price}` : `${dog.price}` }
+    }
+
+    const spreads = findMarket('spreads')
+    if (spreads) {
+      const sorted = [...spreads.outcomes].sort((a, b) => a.point - b.point)
+      const fav = sorted[0]
+      const dog = sorted[sorted.length - 1]
+      gameOdds['sp-fav'] = { team: `${fav.name} ${fav.point}`, odds: fav.price > 0 ? `+${fav.price}` : `${fav.price}` }
+      gameOdds['sp-dog'] = { team: `${dog.name} +${dog.point}`, odds: dog.price > 0 ? `+${dog.price}` : `${dog.price}` }
+    }
+
+    const totals = findMarket('totals')
+    if (totals) {
+      const over = totals.outcomes.find(o => o.name === 'Over')
+      const under = totals.outcomes.find(o => o.name === 'Under')
+      if (over) gameOdds['tot-ov'] = { team: `Over ${over.point}`, odds: over.price > 0 ? `+${over.price}` : `${over.price}` }
+      if (under) gameOdds['tot-un'] = { team: `Under ${under.point}`, odds: under.price > 0 ? `+${under.price}` : `${under.price}` }
+    }
 
     odds[game.id] = gameOdds
   })
