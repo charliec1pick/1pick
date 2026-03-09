@@ -487,7 +487,7 @@ if (gameFilter === 'top25') {
                   <div style={{ flex: 1, textAlign: 'center' }}>
                     <input
                       style={{ ...s.unitDisplay, color: cat.color, border: '1.5px solid #e2dfd8', borderRadius: '8px', padding: '3px 8px', width: '100%', textAlign: 'center', outline: 'none' }}
-                      type="number" min="1" max={cat.id === 'ml-dog' ? 10 : 40}
+                      type="number" min="1" max={cat.id === 'ml-dog' ? 10 : 40} value={catUnits}
                       onClick={e => e.stopPropagation()}
                       onKeyDown={e => { e.stopPropagation(); if (['ArrowUp', 'ArrowDown'].includes(e.key)) e.preventDefault() }}
                       onChange={e => { e.stopPropagation(); !locked && setUnitVal(cat.id, e.target.value) }}
