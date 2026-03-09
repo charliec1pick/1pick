@@ -77,23 +77,33 @@ function normalizeTeam(name) {
   return (name || '').toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim()
 }
 
+// Extract the nickname (last word) of a team name e.g. "Texas A&M-CC Islanders" -> "islanders"
+function teamNickname(name) {
+  const parts = normalizeTeam(name).split(' ')
+  return parts[parts.length - 1]
+}
+
+// Check if two team names refer to the same team using progressive matching:
+// 1. Exact normalized match
+// 2. Substring match (one contains the other)
+// 3. Nickname (last word) match — handles "Texas A&M-CC Islanders" vs "Texas A&M-Corpus Christi Islanders"
+function teamsMatch(a, b) {
+  const na = normalizeTeam(a)
+  const nb = normalizeTeam(b)
+  if (na === nb) return true
+  if (na.includes(nb) || nb.includes(na)) return true
+  return teamNickname(a) === teamNickname(b)
+}
+
 // Helper: check if a game is started using ESPN scores_cache status first, then commence_time as fallback.
-// Uses normalized fuzzy matching so ESPN display names don't need to exactly match Odds API names.
 function isGameStarted(game, liveScores) {
   if (!game) return false
   // Try exact key first
   const exactRow = liveScores[`${game.away}|${game.home}`]
   if (exactRow) return exactRow.status === 'in' || exactRow.status === 'post'
-  // Fuzzy match: look for a scores_cache row where both team names contain the last word of the odds name
-  const normAway = normalizeTeam(game.away)
-  const normHome = normalizeTeam(game.home)
+  // Fuzzy match using progressive team name matching
   for (const row of Object.values(liveScores)) {
-    const rowAway = normalizeTeam(row.away_team)
-    const rowHome = normalizeTeam(row.home_team)
-    if (
-      (rowAway.includes(normAway) || normAway.includes(rowAway)) &&
-      (rowHome.includes(normHome) || normHome.includes(rowHome))
-    ) {
+    if (teamsMatch(game.away, row.away_team) && teamsMatch(game.home, row.home_team)) {
       return row.status === 'in' || row.status === 'post'
     }
   }
@@ -151,15 +161,9 @@ export default function Picks({ session, activeSport }) {
     if (!pick?.awayTeam || !pick?.homeTeam) return null
     const exact = liveScores[`${pick.awayTeam}|${pick.homeTeam}`]
     if (exact) return exact
-    const normAway = normalizeTeam(pick.awayTeam)
-    const normHome = normalizeTeam(pick.homeTeam)
+    // Fuzzy fallback using same progressive matching as isGameStarted
     for (const row of Object.values(liveScores)) {
-      const rowAway = normalizeTeam(row.away_team)
-      const rowHome = normalizeTeam(row.home_team)
-      if (
-        (rowAway.includes(normAway) || normAway.includes(rowAway)) &&
-        (rowHome.includes(normHome) || normHome.includes(rowHome))
-      ) {
+      if (teamsMatch(pick.awayTeam, row.away_team) && teamsMatch(pick.homeTeam, row.home_team)) {
         return row
       }
     }

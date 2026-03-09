@@ -55,11 +55,27 @@ function calcPayout(units, lockedOdds, result) {
 
 // Match a pick's home_team/away_team to a scores_cache row
 // ESPN team names should match since odds_cache also stores displayName-style names
+function normalizeTeam(name) {
+  return (name || '').toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim()
+}
+
+function teamNickname(name) {
+  const parts = normalizeTeam(name).split(' ')
+  return parts[parts.length - 1]
+}
+
+function fuzzyTeamsMatch(a, b) {
+  const na = normalizeTeam(a)
+  const nb = normalizeTeam(b)
+  if (na === nb) return true
+  if (na.includes(nb) || nb.includes(na)) return true
+  return teamNickname(a) === teamNickname(b)
+}
+
 function teamsMatch(pick, scoreRow) {
-  const normalize = s => s?.toLowerCase().trim()
   return (
-    normalize(pick.home_team) === normalize(scoreRow.home_team) &&
-    normalize(pick.away_team) === normalize(scoreRow.away_team)
+    fuzzyTeamsMatch(pick.home_team, scoreRow.home_team) &&
+    fuzzyTeamsMatch(pick.away_team, scoreRow.away_team)
   )
 }
 
