@@ -150,7 +150,7 @@ export default function Picks({ session, activeSport }) {
   const [allPoolEntries, setAllPoolEntries] = useState([])
   const [activePoolEntry, setActivePoolEntry] = useState(null)
   const [picks, setPicks] = useState({})
-  const [units, setUnits] = useState({ 'ml-fav': 15, 'ml-dog': 15, 'sp-fav': 15, 'sp-dog': 15, 'tot-ov': 15, 'tot-un': 15 })
+  const [units, setUnits] = useState({ 'ml-fav': 15, 'ml-dog': 10, 'sp-fav': 15, 'sp-dog': 15, 'tot-ov': 15, 'tot-un': 15 })
   const [openModal, setOpenModal] = useState(null)
   const [loading, setLoading] = useState(true)
   const [selectedSession, setSelectedSession] = useState(null)
@@ -162,6 +162,7 @@ export default function Picks({ session, activeSport }) {
   const [liveScores, setLiveScores] = useState({}) // keyed by "away_team|home_team"
   const [optedIn, setOptedIn] = useState(false)
   const [togglingOptIn, setTogglingOptIn] = useState(false)
+  const [showOptOutConfirm, setShowOptOutConfirm] = useState(false)
 
   const totalUnits = units['ml-fav'] + units['ml-dog'] + units['sp-fav'] + units['sp-dog'] + units['tot-ov'] + units['tot-un']
   const remaining = 100 - totalUnits
@@ -216,7 +217,7 @@ export default function Picks({ session, activeSport }) {
   async function loadMyPools() {
     setLoading(true)
     setPicks({})
-    setUnits({ 'ml-fav': 15, 'ml-dog': 15, 'sp-fav': 15, 'sp-dog': 15, 'tot-ov': 15, 'tot-un': 15 })
+    setUnits({ 'ml-fav': 15, 'ml-dog': 10, 'sp-fav': 15, 'sp-dog': 15, 'tot-ov': 15, 'tot-un': 15 })
 
     const { data: allEntries } = await supabase
       .from('pool_entries')
@@ -252,7 +253,7 @@ export default function Picks({ session, activeSport }) {
     const { data } = await supabase.from('picks').select('*').eq('pool_entry_id', poolEntryId)
     if (data && data.length > 0) {
       const pickMap = {}
-      const unitMap = { 'ml-fav': 15, 'ml-dog': 15, 'sp-fav': 15, 'sp-dog': 15, 'tot-ov': 15, 'tot-un': 15 }
+      const unitMap = { 'ml-fav': 15, 'ml-dog': 10, 'sp-fav': 15, 'sp-dog': 15, 'tot-ov': 15, 'tot-un': 15 }
       data.forEach(p => {
         pickMap[p.category] = {
           gameId: p.game_id, team: p.team, lockedOdds: p.locked_odds,
@@ -265,7 +266,7 @@ export default function Picks({ session, activeSport }) {
       setUnits(unitMap)
     } else {
       setPicks({})
-      setUnits({ 'ml-fav': 15, 'ml-dog': 15, 'sp-fav': 15, 'sp-dog': 15, 'tot-ov': 15, 'tot-un': 15 })
+      setUnits({ 'ml-fav': 15, 'ml-dog': 10, 'sp-fav': 15, 'sp-dog': 15, 'tot-ov': 15, 'tot-un': 15 })
     }
   }
 
@@ -284,7 +285,7 @@ export default function Picks({ session, activeSport }) {
     } else {
       setOptedIn(false)
       setPicks({})
-      setUnits({ 'ml-fav': 15, 'ml-dog': 15, 'sp-fav': 15, 'sp-dog': 15, 'tot-ov': 15, 'tot-un': 15 })
+      setUnits({ 'ml-fav': 15, 'ml-dog': 10, 'sp-fav': 15, 'sp-dog': 15, 'tot-ov': 15, 'tot-un': 15 })
     }
   }
 
@@ -372,6 +373,11 @@ export default function Picks({ session, activeSport }) {
     setSaving(false)
   }
 
+  // Per-category unit cap
+  function maxUnits(catId) {
+    return catId === 'ml-dog' ? 10 : 40
+  }
+
   async function increment(catId) {
     if (viewingPastSession) return
     const pick = picks[catId]
@@ -380,7 +386,7 @@ export default function Picks({ session, activeSport }) {
     if (locked) return
     const current = units[catId]
     if (totalUnits >= 100) return
-    if (current >= 40) return
+    if (current >= maxUnits(catId)) return
     const newVal = current + 1
     setUnits(prev => ({ ...prev, [catId]: newVal }))
     if (pick && activePoolEntry) {
@@ -413,7 +419,7 @@ export default function Picks({ session, activeSport }) {
     const game = pick ? games.find(g => g.id === pick.gameId) : null
     const locked = !game && !!pick ? true : isGameStarted(game, liveScores)
     if (locked) return
-    const newVal = Math.max(1, Math.min(40, parseInt(val) || 1))
+    const newVal = Math.max(1, Math.min(maxUnits(catId), parseInt(val) || 1))
     const otherTotal = totalUnits - units[catId]
     const capped = Math.min(newVal, 100 - otherTotal)
     setUnits(prev => ({ ...prev, [catId]: capped }))
@@ -477,7 +483,7 @@ export default function Picks({ session, activeSport }) {
               <div key={entry.id} style={{ ...s.poolChip, ...(activePoolEntry?.friend_pool_id === entry.friend_pool_id ? s.poolChipActive : {}) }}
                 onClick={() => {
                   setPicks({})
-                  setUnits({ 'ml-fav': 15, 'ml-dog': 15, 'sp-fav': 15, 'sp-dog': 15, 'tot-ov': 15, 'tot-un': 15 })
+                  setUnits({ 'ml-fav': 15, 'ml-dog': 10, 'sp-fav': 15, 'sp-dog': 15, 'tot-ov': 15, 'tot-un': 15 })
                   setActivePoolEntry(entry)
                   setOptedIn(entry.opted_in || false)
                   const p = entry.friend_pools.current_period || 1
@@ -531,9 +537,21 @@ export default function Picks({ session, activeSport }) {
       {!viewingPastSession && optedIn && !hasAnyLockedPick() && (
         <div style={s.optOutBar}>
           <span style={s.optOutText}>You're opted in for this session</span>
-          <button style={s.optOutBtn} onClick={handleOptOut} disabled={togglingOptIn}>
-            Sit This One Out
-          </button>
+          {!showOptOutConfirm ? (
+            <button style={s.optOutBtn} onClick={() => setShowOptOutConfirm(true)}>
+              Sit This One Out
+            </button>
+          ) : (
+            <div style={s.optOutConfirm}>
+              <div style={s.optOutConfirmText}>Are you sure? You'll appear as inactive on the leaderboard for this session.</div>
+              <div style={{display:'flex',gap:'6px'}}>
+                <button style={s.optOutConfirmNo} onClick={() => setShowOptOutConfirm(false)}>Never mind</button>
+                <button style={s.optOutConfirmYes} onClick={() => { setShowOptOutConfirm(false); handleOptOut() }} disabled={togglingOptIn}>
+                  {togglingOptIn ? 'Opting out...' : 'Yes, sit out'}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -568,7 +586,7 @@ export default function Picks({ session, activeSport }) {
           const gameStarted = isGameStarted(game, liveScores)
           const locked = viewingPastSession || (!game && !!pick) || gameStarted || false
           const catUnits = units[cat.id]
-          const canIncrease = !locked && totalUnits < 100 && catUnits < (cat.id === 'ml-dog' ? 10 : 40)
+          const canIncrease = !locked && totalUnits < 100 && catUnits < maxUnits(cat.id)
           const result = pick?.result
           const resultColor = result === 'win' ? '#1a7a4a' : result === 'loss' ? '#c0392b' : '#888580'
           const resultLabel = result === 'win' ? '✅ Win' : result === 'loss' ? '❌ Loss' : result === 'pending' ? '⏳ Pending' : null
@@ -634,12 +652,13 @@ export default function Picks({ session, activeSport }) {
                   <div style={{ flex: 1, textAlign: 'center' }}>
                     <input
                       style={{ ...s.unitDisplay, color: cat.color, border: '1.5px solid #e2dfd8', borderRadius: '8px', padding: '3px 8px', width: '100%', textAlign: 'center', outline: 'none' }}
-                      type="number" min="1" max={cat.id === 'ml-dog' ? 10 : 40} value={catUnits}
+                      type="number" min="1" max={maxUnits(cat.id)} value={catUnits}
                       onClick={e => e.stopPropagation()}
                       onKeyDown={e => { e.stopPropagation(); if (['ArrowUp', 'ArrowDown'].includes(e.key)) e.preventDefault() }}
                       onChange={e => { e.stopPropagation(); !locked && setUnitVal(cat.id, e.target.value) }}
                     />
                     <div style={s.unitLabel}>units</div>
+                    <div style={s.unitMax}>max {maxUnits(cat.id)}</div>
                   </div>
                   <button style={{ ...s.unitBtn, opacity: canIncrease ? 1 : 0.4 }} onClick={() => increment(cat.id)}>+</button>
                 </div>
@@ -803,7 +822,12 @@ const s = {
   optInTitle: { fontFamily: "'Playfair Display',serif", fontWeight: 900, fontSize: '1.15rem', color: '#fff', marginBottom: '4px' },
   optInSub: { fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.5 },
   optInBtn: { width: '100%', padding: '14px', background: 'linear-gradient(135deg, #4B2E83, #6b3fa0)', border: 'none', borderRadius: '10px', color: '#fff', fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: '0.95rem', textTransform: 'uppercase', letterSpacing: '2px', cursor: 'pointer', boxShadow: '0 4px 16px rgba(75,46,131,0.4)' },
-  optOutBar: { background: '#fff', border: '1px solid #e2dfd8', borderRadius: '10px', padding: '10px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' },
+  optOutBar: { background: '#fff', border: '1px solid #e2dfd8', borderRadius: '10px', padding: '12px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' },
   optOutText: { fontSize: '0.72rem', fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, color: '#1a7a4a', textTransform: 'uppercase', letterSpacing: '1px' },
   optOutBtn: { padding: '6px 14px', background: '#f9f8f6', border: '1.5px solid #e2dfd8', borderRadius: '7px', color: '#888580', fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '1px', cursor: 'pointer', whiteSpace: 'nowrap' },
+  optOutConfirm: { width: '100%', marginTop: '4px' },
+  optOutConfirmText: { fontSize: '0.78rem', color: '#888580', lineHeight: 1.5, marginBottom: '10px' },
+  optOutConfirmNo: { padding: '7px 14px', background: '#f9f8f6', border: '1.5px solid #e2dfd8', borderRadius: '7px', color: '#888580', fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: '0.7rem', cursor: 'pointer' },
+  optOutConfirmYes: { padding: '7px 14px', background: '#c0392b', border: 'none', borderRadius: '7px', color: '#fff', fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', cursor: 'pointer' },
+  unitMax: { fontSize: '0.5rem', fontFamily: "'Barlow Condensed',sans-serif", textTransform: 'uppercase', letterSpacing: '1px', color: '#aaa', textAlign: 'center', marginTop: '1px' },
 }
