@@ -72,38 +72,72 @@ const CONFERENCES = {
   'ASUN': ['Austin Peay Governors','Bellarmine Knights','Central Arkansas Bears','Eastern Kentucky Colonels','Florida Gulf Coast Eagles','Jacksonville Dolphins','Lipscomb Bisons','North Alabama Lions','North Florida Ospreys','Queens University Royals','Stetson Hatters','West Georgia Wolves'],
 }
 
-// Normalize a team name for fuzzy matching: lowercase, strip punctuation, collapse spaces
+// Normalize a team name for matching: lowercase, strip punctuation, collapse spaces
 function normalizeTeam(name) {
   return (name || '').toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim()
 }
 
-// Extract the nickname (last word) of a team name e.g. "Texas A&M-CC Islanders" -> "islanders"
-function teamNickname(name) {
-  const parts = normalizeTeam(name).split(' ')
-  return parts[parts.length - 1]
+// Expand common abbreviations so "Kansas St" and "Kansas State" normalize the same
+function expandAbbreviations(str) {
+  return str
+    .replace(/\bst\b/g, 'state')
+    .replace(/\buniv\b/g, 'university')
+    .replace(/\bintl?\b/g, 'international')
+    .replace(/\bmt\b/g, 'mount')
+    .replace(/\bft\b/g, 'fort')
+    .replace(/\bn\b/g, 'northern')
+    .replace(/\bs\b/g, 'southern')
+    .replace(/\be\b/g, 'eastern')
+    .replace(/\bw\b/g, 'western')
+    .replace(/\bmiss\b/g, 'mississippi')
 }
 
-// Check if two team names refer to the same team using progressive matching:
+function expandedNormalize(name) {
+  return expandAbbreviations(normalizeTeam(name))
+}
+
+// Check if two team names refer to the same team:
 // 1. Exact normalized match
-// 2. Substring match (one contains the other)
-// 3. Nickname (last word) match — handles "Texas A&M-CC Islanders" vs "Texas A&M-Corpus Christi Islanders"
+// 2. Expanded abbreviation match (st→state, etc.)
+// 3. Substring match (one contains the other)
+// 4. School name match (strip mascot, compare school portion)
+// NO nickname-only fallback — prevents "Southern Miss Eagles" matching "Georgia Southern Eagles"
 function teamsMatch(a, b) {
   const na = normalizeTeam(a)
   const nb = normalizeTeam(b)
   if (na === nb) return true
-  if (na.includes(nb) || nb.includes(na)) return true
-  return teamNickname(a) === teamNickname(b)
+  const ea = expandedNormalize(a)
+  const eb = expandedNormalize(b)
+  if (ea === eb) return true
+  if (ea.includes(eb) || eb.includes(ea)) return true
+  // School name match: strip last word (mascot) and compare
+  const partsA = ea.split(' ')
+  const partsB = eb.split(' ')
+  if (partsA.length >= 2 && partsB.length >= 2) {
+    const schoolA = partsA.slice(0, -1).join(' ')
+    const schoolB = partsB.slice(0, -1).join(' ')
+    if (schoolA === schoolB) return true
+    if (schoolA.includes(schoolB) || schoolB.includes(schoolA)) return true
+  }
+  return false
 }
 
 // Helper: check if a game is started using ESPN scores_cache status first, then commence_time as fallback.
+// Uses exact UTC date matching to avoid matching yesterday's completed game to today's game.
 function isGameStarted(game, liveScores) {
   if (!game) return false
+  const gameDate = game.commence_time ? new Date(game.commence_time).toISOString().split('T')[0] : null
+
   // Try exact key first
   const exactRow = liveScores[`${game.away}|${game.home}`]
-  if (exactRow) return exactRow.status === 'in' || exactRow.status === 'post'
-  // Fuzzy match using progressive team name matching
+  if (exactRow && (!gameDate || !exactRow.game_date || gameDate === exactRow.game_date)) {
+    return exactRow.status === 'in' || exactRow.status === 'post'
+  }
+
+  // Fuzzy match: require both teams match AND exact same date
   for (const row of Object.values(liveScores)) {
-    if (teamsMatch(game.away, row.away_team) && teamsMatch(game.home, row.home_team)) {
+    const sameDate = !gameDate || !row.game_date || gameDate === row.game_date
+    if (sameDate && teamsMatch(game.away, row.away_team) && teamsMatch(game.home, row.home_team)) {
       return row.status === 'in' || row.status === 'post'
     }
   }
@@ -126,6 +160,8 @@ export default function Picks({ session, activeSport }) {
   const [gameFilter, setGameFilter] = useState('all')
   const [gameSearch, setGameSearch] = useState('')
   const [liveScores, setLiveScores] = useState({}) // keyed by "away_team|home_team"
+  const [optedIn, setOptedIn] = useState(false)
+  const [togglingOptIn, setTogglingOptIn] = useState(false)
 
   const totalUnits = units['ml-fav'] + units['ml-dog'] + units['sp-fav'] + units['sp-dog'] + units['tot-ov'] + units['tot-un']
   const remaining = 100 - totalUnits
@@ -159,11 +195,18 @@ export default function Picks({ session, activeSport }) {
 
   function getLiveScore(pick) {
     if (!pick?.awayTeam || !pick?.homeTeam) return null
+    // Derive the expected game date from the pick's game in the odds data
+    const game = pick.gameId ? games.find(g => g.id === pick.gameId) : null
+    const pickDate = game?.commence_time ? new Date(game.commence_time).toISOString().split('T')[0] : null
+
     const exact = liveScores[`${pick.awayTeam}|${pick.homeTeam}`]
-    if (exact) return exact
-    // Fuzzy fallback using same progressive matching as isGameStarted
+    if (exact && (!pickDate || !exact.game_date || pickDate === exact.game_date)) {
+      return exact
+    }
+    // Fuzzy fallback with exact date constraint
     for (const row of Object.values(liveScores)) {
-      if (teamsMatch(pick.awayTeam, row.away_team) && teamsMatch(pick.homeTeam, row.home_team)) {
+      const sameDate = !pickDate || !row.game_date || pickDate === row.game_date
+      if (sameDate && teamsMatch(pick.awayTeam, row.away_team) && teamsMatch(pick.homeTeam, row.home_team)) {
         return row
       }
     }
@@ -196,6 +239,7 @@ export default function Picks({ session, activeSport }) {
         setSelectedSession(currentPeriod)
         setViewingPastSession(false)
         setActivePoolEntry(currentEntries[0])
+        setOptedIn(currentEntries[0].opted_in || false)
         await loadPicks(currentEntries[0].id)
       }
     } else {
@@ -235,16 +279,69 @@ export default function Picks({ session, activeSport }) {
       e.friend_pool_id === activePoolEntry.friend_pool_id && e.period === sessionNum
     )
     if (poolEntry) {
+      setOptedIn(poolEntry.opted_in || false)
       await loadPicks(poolEntry.id)
     } else {
+      setOptedIn(false)
       setPicks({})
       setUnits({ 'ml-fav': 15, 'ml-dog': 15, 'sp-fav': 15, 'sp-dog': 15, 'tot-ov': 15, 'tot-un': 15 })
     }
   }
 
+  async function handleOptIn() {
+    if (!activePoolEntry || togglingOptIn) return
+    setTogglingOptIn(true)
+
+    const { error } = await supabase
+      .from('pool_entries')
+      .update({ opted_in: true })
+      .eq('id', activePoolEntry.id)
+
+    if (error) {
+      setTogglingOptIn(false)
+      return
+    }
+
+    setOptedIn(true)
+    const updated = { ...activePoolEntry, opted_in: true }
+    setActivePoolEntry(updated)
+    setAllPoolEntries(prev => prev.map(e => e.id === activePoolEntry.id ? { ...e, opted_in: true } : e))
+    setMyPools(prev => prev.map(e => e.id === activePoolEntry.id ? { ...e, opted_in: true } : e))
+    setTogglingOptIn(false)
+  }
+
+  async function handleOptOut() {
+    if (!activePoolEntry || togglingOptIn) return
+    // Can only opt out if no picks are locked
+    const hasLockedPick = Object.values(picks).some(pick => {
+      if (!pick) return false
+      const game = pick.gameId ? games.find(g => g.id === pick.gameId) : null
+      return isGameStarted(game, liveScores) || (!game && !!pick.gameId)
+    })
+    if (hasLockedPick) return
+    setTogglingOptIn(true)
+    await supabase.from('pool_entries').update({ opted_in: false }).eq('id', activePoolEntry.id)
+    setOptedIn(false)
+    const updated = { ...activePoolEntry, opted_in: false }
+    setActivePoolEntry(updated)
+    setAllPoolEntries(prev => prev.map(e => e.id === activePoolEntry.id ? { ...e, opted_in: false } : e))
+    setMyPools(prev => prev.map(e => e.id === activePoolEntry.id ? { ...e, opted_in: false } : e))
+    setTogglingOptIn(false)
+  }
+
+  // Check if any pick is locked (for opt-out button visibility)
+  function hasAnyLockedPick() {
+    return Object.values(picks).some(pick => {
+      if (!pick) return false
+      const game = pick.gameId ? games.find(g => g.id === pick.gameId) : null
+      return isGameStarted(game, liveScores) || (!game && !!pick.gameId)
+    })
+  }
+
   async function savePick(catId, gameId, team, lockedOdds, homeTeam, awayTeam) {
     if (!activePoolEntry) return
     if (viewingPastSession) return
+    if (!optedIn) return
     if (saving) return
     const game = games.find(g => g.id === gameId)
     if (isGameStarted(game, liveScores)) return
@@ -382,6 +479,7 @@ export default function Picks({ session, activeSport }) {
                   setPicks({})
                   setUnits({ 'ml-fav': 15, 'ml-dog': 15, 'sp-fav': 15, 'sp-dog': 15, 'tot-ov': 15, 'tot-un': 15 })
                   setActivePoolEntry(entry)
+                  setOptedIn(entry.opted_in || false)
                   const p = entry.friend_pools.current_period || 1
                   setTotalSessions(p)
                   setSelectedSession(p)
@@ -399,16 +497,47 @@ export default function Picks({ session, activeSport }) {
         <div style={s.sessionLabel}>Session</div>
         <select style={s.sessionSelect} value={selectedSession || currentPeriod}
           onChange={e => handleSessionChange(parseInt(e.target.value))}>
-          {sessionOptions.map(n => (
-            <option key={n} value={n}>
-              {n === currentPeriod ? `Session ${n} (Current)` : `Session ${n}`}
-            </option>
-          ))}
+          {sessionOptions.map(n => {
+            const sessionNames = activePoolEntry?.friend_pools?.session_names || {}
+            const name = sessionNames[n]
+            const label = name ? `${name}` : `Session ${n}`
+            return (
+              <option key={n} value={n}>
+                {n === currentPeriod ? `${label} (Current)` : label}
+              </option>
+            )
+          })}
         </select>
         {viewingPastSession && <div style={s.pastBadge}>📖 Read Only</div>}
       </div>
 
-      {!viewingPastSession && (
+      {/* Opt-in banner — current session only */}
+      {!viewingPastSession && !optedIn && (
+        <div style={s.optInBanner}>
+          <div style={s.optInContent}>
+            <div style={s.optInIcon}>🏟️</div>
+            <div style={{flex:1}}>
+              <div style={s.optInTitle}>New Session Started</div>
+              <div style={s.optInSub}>Opt in to start making picks for this session. If you're sitting this one out, you'll appear as inactive on the leaderboard.</div>
+            </div>
+          </div>
+          <button style={s.optInBtn} onClick={handleOptIn} disabled={togglingOptIn}>
+            {togglingOptIn ? 'Joining...' : "I'm In — Let's Go →"}
+          </button>
+        </div>
+      )}
+
+      {/* Opt-out button — available until any pick is locked */}
+      {!viewingPastSession && optedIn && !hasAnyLockedPick() && (
+        <div style={s.optOutBar}>
+          <span style={s.optOutText}>You're opted in for this session</span>
+          <button style={s.optOutBtn} onClick={handleOptOut} disabled={togglingOptIn}>
+            Sit This One Out
+          </button>
+        </div>
+      )}
+
+      {!viewingPastSession && optedIn && (
         <div style={s.unitsPanel}>
           <div style={s.unitsLeft}>
             <div style={s.unitsLabel}>Left</div>
@@ -428,9 +557,10 @@ export default function Picks({ session, activeSport }) {
       )}
 
       <div style={s.sectionTitle}>
-        <span>{viewingPastSession ? `Session ${selectedSession} Results` : "This Session's Picks — Tap to select"}</span>
+        <span>{viewingPastSession ? `Session ${selectedSession} Results` : !optedIn ? 'Opt in above to make picks' : "This Session's Picks — Tap to select"}</span>
       </div>
 
+      {(viewingPastSession || optedIn) && (
       <div style={s.picksGrid}>
         {PICK_CATS.map(cat => {
           const pick = picks[cat.id]
@@ -525,8 +655,9 @@ export default function Picks({ session, activeSport }) {
           )
         })}
       </div>
+      )}
 
-      {!viewingPastSession && openModal && (
+      {!viewingPastSession && optedIn && openModal && (
         <div style={s.modalOverlay} onClick={() => setOpenModal(null)}>
           <div style={s.modalBox} onClick={e => e.stopPropagation()}>
             <div style={s.modalHeader}>
@@ -666,4 +797,13 @@ const s = {
   liveTeamName: { fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 600, fontSize: '0.73rem', color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '75%' },
   liveScoreNum: { fontFamily: "'Playfair Display',serif", fontWeight: 900, fontSize: '1rem', color: '#1a1a1a', marginLeft: '8px' },
   liveStatusLine: { fontFamily: "'Barlow Condensed',sans-serif", fontSize: '0.62rem', textTransform: 'uppercase', letterSpacing: '1.2px', color: '#e05c00', fontWeight: 700, marginTop: '4px', textAlign: 'center' },
+  optInBanner: { background: 'linear-gradient(135deg, #1a1a1a 0%, #2d1a5a 100%)', borderRadius: '14px', padding: '22px', marginBottom: '20px' },
+  optInContent: { display: 'flex', alignItems: 'flex-start', gap: '14px', marginBottom: '16px' },
+  optInIcon: { fontSize: '1.6rem', flexShrink: 0, marginTop: '2px' },
+  optInTitle: { fontFamily: "'Playfair Display',serif", fontWeight: 900, fontSize: '1.15rem', color: '#fff', marginBottom: '4px' },
+  optInSub: { fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.5 },
+  optInBtn: { width: '100%', padding: '14px', background: 'linear-gradient(135deg, #4B2E83, #6b3fa0)', border: 'none', borderRadius: '10px', color: '#fff', fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: '0.95rem', textTransform: 'uppercase', letterSpacing: '2px', cursor: 'pointer', boxShadow: '0 4px 16px rgba(75,46,131,0.4)' },
+  optOutBar: { background: '#fff', border: '1px solid #e2dfd8', borderRadius: '10px', padding: '10px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' },
+  optOutText: { fontSize: '0.72rem', fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, color: '#1a7a4a', textTransform: 'uppercase', letterSpacing: '1px' },
+  optOutBtn: { padding: '6px 14px', background: '#f9f8f6', border: '1.5px solid #e2dfd8', borderRadius: '7px', color: '#888580', fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '1px', cursor: 'pointer', whiteSpace: 'nowrap' },
 }

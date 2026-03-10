@@ -28,6 +28,49 @@ export default function Leaderboard({ session, activeSport }) {
   const { games } = useOdds(activeSport)
   const [liveScores, setLiveScores] = useState({}) // keyed by "away_team|home_team"
 
+  // --- Team matching utilities (same logic as Picks.jsx / scores.js) ---
+  function normalizeTeam(name) {
+    return (name || '').toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim()
+  }
+
+  function expandAbbreviations(str) {
+    return str
+      .replace(/\bst\b/g, 'state')
+      .replace(/\buniv\b/g, 'university')
+      .replace(/\bintl?\b/g, 'international')
+      .replace(/\bmt\b/g, 'mount')
+      .replace(/\bft\b/g, 'fort')
+      .replace(/\bn\b/g, 'northern')
+      .replace(/\bs\b/g, 'southern')
+      .replace(/\be\b/g, 'eastern')
+      .replace(/\bw\b/g, 'western')
+      .replace(/\bmiss\b/g, 'mississippi')
+  }
+
+  function expandedNormalize(name) {
+    return expandAbbreviations(normalizeTeam(name))
+  }
+
+  function teamNamesMatch(a, b) {
+    const na = normalizeTeam(a)
+    const nb = normalizeTeam(b)
+    if (na === nb) return true
+    const ea = expandedNormalize(a)
+    const eb = expandedNormalize(b)
+    if (ea === eb) return true
+    if (ea.includes(eb) || eb.includes(ea)) return true
+    // School name match: strip last word (mascot) and compare
+    const partsA = ea.split(' ')
+    const partsB = eb.split(' ')
+    if (partsA.length >= 2 && partsB.length >= 2) {
+      const schoolA = partsA.slice(0, -1).join(' ')
+      const schoolB = partsB.slice(0, -1).join(' ')
+      if (schoolA === schoolB) return true
+      if (schoolA.includes(schoolB) || schoolB.includes(schoolA)) return true
+    }
+    return false
+  }
+
   useEffect(() => { loadMyPools() }, [activeSport])
   useEffect(() => { if (activePool) loadLeaderboard(activePool.id) }, [view, selectedSession])
 
@@ -54,12 +97,26 @@ async function fetchLiveScores() {
   setLiveScores(map)
 }
 
-function getLiveScore(pick) {
-  if (!pick?.away_team || !pick?.home_team) return null
-  console.log('liveScores keys:', Object.keys(liveScores))
-  console.log('looking for:', `${pick.away_team}|${pick.home_team}`)
-  return liveScores[`${pick.away_team}|${pick.home_team}`] || null
-}
+  // Exact-date + abbreviation-expanded live score lookup (no manual name map needed)
+  function getLiveScore(pick) {
+    if (!pick?.away_team || !pick?.home_team) return null
+    const pickDate = pick.commence_time ? new Date(pick.commence_time).toISOString().split('T')[0] : null
+
+    // Try exact key first
+    const exact = liveScores[`${pick.away_team}|${pick.home_team}`]
+    if (exact && (!pickDate || !exact.game_date || pickDate === exact.game_date)) {
+      return exact
+    }
+
+    // Fuzzy fallback with exact date constraint
+    for (const row of Object.values(liveScores)) {
+      const sameDate = !pickDate || !row.game_date || pickDate === row.game_date
+      if (sameDate && teamNamesMatch(pick.away_team, row.away_team) && teamNamesMatch(pick.home_team, row.home_team)) {
+        return row
+      }
+    }
+    return null
+  }
 
   async function loadMyPools() {
     setLoading(true)
@@ -119,6 +176,12 @@ function getLiveScore(pick) {
     const entriesWithPicks = await Promise.all(users.map(async entry => {
       let allPicks = []
 
+      // Determine if this user opted in for the viewed period
+      const periodEntry = allEntries.find(e =>
+        e.user_id === entry.user_id && e.period === viewPeriod
+      )
+      const isOptedIn = periodEntry?.opted_in || false
+
       if (view === 'season') {
         const userEntries = allEntries.filter(e => e.user_id === entry.user_id)
         for (const e of userEntries) {
@@ -126,9 +189,6 @@ function getLiveScore(pick) {
           if (p) allPicks = [...allPicks, ...p]
         }
       } else {
-        const periodEntry = allEntries.find(e =>
-          e.user_id === entry.user_id && e.period === viewPeriod
-        )
         if (periodEntry) {
           const { data: p } = await supabase.from('picks').select('*').eq('pool_entry_id', periodEntry.id)
           allPicks = p || []
@@ -137,13 +197,20 @@ function getLiveScore(pick) {
 
       const wins = allPicks.filter(p => p.result === 'win' && p.category !== 'unallocated-penalty').length
       const losses = allPicks.filter(p => p.result === 'loss' && p.category !== 'unallocated-penalty').length
-      const netUnits = parseFloat(allPicks.reduce((sum, p) => {
-        if (p.result === 'win' || p.result === 'loss') return sum + (p.payout_units || 0)
-        return sum
-      }, 0).toFixed(1))
+
+      // Net units from actual picks only (exclude penalty)
+      const pickNetUnits = parseFloat(allPicks
+        .filter(p => p.category !== 'unallocated-penalty')
+        .reduce((sum, p) => {
+          if (p.result === 'win' || p.result === 'loss') return sum + (p.payout_units || 0)
+          return sum
+        }, 0).toFixed(1))
 
       const penaltyPick = allPicks.find(p => p.category === 'unallocated-penalty')
       const penalty = penaltyPick ? penaltyPick.payout_units : 0
+
+      // Total net units = pick performance + penalty (penalty is already negative)
+      const netUnits = parseFloat((pickNetUnits + penalty).toFixed(1))
 
       // Store picks on entry for dropdown
       const sessionPicks = allPicks.filter(p => p.category !== 'unallocated-penalty')
@@ -154,7 +221,8 @@ function getLiveScore(pick) {
         totalPicks: sessionPicks.length,
         penalty,
         sessionPicks,
-        isYou: entry.user_id === session.user.id
+        isYou: entry.user_id === session.user.id,
+        isOptedIn
       }
     }))
 
@@ -226,11 +294,16 @@ function getLiveScore(pick) {
               style={s.sessionSelect}
               value={selectedSession}
               onChange={e => setSelectedSession(parseInt(e.target.value))}>
-              {sessionOptions.map(n => (
-                <option key={n} value={n}>
-                  {n === (activePool?.current_period || 1) ? `Session ${n} (Current)` : `Session ${n}`}
-                </option>
-              ))}
+              {sessionOptions.map(n => {
+                const sessionNames = activePool?.session_names || {}
+                const name = sessionNames[n]
+                const label = name ? `${name}` : `Session ${n}`
+                return (
+                  <option key={n} value={n}>
+                    {n === (activePool?.current_period || 1) ? `${label} (Current)` : label}
+                  </option>
+                )
+              })}
             </select>
           )}
         </div>
@@ -249,28 +322,29 @@ function getLiveScore(pick) {
           <div>Picks</div>
         </div>
 
-        {entries.length === 0 ? (
-          <div style={{padding:'32px',textAlign:'center',color:'#888580',fontSize:'0.85rem'}}>
-            No picks submitted yet — be the first!
-          </div>
-        ) : entries.map((entry, i) => {
-          const isExpanded = expandedEntry === entry.id
-          const picks = entry.sessionPicks || []
+        {(() => {
+          // In season view, show everyone together. In session view, split by opt-in.
+          const activeEntries = view === 'season' ? entries : entries.filter(e => e.isOptedIn)
+          const inactiveEntries = view === 'season' ? [] : entries.filter(e => !e.isOptedIn)
 
-          return (
+          const renderRow = (entry, i, isInactive) => {
+            const isExpanded = expandedEntry === entry.id
+            const picks = entry.sessionPicks || []
+
+            return (
             <div key={entry.id}>
               {/* Main row */}
               <div
-                style={{...s.row, ...(entry.isYou ? s.rowYou : {}), cursor: view !== 'season' ? 'pointer' : 'default', userSelect:'none'}}
-                onClick={() => view !== 'season' && toggleExpand(entry.id)}>
-                <div style={{...s.rank, ...(i===0?{color:'#C9A84C',fontSize:'1.25rem'}:i===1?{color:'#aaa',fontSize:'1.1rem'}:i===2?{color:'#cd7f32'}:{})}}>
-                  {i < 3 ? ranks[i] : i + 1}
+                style={{...s.row, ...(entry.isYou ? s.rowYou : {}), ...(isInactive ? {opacity: 0.5} : {}), cursor: view !== 'season' && !isInactive ? 'pointer' : 'default', userSelect:'none'}}
+                onClick={() => view !== 'season' && !isInactive && toggleExpand(entry.id)}>
+                <div style={{...s.rank, ...(isInactive ? {} : i===0?{color:'#C9A84C',fontSize:'1.25rem'}:i===1?{color:'#aaa',fontSize:'1.1rem'}:i===2?{color:'#cd7f32'}:{})}}>
+                  {isInactive ? '—' : i < 3 ? ranks[i] : i + 1}
                 </div>
                 <div style={s.player}>
                   {entry.profiles?.avatar_url ? (
                     <img src={entry.profiles.avatar_url} alt="avatar" style={{...s.avatar, objectFit:'cover', background:'none'}} />
                   ) : (
-                    <div style={{...s.avatar, background: avatarColors[i % avatarColors.length]}}>
+                    <div style={{...s.avatar, background: isInactive ? '#bbb' : avatarColors[i % avatarColors.length]}}>
                       {entry.profiles?.username?.[0]?.toUpperCase() || '?'}
                     </div>
                   )}
@@ -278,21 +352,22 @@ function getLiveScore(pick) {
                     <div style={s.playerName}>
                       {entry.profiles?.username || 'Unknown'}
                       {entry.isYou && <span style={s.youTag}>You</span>}
+                      {isInactive && <span style={s.inactiveTag}>Inactive</span>}
                     </div>
                   </div>
                 </div>
-                <div style={s.record}>{entry.wins}–{entry.losses}</div>
-                <div style={{...s.netUnits, color: entry.netUnits > 0 ? '#1a7a4a' : entry.netUnits < 0 ? '#c0392b' : '#888580'}}>
-                  {entry.netUnits > 0 ? '+' : ''}{entry.netUnits}
+                <div style={s.record}>{isInactive ? '—' : `${entry.wins}–${entry.losses}`}</div>
+                <div style={{...s.netUnits, color: isInactive ? '#888580' : entry.netUnits > 0 ? '#1a7a4a' : entry.netUnits < 0 ? '#c0392b' : '#888580'}}>
+                  {isInactive ? '—' : `${entry.netUnits > 0 ? '+' : ''}${entry.netUnits}`}
                 </div>
                 <div style={{...s.picksCount, display:'flex', alignItems:'center', gap:'4px'}}>
-                  {view === 'season' ? `${entry.totalPicks}/${totalSessions * 6}` : `${entry.totalPicks}/6`}
-                  {view !== 'season' && <span style={{fontSize:'0.6rem', color:'#aaa'}}>{isExpanded ? '▲' : '▼'}</span>}
+                  {isInactive ? '—' : view === 'season' ? `${entry.totalPicks}/${totalSessions * 6}` : `${entry.totalPicks}/6`}
+                  {!isInactive && view !== 'season' && <span style={{fontSize:'0.6rem', color:'#aaa'}}>{isExpanded ? '▲' : '▼'}</span>}
                 </div>
               </div>
 
               {/* Penalty row */}
-              {entry.penalty < 0 && view !== 'season' && (
+              {!isInactive && entry.penalty < 0 && view !== 'season' && (
                 <div style={s.penaltyRow}>
                   <div style={{gridColumn:'1/3',display:'flex',alignItems:'center',gap:'6px'}}>
                     <span style={s.penaltyIcon}>⚠️</span>
@@ -305,7 +380,7 @@ function getLiveScore(pick) {
               )}
 
               {/* Picks dropdown */}
-              {isExpanded && (
+              {isExpanded && !isInactive && (
                 <div style={s.picksDropdown}>
                   <div style={s.picksDropdownTitle}>
                     <span style={{cursor:'pointer', textDecoration:'underline', textDecorationStyle:'dotted'}} onClick={() => setViewingProfile(entry.user_id)}>
@@ -317,11 +392,17 @@ function getLiveScore(pick) {
                     {PICK_CATS.map(cat => {
                       const pick = picks.find(p => p.category === cat.id)
                       const game = pick ? games.find(g => g.id === pick.game_id) : null
-                      const isLocked = pick && (game?.started || !game)
-                      const resultColor = pick?.result === 'win' ? '#1a7a4a' : pick?.result === 'loss' ? '#c0392b' : '#888580'
                       const liveScore = pick ? getLiveScore(pick) : null
                       const isLive = liveScore?.status === 'in'
                       const isFinal = liveScore?.status === 'post'
+                      const isLocked = pick && (
+                        isLive || isFinal ||
+                        !game ||
+                        (pick.commence_time ? Date.now() >= new Date(pick.commence_time).getTime()
+                          : game?.commence_time ? Date.now() >= new Date(game.commence_time).getTime()
+                          : false)
+                      )
+                      const resultColor = pick?.result === 'win' ? '#1a7a4a' : pick?.result === 'loss' ? '#c0392b' : '#888580'
 
                       return (
                         <div key={cat.id} style={{
@@ -390,7 +471,35 @@ function getLiveScore(pick) {
               )}
             </div>
           )
-        })}
+          }
+
+          return (
+            <>
+              {activeEntries.length === 0 && inactiveEntries.length === 0 ? (
+                <div style={{padding:'32px',textAlign:'center',color:'#888580',fontSize:'0.85rem'}}>
+                  No picks submitted yet — be the first!
+                </div>
+              ) : (
+                <>
+                  {activeEntries.length === 0 && view !== 'season' && (
+                    <div style={{padding:'24px',textAlign:'center',color:'#888580',fontSize:'0.82rem'}}>
+                      No one has opted in yet — be the first!
+                    </div>
+                  )}
+                  {activeEntries.map((entry, i) => renderRow(entry, i, false))}
+                  {inactiveEntries.length > 0 && (
+                    <>
+                      <div style={s.inactiveDivider}>
+                        <span style={s.inactiveDividerText}>Inactive This Session</span>
+                      </div>
+                      {inactiveEntries.map((entry, i) => renderRow(entry, i, true))}
+                    </>
+                  )}
+                </>
+              )}
+            </>
+          )
+        })()}
       </div>
     {viewingProfile && (
         <UserProfileModal userId={viewingProfile} onClose={() => setViewingProfile(null)} />
@@ -424,6 +533,9 @@ const s = {
   avatar:{width:'30px',height:'30px',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'0.68rem',fontWeight:700,fontFamily:"'Barlow Condensed',sans-serif",color:'#fff',flexShrink:0},
   playerName:{fontWeight:600,fontSize:'0.86rem',display:'flex',alignItems:'center',flexWrap:'wrap',gap:'4px'},
   youTag:{fontSize:'0.56rem',fontFamily:"'Barlow Condensed',sans-serif",background:'#4B2E83',color:'#fff',padding:'1px 6px',borderRadius:'4px'},
+  inactiveTag:{fontSize:'0.56rem',fontFamily:"'Barlow Condensed',sans-serif",background:'#e2dfd8',color:'#888580',padding:'1px 6px',borderRadius:'4px'},
+  inactiveDivider:{padding:'10px 16px',borderTop:'1px solid #e2dfd8',background:'#f9f8f6',display:'flex',alignItems:'center',justifyContent:'center'},
+  inactiveDividerText:{fontSize:'0.62rem',fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,textTransform:'uppercase',letterSpacing:'2px',color:'#aaa'},
   record:{fontSize:'0.78rem',color:'#888580',fontFamily:"'Barlow Condensed',sans-serif",fontWeight:600},
   netUnits:{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.92rem'},
   picksCount:{fontSize:'0.78rem',color:'#888580',fontFamily:"'Barlow Condensed',sans-serif"},

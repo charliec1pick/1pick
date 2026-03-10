@@ -33,9 +33,8 @@ function checkPickResult(pick, homeTeam, awayTeam, homeScore, awayScore) {
     if (!match) return 'pending'
     const spread = parseFloat(match[1])
     const teamName = pick.team.replace(/[+-]?\d+\.?\d*$/, '').trim()
-    const isHome =
-      homeTeam.includes(teamName) ||
-      teamName.includes(homeTeam.split(' ').pop())
+    // Use proper expanded matching instead of nickname-only check
+    const isHome = teamsMatchSingle(teamName, homeTeam)
     const teamScore = isHome ? homeScore : awayScore
     const oppScore = isHome ? awayScore : homeScore
     const margin = teamScore + spread - oppScore
@@ -53,29 +52,83 @@ function calcPayout(units, lockedOdds, result) {
   return parseFloat((units * (odds / 100)).toFixed(1))
 }
 
-// Match a pick's home_team/away_team to a scores_cache row
-// ESPN team names should match since odds_cache also stores displayName-style names
+// --- Team matching: date-aware + abbreviation-expanded, NO nickname-only fallback ---
+
+// Expand common abbreviations so "Kansas St" and "Kansas State" normalize the same
+function expandAbbreviations(str) {
+  return str
+    .replace(/\bst\b/g, 'state')
+    .replace(/\buniv\b/g, 'university')
+    .replace(/\bintl?\b/g, 'international')
+    .replace(/\bmt\b/g, 'mount')
+    .replace(/\bft\b/g, 'fort')
+    // Directional: "N" → "northern", "S" → "southern", etc.
+    // Must come after other replacements to avoid conflicts
+    .replace(/\bn\b/g, 'northern')
+    .replace(/\bs\b/g, 'southern')
+    .replace(/\be\b/g, 'eastern')
+    .replace(/\bw\b/g, 'western')
+    .replace(/\bmiss\b/g, 'mississippi')
+}
+
 function normalizeTeam(name) {
   return (name || '').toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim()
 }
 
-function teamNickname(name) {
-  const parts = normalizeTeam(name).split(' ')
-  return parts[parts.length - 1]
+// Expanded normalization for fuzzy comparison — applies abbreviation expansion
+function expandedNormalize(name) {
+  return expandAbbreviations(normalizeTeam(name))
 }
 
-function fuzzyTeamsMatch(a, b) {
+function teamsMatchSingle(a, b) {
+  // 1. Exact normalized match
   const na = normalizeTeam(a)
   const nb = normalizeTeam(b)
   if (na === nb) return true
-  if (na.includes(nb) || nb.includes(na)) return true
-  return teamNickname(a) === teamNickname(b)
+
+  // 2. Expanded abbreviation match
+  const ea = expandedNormalize(a)
+  const eb = expandedNormalize(b)
+  if (ea === eb) return true
+
+  // 3. Substring match (one contains the other) — catches partial name differences
+  if (ea.includes(eb) || eb.includes(ea)) return true
+
+  // 4. School name match — strip the last word (mascot) and compare the school portion.
+  //    Handles "Florida International Golden Panthers" vs "Florida International Panthers"
+  //    where the mascot word differs but the school is the same.
+  const partsA = ea.split(' ')
+  const partsB = eb.split(' ')
+  if (partsA.length >= 2 && partsB.length >= 2) {
+    const schoolA = partsA.slice(0, -1).join(' ')
+    const schoolB = partsB.slice(0, -1).join(' ')
+    if (schoolA === schoolB) return true
+    if (schoolA.includes(schoolB) || schoolB.includes(schoolA)) return true
+  }
+
+  // NO nickname-only fallback — this is what caused cross-game contamination
+  return false
+}
+
+// Extract the UTC game date from a pick's commence_time as YYYY-MM-DD
+function pickGameDate(pick) {
+  if (!pick.commence_time) return null
+  // Both ESPN (scores_cache.game_date) and Odds API (commence_time) use UTC,
+  // so splitting at 'T' gives a consistent date for exact matching.
+  return new Date(pick.commence_time).toISOString().split('T')[0]
 }
 
 function teamsMatch(pick, scoreRow) {
+  // Date gate: require exact date match (both are UTC-based YYYY-MM-DD).
+  // If either date is missing, skip the date filter to avoid breaking old picks
+  // that were saved without commence_time.
+  const pDate = pickGameDate(pick)
+  const sDate = scoreRow.game_date
+  if (pDate && sDate && pDate !== sDate) return false
+
   return (
-    fuzzyTeamsMatch(pick.home_team, scoreRow.home_team) &&
-    fuzzyTeamsMatch(pick.away_team, scoreRow.away_team)
+    teamsMatchSingle(pick.home_team, scoreRow.home_team) &&
+    teamsMatchSingle(pick.away_team, scoreRow.away_team)
   )
 }
 

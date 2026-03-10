@@ -46,8 +46,7 @@ export default function UserProfileModal({ userId, onClose }) {
 
     const wins = filteredPicks.filter(p => p.result === 'win').length
     const losses = filteredPicks.filter(p => p.result === 'loss').length
-    const netUnits = parseFloat(picks
-      .filter(p => selectedSport === 'all' ? true : p.pool_entries?.friend_pools?.sport === selectedSport)
+    const netUnits = parseFloat(filteredPicks
       .reduce((sum, p) => {
         if (p.result === 'win' || p.result === 'loss') return sum + (p.payout_units || 0)
         return sum

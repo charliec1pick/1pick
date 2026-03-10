@@ -19,6 +19,14 @@ export default function Lobby({ session, profile, activeSport }) {
   const [sessionEnd, setSessionEnd] = useState('')
   const [newSessionStart, setNewSessionStart] = useState('')
   const [newSessionEnd, setNewSessionEnd] = useState('')
+  const [newSessionName, setNewSessionName] = useState('')
+  const [firstSessionName, setFirstSessionName] = useState('')
+  const [editingPoolName, setEditingPoolName] = useState(null) // pool id being edited
+  const [editPoolNameVal, setEditPoolNameVal] = useState('')
+  const [savingPoolName, setSavingPoolName] = useState(false)
+  const [editingSessionName, setEditingSessionName] = useState(null) // pool id being edited
+  const [editSessionNameVal, setEditSessionNameVal] = useState('')
+  const [savingSessionName, setSavingSessionName] = useState(false)
 
   useEffect(() => { loadMyPools() }, [activeSport])
 
@@ -52,6 +60,7 @@ export default function Lobby({ session, profile, activeSport }) {
     setError('')
     if (!poolName.trim()) { setError('Give your pool a name'); setCreating(false); return }
     const code = generateCode()
+    const sessionNames = firstSessionName.trim() ? { 1: firstSessionName.trim() } : {}
     const { data: pool, error: poolError } = await supabase
       .from('friend_pools')
       .insert({
@@ -62,6 +71,7 @@ export default function Lobby({ session, profile, activeSport }) {
         current_period: 1,
         session_start: sessionStart || null,
         session_end: sessionEnd || null,
+        session_names: sessionNames,
       })
       .select()
       .single()
@@ -69,9 +79,11 @@ export default function Lobby({ session, profile, activeSport }) {
     await supabase.from('pool_entries').insert({
       user_id: session.user.id,
       friend_pool_id: pool.id,
-      period: 1
+      period: 1,
+      opted_in: true
     })
     setPoolName('')
+    setFirstSessionName('')
     setSessionStart('')
     setSessionEnd('')
     setShowCreate(false)
@@ -98,7 +110,7 @@ export default function Lobby({ session, profile, activeSport }) {
     const currentPeriod = pool.current_period || 1
     const { error: entryError } = await supabase
       .from('pool_entries')
-      .insert({ user_id: session.user.id, friend_pool_id: pool.id, period: currentPeriod })
+      .insert({ user_id: session.user.id, friend_pool_id: pool.id, period: currentPeriod, opted_in: true })
     if (entryError) { setError('You may already be in this pool'); setJoining(false); return }
     setJoinCode('')
     setShowJoin(false)
@@ -135,22 +147,27 @@ async function deletePool(poolId) {
 
   async function resetPool(poolId) {
     setResetting(true)
-    const { data: entries } = await supabase
+    const { data: pool } = await supabase
+      .from('friend_pools')
+      .select('current_period')
+      .eq('id', poolId)
+      .single()
+
+    const currentPeriod = pool?.current_period || 1
+    const newPeriod = currentPeriod + 1
+
+    // Only get entries for the CURRENT period — not all periods
+    const { data: currentEntries } = await supabase
       .from('pool_entries')
-      .select('id, user_id')
+      .select('id, user_id, opted_in')
       .eq('friend_pool_id', poolId)
+      .eq('period', currentPeriod)
 
-    if (entries) {
-      const { data: pool } = await supabase
-        .from('friend_pools')
-        .select('current_period')
-        .eq('id', poolId)
-        .single()
+    if (currentEntries) {
+      // Apply penalty only to OPTED-IN users
+      for (const entry of currentEntries) {
+        if (!entry.opted_in) continue // skip inactive users — no penalty
 
-      const currentPeriod = pool?.current_period || 1
-      const newPeriod = currentPeriod + 1
-
-      for (const entry of entries) {
         const { data: userPicks } = await supabase
           .from('picks')
           .select('units, category')
@@ -176,13 +193,35 @@ async function deletePool(poolId) {
         }
       }
 
-      for (const entry of entries) {
+      // Create new period entries for ALL users — everyone starts as not opted in
+      const { data: allEntries } = await supabase
+        .from('pool_entries')
+        .select('user_id')
+        .eq('friend_pool_id', poolId)
+
+      // Deduplicate users
+      const uniqueUsers = [...new Set(allEntries?.map(e => e.user_id) || [])]
+
+      for (const userId of uniqueUsers) {
         await supabase.from('pool_entries').insert({
-          user_id: entry.user_id,
+          user_id: userId,
           friend_pool_id: poolId,
           period: newPeriod,
+          opted_in: false,
           joined_at: new Date().toISOString()
         })
+      }
+
+      // Fetch current session_names to append the new one
+      const { data: poolData } = await supabase
+        .from('friend_pools')
+        .select('session_names')
+        .eq('id', poolId)
+        .single()
+
+      const sessionNames = poolData?.session_names || {}
+      if (newSessionName.trim()) {
+        sessionNames[newPeriod] = newSessionName.trim()
       }
 
       await supabase
@@ -191,6 +230,7 @@ async function deletePool(poolId) {
           current_period: newPeriod,
           session_start: newSessionStart || null,
           session_end: newSessionEnd || null,
+          session_names: sessionNames,
         })
         .eq('id', poolId)
     }
@@ -198,7 +238,34 @@ async function deletePool(poolId) {
     setShowResetConfirm(null)
     setNewSessionStart('')
     setNewSessionEnd('')
+    setNewSessionName('')
     setResetting(false)
+    loadMyPools()
+  }
+
+  async function savePoolName(poolId) {
+    if (!editPoolNameVal.trim() || savingPoolName) return
+    setSavingPoolName(true)
+    await supabase.from('friend_pools').update({ name: editPoolNameVal.trim() }).eq('id', poolId)
+    setEditingPoolName(null)
+    setEditPoolNameVal('')
+    setSavingPoolName(false)
+    loadMyPools()
+  }
+
+  async function saveSessionName(poolId, period, sessionNames) {
+    if (savingSessionName) return
+    setSavingSessionName(true)
+    const updated = { ...sessionNames }
+    if (editSessionNameVal.trim()) {
+      updated[period] = editSessionNameVal.trim()
+    } else {
+      delete updated[period]
+    }
+    await supabase.from('friend_pools').update({ session_names: updated }).eq('id', poolId)
+    setEditingSessionName(null)
+    setEditSessionNameVal('')
+    setSavingSessionName(false)
     loadMyPools()
   }
 
@@ -228,6 +295,11 @@ async function deletePool(poolId) {
             <label style={s.label}>Pool Name</label>
             <input style={s.input} type="text" placeholder="e.g. Friday Night Crew"
               value={poolName} onChange={e => setPoolName(e.target.value)} />
+          </div>
+          <div style={s.field}>
+            <label style={s.label}>First Session Name <span style={s.optional}>(optional)</span></label>
+            <input style={s.input} type="text" placeholder="e.g. Round of 64"
+              value={firstSessionName} onChange={e => setFirstSessionName(e.target.value)} />
           </div>
           <div style={s.dateRow}>
             <div style={{flex:1}}>
@@ -308,9 +380,53 @@ async function deletePool(poolId) {
           <div style={s.poolCard}>
             <div style={s.poolIcon}>👥</div>
             <div style={s.poolInfo}>
-              <div style={s.poolName}>{entry.friend_pools.name}</div>
+              {/* Editable pool name for commissioners */}
+              {editingPoolName === entry.friend_pools.id ? (
+                <div style={{display:'flex',gap:'6px',alignItems:'center',marginBottom:'4px'}}>
+                  <input style={{...s.input, padding:'5px 10px', fontSize:'0.88rem', fontWeight:700}} type="text"
+                    value={editPoolNameVal} onChange={e => setEditPoolNameVal(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && savePoolName(entry.friend_pools.id)} autoFocus />
+                  <button style={s.inlineSaveBtn} onClick={() => savePoolName(entry.friend_pools.id)} disabled={savingPoolName}>✓</button>
+                  <button style={s.inlineCancelBtn} onClick={() => setEditingPoolName(null)}>✕</button>
+                </div>
+              ) : (
+                <div style={{...s.poolName, display:'flex', alignItems:'center', gap:'6px'}}>
+                  {entry.friend_pools.name}
+                  {entry.friend_pools.commissioner_id === session.user.id && (
+                    <span style={s.editIcon} onClick={() => { setEditingPoolName(entry.friend_pools.id); setEditPoolNameVal(entry.friend_pools.name) }}>✎</span>
+                  )}
+                </div>
+              )}
               <div style={s.poolMeta}>
                 Code: <strong>{entry.friend_pools.invite_code}</strong> · {entry.friend_pools.sport === 'multi' ? '🌐 Multi-Sport' : entry.friend_pools.sport.toUpperCase()} · Session {entry.friend_pools.current_period || 1}
+                {(() => {
+                  const names = entry.friend_pools.session_names || {}
+                  const currentPeriod = entry.friend_pools.current_period || 1
+                  const currentName = names[currentPeriod]
+
+                  if (editingSessionName === entry.friend_pools.id) {
+                    return (
+                      <span style={{display:'inline-flex',gap:'4px',alignItems:'center',marginLeft:'6px'}}>
+                        · 📋 <input style={{...s.input, padding:'3px 8px', fontSize:'0.72rem', width:'120px', display:'inline'}} type="text"
+                          placeholder="Session name" value={editSessionNameVal}
+                          onChange={e => setEditSessionNameVal(e.target.value)}
+                          onKeyDown={e => e.key === 'Enter' && saveSessionName(entry.friend_pools.id, currentPeriod, names)} autoFocus />
+                        <button style={s.inlineSaveBtn} onClick={() => saveSessionName(entry.friend_pools.id, currentPeriod, names)} disabled={savingSessionName}>✓</button>
+                        <button style={s.inlineCancelBtn} onClick={() => setEditingSessionName(null)}>✕</button>
+                      </span>
+                    )
+                  }
+                  return (
+                    <span>
+                      {currentName ? <span> · 📋 {currentName}</span> : null}
+                      {entry.friend_pools.commissioner_id === session.user.id && (
+                        <span style={s.editIcon} onClick={() => { setEditingSessionName(entry.friend_pools.id); setEditSessionNameVal(currentName || '') }}>
+                          {currentName ? ' ✎' : ' + name session'}
+                        </span>
+                      )}
+                    </span>
+                  )
+                })()}
                 {entry.friend_pools.session_start && entry.friend_pools.session_end && (
                   <span> · 📅 {entry.friend_pools.session_start} → {entry.friend_pools.session_end}</span>
                 )}
@@ -321,7 +437,7 @@ async function deletePool(poolId) {
                 {entry.friend_pools.commissioner_id === session.user.id ? '👑 Commissioner' : '✓ Joined'}
               </div>
               {entry.friend_pools.commissioner_id === session.user.id && (
-                <button style={s.resetBtn} onClick={() => { setShowResetConfirm(entry.friend_pools.id); setNewSessionStart(''); setNewSessionEnd('') }}>
+                <button style={s.resetBtn} onClick={() => { setShowResetConfirm(entry.friend_pools.id); setNewSessionStart(''); setNewSessionEnd(''); setNewSessionName('') }}>
                   New Session
                 </button>
               )}
@@ -339,6 +455,11 @@ async function deletePool(poolId) {
             <div style={s.confirmCard}>
               <div style={s.confirmTitle}>⚠️ New Session?</div>
               <div style={s.confirmText}>This will clear all picks for everyone in <strong>{entry.friend_pools.name}</strong> and start a new session. Season standings will be preserved. This cannot be undone.</div>
+              <div style={s.field}>
+                <label style={{...s.label, color:'#c0392b'}}>Session Name <span style={s.optional}>(optional)</span></label>
+                <input style={s.input} type="text" placeholder="e.g. Round of 32"
+                  value={newSessionName} onChange={e => setNewSessionName(e.target.value)} />
+              </div>
               <div style={s.dateRow}>
                 <div style={{flex:1}}>
                   <label style={{...s.label, color:'#c0392b'}}>New Session Start <span style={s.optional}>(optional)</span></label>
@@ -420,4 +541,7 @@ const s = {
   commishText:{fontSize:'0.8rem',color:'#7a6a2a',lineHeight:1.5},
   deleteBtn:{padding:'4px 10px',background:'rgba(192,57,43,0.05)',border:'1px solid rgba(192,57,43,0.2)',borderRadius:'6px',color:'#c0392b',fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.65rem',textTransform:'uppercase',letterSpacing:'1px',cursor:'pointer'},
   multiBadge:{display:'inline-block',background:'rgba(107,71,184,0.12)',border:'1px solid rgba(107,71,184,0.3)',borderRadius:'20px',padding:'5px 14px',fontSize:'0.72rem',fontFamily:"'Barlow Condensed',sans-serif",textTransform:'uppercase',letterSpacing:'1.5px',color:'#a07ee0',marginBottom:'10px'},
+  editIcon:{fontSize:'0.68rem',color:'#4B2E83',cursor:'pointer',opacity:0.6,fontStyle:'normal',fontFamily:"'Barlow Condensed',sans-serif",fontWeight:600},
+  inlineSaveBtn:{width:'24px',height:'24px',borderRadius:'6px',border:'1.5px solid #1a7a4a',background:'#eaf7ef',color:'#1a7a4a',fontSize:'0.75rem',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,fontWeight:700},
+  inlineCancelBtn:{width:'24px',height:'24px',borderRadius:'6px',border:'1.5px solid #e2dfd8',background:'#f9f8f6',color:'#888580',fontSize:'0.75rem',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,fontWeight:700},
 }
