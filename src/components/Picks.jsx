@@ -11,65 +11,153 @@ const PICK_CATS = [
   { id: 'tot-un', label: 'Total Under', color: '#6b47b8' },
 ]
 
-const TOP_25 = [
+// ─── SPORT-SPECIFIC FILTERS ──────────────────────────────────────────────────
+
+// CBB Top 25 — update these periodically or fetch from ESPN rankings API
+const CBB_TOP_25 = [
   { rank: 1,  name: 'Duke Blue Devils' },
   { rank: 2,  name: 'Arizona Wildcats' },
   { rank: 3,  name: 'Michigan Wolverines' },
-  { rank: 4,  name: 'UConn Huskies' },
-  { rank: 5,  name: 'Florida Gators' },
-  { rank: 6,  name: 'Iowa State Cyclones' },
-  { rank: 7,  name: 'Houston Cougars' },
+  { rank: 4,  name: 'Florida Gators' },
+  { rank: 5,  name: 'Houston Cougars' },
+  { rank: 6,  name: 'UConn Huskies' },
+  { rank: 7,  name: 'Iowa State Cyclones' },
   { rank: 8,  name: 'Michigan State Spartans' },
-  { rank: 9,  name: 'Nebraska Cornhuskers' },
-  { rank: 10, name: 'Texas Tech Red Raiders' },
-  { rank: 11, name: 'Illinois Fighting Illini' },
+  { rank: 9,  name: 'Illinois Fighting Illini' },
+  { rank: 10, name: 'Virginia Cavaliers' },
+  { rank: 11, name: 'Nebraska Cornhuskers' },
   { rank: 12, name: 'Gonzaga Bulldogs' },
-  { rank: 13, name: 'Virginia Cavaliers' },
+  { rank: 13, name: "St. John's Red Storm" },
   { rank: 14, name: 'Kansas Jayhawks' },
-  { rank: 15, name: 'Purdue Boilermakers' },
-  { rank: 16, name: 'Alabama Crimson Tide' },
-  { rank: 17, name: 'North Carolina Tar Heels' },
-  { rank: 18, name: "St. John's Red Storm" },
-  { rank: 19, name: 'Miami (OH) RedHawks' },
-  { rank: 20, name: 'Arkansas Razorbacks' },
+  { rank: 15, name: 'Alabama Crimson Tide' },
+  { rank: 16, name: 'Texas Tech Red Raiders' },
+  { rank: 17, name: 'Arkansas Razorbacks' },
+  { rank: 18, name: 'Purdue Boilermakers' },
+  { rank: 19, name: 'North Carolina Tar Heels' },
+  { rank: 20, name: 'Miami (OH) RedHawks' },
   { rank: 21, name: "Saint Mary's Gaels" },
-  { rank: 22, name: 'Miami Hurricanes' },
-  { rank: 23, name: 'Tennessee Volunteers' },
-  { rank: 24, name: 'Vanderbilt Commodores' },
-  { rank: 25, name: 'Saint Louis Billikens' },
+  { rank: 22, name: 'Vanderbilt Commodores' },
+  { rank: 23, name: 'Wisconsin Badgers' },
+  { rank: 24, name: 'Louisville Cardinals' },
+  { rank: 25, name: 'Tennessee Volunteers' },
 ]
 
-const CONFERENCES = {
+// CBB Conferences — ALL conferences, using Odds API names
+const CBB_CONFERENCES = {
+  'ACC': ['Boston College Eagles','California Golden Bears','Clemson Tigers','Duke Blue Devils','Florida State Seminoles','Georgia Tech Yellow Jackets','Louisville Cardinals','Miami Hurricanes','NC State Wolfpack','North Carolina Tar Heels','Notre Dame Fighting Irish','Pittsburgh Panthers','SMU Mustangs','Stanford Cardinal','Syracuse Orange','Virginia Cavaliers','Virginia Tech Hokies','Wake Forest Demon Deacons'],
+  'Big Ten': ['Illinois Fighting Illini','Indiana Hoosiers','Iowa Hawkeyes','Maryland Terrapins','Michigan Wolverines','Michigan State Spartans','Minnesota Golden Gophers','Nebraska Cornhuskers','Northwestern Wildcats','Ohio State Buckeyes','Oregon Ducks','Penn State Nittany Lions','Purdue Boilermakers','Rutgers Scarlet Knights','UCLA Bruins','USC Trojans','Washington Huskies','Wisconsin Badgers'],
+  'Big 12': ['Arizona Wildcats','Arizona St Sun Devils','Baylor Bears','BYU Cougars','Cincinnati Bearcats','Colorado Buffaloes','Houston Cougars','Iowa State Cyclones','Kansas Jayhawks','Kansas St Wildcats','Oklahoma St Cowboys','TCU Horned Frogs','Texas Tech Red Raiders','UCF Knights','Utah Utes','West Virginia Mountaineers'],
+  'SEC': ['Alabama Crimson Tide','Arkansas Razorbacks','Auburn Tigers','Florida Gators','Georgia Bulldogs','Kentucky Wildcats','LSU Tigers','Mississippi St Bulldogs','Missouri Tigers','Oklahoma Sooners','Ole Miss Rebels','South Carolina Gamecocks','Tennessee Volunteers','Texas A&M Aggies','Texas Longhorns','Vanderbilt Commodores'],
+  'Big East': ['Butler Bulldogs','Creighton Bluejays','DePaul Blue Demons','Georgetown Hoyas','Marquette Golden Eagles','Providence Friars','Seton Hall Pirates',"St. John's Red Storm",'UConn Huskies','Villanova Wildcats','Xavier Musketeers'],
+  'American': ['Charlotte 49ers','East Carolina Pirates','Florida Atlantic Owls','Memphis Tigers','North Texas Mean Green','Rice Owls','South Florida Bulls','Temple Owls','Tulane Green Wave','Tulsa Golden Hurricane','UAB Blazers','UTSA Roadrunners','Wichita St Shockers'],
+  'Mountain West': ['Air Force Falcons','Boise State Broncos','Colorado St Rams','Fresno St Bulldogs','Grand Canyon Antelopes','Nevada Wolf Pack','New Mexico Lobos','San Diego St Aztecs','UNLV Rebels','Utah State Aggies','Wyoming Cowboys'],
+  'A-10': ['Davidson Wildcats','Dayton Flyers','Duquesne Dukes','Fordham Rams','George Mason Patriots','GW Revolutionaries','La Salle Explorers','Loyola (Chi) Ramblers','Rhode Island Rams','Richmond Spiders',"Saint Joseph's Hawks",'Saint Louis Billikens','St. Bonaventure Bonnies','VCU Rams'],
+  'Sun Belt': ['App State Mountaineers','Arkansas St Red Wolves','Coastal Carolina Chanticleers','Georgia Southern Eagles','Georgia St Panthers','James Madison Dukes',"Louisiana Ragin' Cajuns",'Marshall Thundering Herd','Old Dominion Monarchs','South Alabama Jaguars','Southern Miss Golden Eagles','Texas State Bobcats','Troy Trojans'],
+  'MAC': ['Akron Zips','Ball State Cardinals','Bowling Green Falcons','Buffalo Bulls','Central Michigan Chippewas','Eastern Michigan Eagles','Kent State Golden Flashes','Miami (OH) RedHawks','Northern Illinois Huskies','Ohio Bobcats','Toledo Rockets','UMass Minutemen','Western Michigan Broncos'],
+  'CUSA': ['Florida International Panthers','Jacksonville St Gamecocks','Liberty Flames','Louisiana Tech Bulldogs','Middle Tennessee Blue Raiders','Missouri St Bears','New Mexico St Aggies','Sam Houston St Bearkats','UTEP Miners','Western Kentucky Hilltoppers'],
+  'MVC': ['Bradley Braves','Drake Bulldogs','Evansville Purple Aces','Illinois St Redbirds','Indiana St Sycamores','Missouri St Bears','Murray St Racers','Northern Iowa Panthers','Southern Illinois Salukis','Belmont Bruins'],
+  'WCC': ['Gonzaga Bulldogs','Loyola Marymount Lions','Oregon St Beavers','Pacific Tigers','Pepperdine Waves','Portland Pilots','San Diego Toreros','San Francisco Dons','Santa Clara Broncos',"Saint Mary's Gaels",'Seattle Redhawks','Washington St Cougars'],
+  'Horizon': ['Cleveland St Vikings','Detroit Mercy Titans','Green Bay Phoenix','Illinois Chicago Flames','Milwaukee Panthers','Northern Kentucky Norse','Oakland Golden Grizzlies','Purdue Fort Wayne Mastodons','Wright St Raiders','Youngstown St Penguins'],
+  'Ivy League': ['Brown Bears','Columbia Lions','Cornell Big Red','Dartmouth Big Green','Harvard Crimson','Pennsylvania Quakers','Princeton Tigers','Yale Bulldogs'],
+  'Patriot': ['Army Knights','Boston Univ. Terriers','Bucknell Bison','Colgate Raiders','Holy Cross Crusaders','Lafayette Leopards','Lehigh Mountain Hawks','Loyola (MD) Greyhounds','Navy Midshipmen'],
+  'SoCon': ['Chattanooga Mocs','East Tennessee St Buccaneers','Furman Paladins','Mercer Bears','Samford Bulldogs','The Citadel Bulldogs','UNC Greensboro Spartans','VMI Keydets','Western Carolina Catamounts','Wofford Terriers'],
+  'CAA': ['Campbell Fighting Camels','Charleston Cougars','Drexel Dragons','Elon Phoenix','Hampton Pirates','Hofstra Pride','Monmouth Hawks','Northeastern Huskies','Stony Brook Seawolves','Towson Tigers','UNC Wilmington Seahawks','William & Mary Tribe'],
+  'SWAC': ['Alabama A&M Bulldogs','Alabama St Hornets','Alcorn St Braves','Arkansas-Pine Bluff Golden Lions','Bethune-Cookman Wildcats','Florida A&M Rattlers','Grambling St Tigers','Jackson St Tigers','Miss Valley St Delta Devils','Prairie View Panthers','Southern Jaguars','Texas Southern Tigers'],
+  'MEAC': ['Coppin St Eagles','Delaware St Hornets','Howard Bison','Maryland-Eastern Shore Hawks','Morgan St Bears','Norfolk St Spartans','North Carolina A&T Aggies','North Carolina Central Eagles','South Carolina St Bulldogs'],
+  'OVC': ['Eastern Illinois Panthers','Lindenwood Lions','Little Rock Trojans','Morehead St Eagles','SIU-Edwardsville Cougars','SE Missouri St Redhawks','Tennessee St Tigers','UT-Arlington Mavericks'],
+  'WAC': ['Abilene Christian Wildcats','Chicago St Cougars','Grand Canyon Antelopes','Sam Houston St Bearkats','Southern Utah Thunderbirds','Tarleton State Texans','UT Rio Grande Valley Vaqueros','Utah Tech Trailblazers','Utah Valley Wolverines'],
+  'Big South': ['Campbell Fighting Camels','Charleston Southern Buccaneers','Gardner-Webb Bulldogs','High Point Panthers','Longwood Lancers','Presbyterian Blue Hose','Radford Highlanders','UNC Asheville Bulldogs','Winthrop Eagles'],
+  'NEC': ['Bryant Bulldogs','Central Connecticut St Blue Devils','Fairleigh Dickinson Knights','LIU Sharks','Merrimack Warriors',"Mt. St. Mary's Mountaineers",'Sacred Heart Pioneers','Saint Francis Red Flash','Wagner Seahawks'],
+  'MAAC': ['Canisius Golden Griffins','Fairfield Stags','Iona Gaels','Manhattan Jaspers','Marist Red Foxes','Niagara Purple Eagles','Quinnipiac Bobcats','Rider Broncs','Sacred Heart Pioneers','Siena Saints',"Saint Peter's Peacocks"],
+  'Big West': ['Cal Poly Mustangs','CSU Fullerton Titans','Hawaii Rainbow Warriors','Long Beach St 49ers','UC Davis Aggies','UC Irvine Anteaters','UC Riverside Highlanders','UC San Diego Tritons','UC Santa Barbara Gauchos'],
+  'Summit': ['Denver Pioneers','UMKC Kangaroos','North Dakota Fighting Hawks','North Dakota St Bison','Omaha Mavericks','Oral Roberts Golden Eagles','South Dakota Coyotes','South Dakota St Jackrabbits'],
+  'America East': ['Binghamton Bearcats','Bryant Bulldogs','Maine Black Bears','New Hampshire Wildcats','NJIT Highlanders','Albany Great Danes','UMBC Retrievers','UMass Lowell River Hawks','Vermont Catamounts'],
+  'Big Sky': ['Eastern Washington Eagles','Idaho State Bengals','Idaho Vandals','Montana Grizzlies','Montana St Bobcats','Northern Arizona Lumberjacks','N Colorado Bears','Portland St Vikings','Sacramento St Hornets','Weber State Wildcats'],
+  'ASUN': ['Austin Peay Governors','Bellarmine Knights','Central Arkansas Bears','Eastern Kentucky Colonels','Florida Gulf Coast Eagles','Jacksonville Dolphins','Lipscomb Bisons','North Alabama Lions','North Florida Ospreys','Queens University Royals','Stetson Hatters','West Georgia Wolves'],
+}
+
+// NBA Conferences & Divisions
+const NBA_FILTERS = {
+  'Eastern Conference': ['Atlanta Hawks','Boston Celtics','Brooklyn Nets','Charlotte Hornets','Chicago Bulls','Cleveland Cavaliers','Detroit Pistons','Indiana Pacers','Miami Heat','Milwaukee Bucks','New York Knicks','Orlando Magic','Philadelphia 76ers','Toronto Raptors','Washington Wizards'],
+  'Western Conference': ['Dallas Mavericks','Denver Nuggets','Golden State Warriors','Houston Rockets','Los Angeles Clippers','Los Angeles Lakers','Memphis Grizzlies','Minnesota Timberwolves','New Orleans Pelicans','Oklahoma City Thunder','Phoenix Suns','Portland Trail Blazers','Sacramento Kings','San Antonio Spurs','Utah Jazz'],
+  'Atlantic': ['Boston Celtics','Brooklyn Nets','New York Knicks','Philadelphia 76ers','Toronto Raptors'],
+  'Central': ['Chicago Bulls','Cleveland Cavaliers','Detroit Pistons','Indiana Pacers','Milwaukee Bucks'],
+  'Southeast': ['Atlanta Hawks','Charlotte Hornets','Miami Heat','Orlando Magic','Washington Wizards'],
+  'Northwest': ['Denver Nuggets','Minnesota Timberwolves','Oklahoma City Thunder','Portland Trail Blazers','Utah Jazz'],
+  'Pacific': ['Golden State Warriors','Los Angeles Clippers','Los Angeles Lakers','Phoenix Suns','Sacramento Kings'],
+  'Southwest': ['Dallas Mavericks','Houston Rockets','Memphis Grizzlies','New Orleans Pelicans','San Antonio Spurs'],
+}
+
+// NHL Conferences & Divisions
+const NHL_FILTERS = {
+  'Eastern Conference': ['Boston Bruins','Buffalo Sabres','Carolina Hurricanes','Columbus Blue Jackets','Detroit Red Wings','Florida Panthers','Montreal Canadiens','New Jersey Devils','New York Islanders','New York Rangers','Ottawa Senators','Philadelphia Flyers','Pittsburgh Penguins','Tampa Bay Lightning','Toronto Maple Leafs','Washington Capitals'],
+  'Western Conference': ['Anaheim Ducks','Calgary Flames','Chicago Blackhawks','Colorado Avalanche','Dallas Stars','Edmonton Oilers','Los Angeles Kings','Minnesota Wild','Nashville Predators','San Jose Sharks','Seattle Kraken','St. Louis Blues','Utah Mammoth','Vancouver Canucks','Vegas Golden Knights','Winnipeg Jets'],
+  'Atlantic': ['Boston Bruins','Buffalo Sabres','Detroit Red Wings','Florida Panthers','Montreal Canadiens','Ottawa Senators','Tampa Bay Lightning','Toronto Maple Leafs'],
+  'Metropolitan': ['Carolina Hurricanes','Columbus Blue Jackets','New Jersey Devils','New York Islanders','New York Rangers','Philadelphia Flyers','Pittsburgh Penguins','Washington Capitals'],
+  'Central': ['Arizona Coyotes','Chicago Blackhawks','Colorado Avalanche','Dallas Stars','Minnesota Wild','Nashville Predators','St. Louis Blues','Utah Mammoth','Winnipeg Jets'],
+  'Pacific': ['Anaheim Ducks','Calgary Flames','Edmonton Oilers','Los Angeles Kings','San Jose Sharks','Seattle Kraken','Vancouver Canucks','Vegas Golden Knights'],
+}
+
+// NFL Conferences & Divisions
+const NFL_FILTERS = {
+  'AFC': ['Baltimore Ravens','Buffalo Bills','Cincinnati Bengals','Cleveland Browns','Denver Broncos','Houston Texans','Indianapolis Colts','Jacksonville Jaguars','Kansas City Chiefs','Las Vegas Raiders','Los Angeles Chargers','Miami Dolphins','New England Patriots','New York Jets','Pittsburgh Steelers','Tennessee Titans'],
+  'NFC': ['Arizona Cardinals','Atlanta Falcons','Carolina Panthers','Chicago Bears','Dallas Cowboys','Detroit Lions','Green Bay Packers','Los Angeles Rams','Minnesota Vikings','New Orleans Saints','New York Giants','Philadelphia Eagles','San Francisco 49ers','Seattle Seahawks','Tampa Bay Buccaneers','Washington Commanders'],
+  'AFC East': ['Buffalo Bills','Miami Dolphins','New England Patriots','New York Jets'],
+  'AFC North': ['Baltimore Ravens','Cincinnati Bengals','Cleveland Browns','Pittsburgh Steelers'],
+  'AFC South': ['Houston Texans','Indianapolis Colts','Jacksonville Jaguars','Tennessee Titans'],
+  'AFC West': ['Denver Broncos','Kansas City Chiefs','Las Vegas Raiders','Los Angeles Chargers'],
+  'NFC East': ['Dallas Cowboys','New York Giants','Philadelphia Eagles','Washington Commanders'],
+  'NFC North': ['Chicago Bears','Detroit Lions','Green Bay Packers','Minnesota Vikings'],
+  'NFC South': ['Atlanta Falcons','Carolina Panthers','New Orleans Saints','Tampa Bay Buccaneers'],
+  'NFC West': ['Arizona Cardinals','Los Angeles Rams','San Francisco 49ers','Seattle Seahawks'],
+}
+
+// CFB Conferences — Power 4, Group of 5, and FCS
+const CFB_CONFERENCES = {
   'ACC': ['Boston College Eagles','California Golden Bears','Clemson Tigers','Duke Blue Devils','Florida State Seminoles','Georgia Tech Yellow Jackets','Louisville Cardinals','Miami Hurricanes','NC State Wolfpack','North Carolina Tar Heels','Notre Dame Fighting Irish','Pittsburgh Panthers','SMU Mustangs','Stanford Cardinal','Syracuse Orange','Virginia Cavaliers','Virginia Tech Hokies','Wake Forest Demon Deacons'],
   'Big Ten': ['Illinois Fighting Illini','Indiana Hoosiers','Iowa Hawkeyes','Maryland Terrapins','Michigan Wolverines','Michigan State Spartans','Minnesota Golden Gophers','Nebraska Cornhuskers','Northwestern Wildcats','Ohio State Buckeyes','Oregon Ducks','Penn State Nittany Lions','Purdue Boilermakers','Rutgers Scarlet Knights','UCLA Bruins','USC Trojans','Washington Huskies','Wisconsin Badgers'],
   'Big 12': ['Arizona Wildcats','Arizona State Sun Devils','Baylor Bears','BYU Cougars','Cincinnati Bearcats','Colorado Buffaloes','Houston Cougars','Iowa State Cyclones','Kansas Jayhawks','Kansas State Wildcats','Oklahoma State Cowboys','TCU Horned Frogs','Texas Tech Red Raiders','UCF Knights','Utah Utes','West Virginia Mountaineers'],
   'SEC': ['Alabama Crimson Tide','Arkansas Razorbacks','Auburn Tigers','Florida Gators','Georgia Bulldogs','Kentucky Wildcats','LSU Tigers','Mississippi State Bulldogs','Missouri Tigers','Oklahoma Sooners','Ole Miss Rebels','South Carolina Gamecocks','Tennessee Volunteers','Texas A&M Aggies','Texas Longhorns','Vanderbilt Commodores'],
-  'Big East': ['Butler Bulldogs','Creighton Bluejays','DePaul Blue Demons','Georgetown Hoyas','Marquette Golden Eagles','Providence Friars','Seton Hall Pirates',"St. John's Red Storm",'UConn Huskies','Villanova Wildcats','Xavier Musketeers'],
-  'American': ['Charlotte 49ers','East Carolina Pirates','Florida Atlantic Owls','Memphis Tigers','North Texas Mean Green','Rice Owls','South Florida Bulls','Temple Owls','Tulane Green Wave','Tulsa Golden Hurricane','UAB Blazers','UTSA Roadrunners','Wichita State Shockers'],
-  'Mountain West': ['Air Force Falcons','Boise State Broncos','Colorado State Rams','Fresno State Bulldogs','Grand Canyon Antelopes','Nevada Wolf Pack','New Mexico Lobos','San Diego State Aztecs','UNLV Rebels','Utah State Aggies','Wyoming Cowboys'],
-  'A-10': ['Davidson Wildcats','Dayton Flyers','Duquesne Dukes','Fordham Rams','George Mason Patriots','George Washington Revolutionaries','La Salle Explorers','Loyola Chicago Ramblers','Rhode Island Rams','Richmond Spiders',"Saint Joseph's Hawks",'Saint Louis Billikens','St. Bonaventure Bonnies','VCU Rams'],
-  'Sun Belt': ['App State Mountaineers','Arkansas State Red Wolves','Coastal Carolina Chanticleers','Georgia Southern Eagles','Georgia State Panthers','James Madison Dukes',"Louisiana Ragin' Cajuns",'Marshall Thundering Herd','Old Dominion Monarchs','South Alabama Jaguars','Southern Miss Golden Eagles','Texas State Bobcats','Troy Trojans'],
-  'MAC': ['Akron Zips','Ball State Cardinals','Bowling Green Falcons','Buffalo Bulls','Central Michigan Chippewas','Eastern Michigan Eagles','Kent State Golden Flashes','Miami (OH) RedHawks','Northern Illinois Huskies','Ohio Bobcats','Toledo Rockets','UMass Minutemen','Western Michigan Broncos'],
-  'CUSA': ['Delaware Fightin Blue Hens','Florida International Panthers','Jacksonville State Gamecocks','Liberty Flames','Louisiana Tech Bulldogs','Middle Tennessee Blue Raiders','Missouri State Bears','New Mexico State Aggies','Sam Houston Bearkats','UTEP Miners','Western Kentucky Hilltoppers'],
-  'MVC': ['Bradley Braves','Drake Bulldogs','Evansville Purple Aces','Illinois State Redbirds','Indiana State Sycamores','Missouri State Bears','Murray State Racers','Northern Iowa Panthers','Southern Illinois Salukis','Belmont Bruins'],
-  'WCC': ['Gonzaga Bulldogs','Loyola Marymount Lions','Oregon State Beavers','Pacific Tigers','Pepperdine Waves','Portland Pilots','San Diego Toreros','San Francisco Dons','Santa Clara Broncos',"Saint Mary's Gaels",'Seattle Redhawks','Washington State Cougars'],
-  'Horizon': ['Cleveland State Vikings','Detroit Mercy Titans','Green Bay Phoenix','Illinois Chicago Flames','Milwaukee Panthers','Northern Illinois Huskies','Northern Kentucky Norse','Oakland Golden Grizzlies','Purdue Fort Wayne Mastodons','Wright State Raiders','Youngstown State Penguins'],
+  'American': ['Charlotte 49ers','East Carolina Pirates','Florida Atlantic Owls','Memphis Tigers','North Texas Mean Green','Rice Owls','South Florida Bulls','Temple Owls','Tulane Green Wave','Tulsa Golden Hurricane','UAB Blazers','UTSA Roadrunners','Army Black Knights','Navy Midshipmen'],
+  'Mountain West': ['Air Force Falcons','Boise State Broncos','Colorado State Rams','Fresno State Bulldogs','Nevada Wolf Pack','New Mexico Lobos','San Diego State Aztecs','San José State Spartans','UNLV Rebels','Utah State Aggies','Wyoming Cowboys','Hawai\'i Rainbow Warriors'],
+  'Sun Belt': ['Appalachian State Mountaineers','Arkansas State Red Wolves','Coastal Carolina Chanticleers','Georgia Southern Eagles','Georgia State Panthers','James Madison Dukes','Louisiana Ragin Cajuns','Marshall Thundering Herd','Old Dominion Monarchs','South Alabama Jaguars','Southern Mississippi Golden Eagles','Texas State Bobcats','Troy Trojans'],
+  'MAC': ['Akron Zips','Ball State Cardinals','Bowling Green Falcons','Buffalo Bulls','Central Michigan Chippewas','Eastern Michigan Eagles','Kent State Golden Flashes','Miami (OH) RedHawks','Northern Illinois Huskies','Ohio Bobcats','Toledo Rockets','Western Michigan Broncos'],
+  'CUSA': ['Florida International Panthers','Jacksonville State Gamecocks','Liberty Flames','Louisiana Tech Bulldogs','Middle Tennessee Blue Raiders','New Mexico State Aggies','Sam Houston State Bearkats','UTEP Miners','Western Kentucky Hilltoppers'],
+  'CAA': ['Campbell Fighting Camels','Delaware Blue Hens','Elon Phoenix','Hampton Pirates','Monmouth Hawks','North Carolina A&T Aggies','Richmond Spiders','Stony Brook Seawolves','Towson Tigers','Villanova Wildcats','William & Mary Tribe'],
+  'Big Sky': ['Eastern Washington Eagles','Idaho State Bengals','Idaho Vandals','Montana Grizzlies','Montana State Bobcats','Northern Arizona Lumberjacks','Northern Colorado Bears','Portland State Vikings','Sacramento State Hornets','Weber State Wildcats','UC Davis Aggies'],
+  'SoCon': ['Chattanooga Mocs','East Tennessee State Buccaneers','Furman Paladins','Mercer Bears','Samford Bulldogs','The Citadel Bulldogs','UNC Greensboro Spartans','VMI Keydets','Western Carolina Catamounts','Wofford Terriers'],
+  'MVFC': ['Illinois State Redbirds','Indiana State Sycamores','Missouri State Bears','Murray State Racers','North Dakota Fighting Hawks','North Dakota State Bison','South Dakota Coyotes','South Dakota State Jackrabbits','Southern Illinois Salukis','Youngstown State Penguins'],
+  'Patriot': ['Bucknell Bison','Colgate Raiders','Fordham Rams','Georgetown Hoyas','Holy Cross Crusaders','Lafayette Leopards','Lehigh Mountain Hawks'],
   'Ivy League': ['Brown Bears','Columbia Lions','Cornell Big Red','Dartmouth Big Green','Harvard Crimson','Pennsylvania Quakers','Princeton Tigers','Yale Bulldogs'],
-  'Patriot': ['Army Black Knights','Boston University Terriers','Bucknell Bison','Colgate Raiders','Holy Cross Crusaders','Lafayette Leopards','Lehigh Mountain Hawks','Loyola Maryland Greyhounds','Navy Midshipmen'],
-  'SoCon': ['Chattanooga Mocs','ETSU Buccaneers','Furman Paladins','Mercer Bears','Samford Bulldogs','The Citadel Bulldogs','UNC Greensboro Spartans','VMI Keydets','Western Carolina Catamounts','Wofford Terriers'],
-  'CAA': ['Campbell Fighting Camels','Charleston Cougars','Delaware Fightin Blue Hens','Drexel Dragons','Elon Phoenix','Hampton Pirates','Hofstra Pride','Monmouth Hawks','Northeastern Huskies','Stony Brook Seawolves','Towson Tigers','UNC Wilmington Seahawks','William & Mary Tribe'],
-  'SWAC': ['Alabama A&M Bulldogs','Alabama State Hornets','Alcorn State Braves','Arkansas-Pine Bluff Golden Lions','Bethune-Cookman Wildcats','Florida A&M Rattlers','Grambling Tigers','Jackson State Tigers','Mississippi Valley State Delta Devils','Prairie View Panthers','Southern Jaguars','Texas Southern Tigers'],
-  'MEAC': ['Coppin State Eagles','Delaware State Hornets','Howard Bison','Maryland Eastern Shore Hawks','Morgan State Bears','Norfolk State Spartans','North Carolina A&T Aggies','North Carolina Central Eagles','South Carolina State Bulldogs'],
-  'OVC': ['Eastern Illinois Panthers','Lindenwood Lions','Little Rock Trojans','Morehead State Eagles','SIU Edwardsville Cougars','Southeast Missouri State Redhawks','Tennessee State Tigers','UT Martin Skyhawks'],
-  'WAC': ['Abilene Christian Wildcats','Chicago State Cougars','Grand Canyon Antelopes','Sam Houston Bearkats','Southern Utah Thunderbirds','Tarleton State Texans','Texas Rio Grande Valley Vaqueros','Utah Tech Trailblazers','Utah Valley Wolverines'],
-  'Big South': ['Campbell Fighting Camels','Charleston Southern Buccaneers','Gardner-Webb Runnin Bulldogs','High Point Panthers','Longwood Lancers','Presbyterian Blue Hose','Radford Highlanders','UNC Asheville Bulldogs','Winthrop Eagles'],
-  'NEC': ['Bryant Bulldogs','Central Connecticut Blue Devils','Fairleigh Dickinson Knights','LIU Sharks','Merrimack Warriors',"Mount St. Mary's Mountaineers",'New Haven Nighthawks','Sacred Heart Pioneers','Saint Francis Red Flash','Wagner Seahawks'],
-  'MAAC': ['Canisius Golden Griffins','Fairfield Stags','Iona Gaels','Manhattan Jaspers','Marist Red Foxes','Niagara Purple Eagles','Quinnipiac Bobcats','Rider Broncs','Sacred Heart Pioneers','Siena Saints',"Saint Peter's Peacocks"],
-  'Big West': ['Cal Poly Mustangs','Cal State Fullerton Titans','Hawaii Rainbow Warriors','Long Beach State Beach','UC Davis Aggies','UC Irvine Anteaters','UC Riverside Highlanders','UC San Diego Tritons','UC Santa Barbara Gauchos'],
-  'Summit': ['Denver Pioneers','Kansas City Roos','North Dakota Fighting Hawks','North Dakota State Bison','Omaha Mavericks','Oral Roberts Golden Eagles','South Dakota Coyotes','South Dakota State Jackrabbits'],
-  'America East': ['Binghamton Bearcats','Bryant Bulldogs','Maine Black Bears','New Hampshire Wildcats','NJIT Highlanders','UAlbany Great Danes','UMBC Retrievers','UMass Lowell River Hawks','Vermont Catamounts'],
-  'Big Sky': ['Eastern Washington Eagles','Idaho State Bengals','Idaho Vandals','Montana Grizzlies','Montana State Bobcats','Northern Arizona Lumberjacks','Northern Colorado Bears','Portland State Vikings','Sacramento State Hornets','Weber State Wildcats'],
-  'ASUN': ['Austin Peay Governors','Bellarmine Knights','Central Arkansas Bears','Eastern Kentucky Colonels','Florida Gulf Coast Eagles','Jacksonville Dolphins','Lipscomb Bisons','North Alabama Lions','North Florida Ospreys','Queens University Royals','Stetson Hatters','West Georgia Wolves'],
+  'SWAC': ['Alabama A&M Bulldogs','Alabama State Hornets','Alcorn State Braves','Arkansas-Pine Bluff Golden Lions','Bethune-Cookman Wildcats','Florida A&M Rattlers','Grambling State Tigers','Jackson State Tigers','Mississippi Valley State Delta Devils','Prairie View A&M Panthers','Southern Jaguars','Texas Southern Tigers'],
+  'MEAC': ['Coppin State Eagles','Delaware State Hornets','Howard Bison','Morgan State Bears','Norfolk State Spartans','North Carolina Central Eagles','South Carolina State Bulldogs'],
+  'ASUN': ['Austin Peay Governors','Central Arkansas Bears','Eastern Kentucky Colonels','Jacksonville Dolphins','Kennesaw State Owls','Lipscomb Bisons','North Alabama Lions','Queens University Royals','West Georgia Wolves'],
+  'NEC': ['Bryant Bulldogs','Central Connecticut Blue Devils','Duquesne Dukes','LIU Sharks','Merrimack Warriors','Sacred Heart Pioneers','Saint Francis Red Flash','Wagner Seahawks','Stonehill Skyhawks'],
+}
+
+// MLB Leagues & Divisions
+const MLB_FILTERS = {
+  'American League': ['Baltimore Orioles','Boston Red Sox','Chicago White Sox','Cleveland Guardians','Detroit Tigers','Houston Astros','Kansas City Royals','Los Angeles Angels','Minnesota Twins','New York Yankees','Athletics','Seattle Mariners','Tampa Bay Rays','Texas Rangers','Toronto Blue Jays'],
+  'National League': ['Arizona Diamondbacks','Atlanta Braves','Chicago Cubs','Cincinnati Reds','Colorado Rockies','Los Angeles Dodgers','Miami Marlins','Milwaukee Brewers','New York Mets','Philadelphia Phillies','Pittsburgh Pirates','San Diego Padres','San Francisco Giants','St. Louis Cardinals','Washington Nationals'],
+  'AL East': ['Baltimore Orioles','Boston Red Sox','New York Yankees','Tampa Bay Rays','Toronto Blue Jays'],
+  'AL Central': ['Chicago White Sox','Cleveland Guardians','Detroit Tigers','Kansas City Royals','Minnesota Twins'],
+  'AL West': ['Houston Astros','Los Angeles Angels','Athletics','Seattle Mariners','Texas Rangers'],
+  'NL East': ['Atlanta Braves','Miami Marlins','New York Mets','Philadelphia Phillies','Washington Nationals'],
+  'NL Central': ['Chicago Cubs','Cincinnati Reds','Milwaukee Brewers','Pittsburgh Pirates','St. Louis Cardinals'],
+  'NL West': ['Arizona Diamondbacks','Colorado Rockies','Los Angeles Dodgers','San Diego Padres','San Francisco Giants'],
+}
+
+// Map sport to its filter config
+function getFiltersForSport(sport) {
+  switch (sport) {
+    case 'cbb': return { filters: CBB_CONFERENCES, top25: CBB_TOP_25, label: 'Conferences' }
+    case 'cfb': return { filters: CFB_CONFERENCES, top25: null, label: 'Conferences' }
+    case 'nba': return { filters: NBA_FILTERS, top25: null, label: 'Conferences & Divisions' }
+    case 'nhl': return { filters: NHL_FILTERS, top25: null, label: 'Conferences & Divisions' }
+    case 'nfl': return { filters: NFL_FILTERS, top25: null, label: 'Conferences & Divisions' }
+    case 'mlb': return { filters: MLB_FILTERS, top25: null, label: 'Leagues & Divisions' }
+    default: return { filters: {}, top25: null, label: 'Filters' }
+  }
 }
 
 // ─── TEAM NAME MAP: Odds API → ESPN ──────────────────────────────────────────
@@ -258,7 +346,7 @@ export default function Picks({ session, activeSport }) {
   const totalUnits = units['ml-fav'] + units['ml-dog'] + units['sp-fav'] + units['sp-dog'] + units['tot-ov'] + units['tot-un']
   const remaining = 100 - totalUnits
 
-  useEffect(() => { loadMyPools() }, [activeSport])
+  useEffect(() => { setGameFilter('all'); loadMyPools() }, [activeSport])
 
   // Poll scores_cache every 60s for live score updates + lock status
   useEffect(() => {
@@ -533,14 +621,17 @@ export default function Picks({ session, activeSport }) {
         return gameDate >= pool.session_start && gameDate <= pool.session_end
       })
     }
-    if (gameFilter === 'top25') {
+
+    const sportConfig = getFiltersForSport(activeSport)
+
+    if (gameFilter === 'top25' && sportConfig.top25) {
       filtered = filtered.filter(g =>
-        TOP_25.some(t => g.home === t.name || g.away === t.name)
+        sportConfig.top25.some(t => g.home === t.name || g.away === t.name)
       )
-    } else if (gameFilter !== 'all' && CONFERENCES[gameFilter]) {
-      const teams = CONFERENCES[gameFilter]
+    } else if (gameFilter !== 'all' && sportConfig.filters[gameFilter]) {
+      const teams = sportConfig.filters[gameFilter]
       filtered = filtered.filter(g =>
-        teams.some(t => g.home === t || g.away === t)
+        teams.some(t => g.home === t || g.away === t || g.home?.includes(t) || g.away?.includes(t))
       )
     }
     if (gameSearch.trim()) {
@@ -790,12 +881,21 @@ export default function Picks({ session, activeSport }) {
                 value={gameFilter}
                 onChange={e => setGameFilter(e.target.value)}>
                 <option value="all">All Games</option>
-                <option value="top25">⭐ Top 25</option>
-                <optgroup label="Conferences">
-                  {Object.keys(CONFERENCES).map(conf => (
-                    <option key={conf} value={conf}>{conf}</option>
-                  ))}
-                </optgroup>
+                {(() => {
+                  const sportConfig = getFiltersForSport(activeSport)
+                  return (
+                    <>
+                      {sportConfig.top25 && <option value="top25">⭐ Top 25</option>}
+                      {Object.keys(sportConfig.filters).length > 0 && (
+                        <optgroup label={sportConfig.label}>
+                          {Object.keys(sportConfig.filters).map(key => (
+                            <option key={key} value={key}>{key}</option>
+                          ))}
+                        </optgroup>
+                      )}
+                    </>
+                  )
+                })()}
               </select>
               <input
                 style={s.filterSearch}
@@ -827,8 +927,10 @@ export default function Picks({ session, activeSport }) {
                       <div style={s.modalGameHeader}>
                         <span>
                           {(() => {
-                            const awayRank = TOP_25.find(t => game.away?.includes(t.name))
-                            const homeRank = TOP_25.find(t => game.home?.includes(t.name))
+                            const sportConfig = getFiltersForSport(activeSport)
+                            const top25 = sportConfig.top25 || []
+                            const awayRank = top25.find(t => game.away?.includes(t.name))
+                            const homeRank = top25.find(t => game.home?.includes(t.name))
                             return (
                               <>
                                 {awayRank && <span style={s.rankBadge}>#{awayRank.rank}</span>}{game.away} @ {homeRank && <span style={s.rankBadge}>#{homeRank.rank}</span>}{game.home}
