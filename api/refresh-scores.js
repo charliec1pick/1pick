@@ -16,7 +16,7 @@ const espnMap = {
 }
 
 // Manually set which sports are currently in season
-const ACTIVE_SPORTS = ['cbb', 'nba'] // update as seasons change
+const ACTIVE_SPORTS = ['cbb', 'nba', 'nhl'] // update as seasons change
 
 function getPeriodLabel(sport, period) {
   if (['nba', 'cbb'].includes(sport)) return `Q${period}`

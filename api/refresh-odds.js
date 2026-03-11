@@ -6,7 +6,7 @@ const supabase = createClient(
 )
 
 // ⚡ Update this list when seasons change — this is the ONLY place that hits the Odds API
-const ACTIVE_SPORTS = ['cbb']
+const ACTIVE_SPORTS = ['cbb', 'nba', 'nhl']
 
 const sportMap = {
   cbb: 'basketball_ncaab',
@@ -19,6 +19,8 @@ const sportMap = {
 
 export default async function handler(req, res) {
   let refreshed = []
+  let creditsRemaining = null
+  let creditsUsed = null
 
   for (const sport of ACTIVE_SPORTS) {
     const sportKey = sportMap[sport]
@@ -26,6 +28,11 @@ export default async function handler(req, res) {
       const response = await fetch(
         `https://api.the-odds-api.com/v4/sports/${sportKey}/odds/?apiKey=${process.env.ODDS_API_KEY}&regions=us&markets=h2h,spreads,totals&oddsFormat=american`
       )
+
+      // Track API credits from response headers
+      creditsRemaining = response.headers.get('x-requests-remaining')
+      creditsUsed = response.headers.get('x-requests-used')
+
       const data = await response.json()
       if (!Array.isArray(data)) continue
 
@@ -41,5 +48,10 @@ export default async function handler(req, res) {
     }
   }
 
-  res.status(200).json({ refreshed, totalCalls: refreshed.length })
+  res.status(200).json({
+    refreshed,
+    creditsPerCycle: ACTIVE_SPORTS.length * 3,
+    creditsUsed,
+    creditsRemaining,
+  })
 }

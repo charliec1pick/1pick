@@ -6,7 +6,7 @@ const supabase = createClient(
 )
 
 // Update this list as sports seasons change
-const ACTIVE_SPORTS = ['cbb', 'nba']
+const ACTIVE_SPORTS = ['cbb', 'nba', 'nhl']
 
 const sportMap = {
   cbb: 'basketball_ncaab',

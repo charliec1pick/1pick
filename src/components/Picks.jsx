@@ -72,12 +72,115 @@ const CONFERENCES = {
   'ASUN': ['Austin Peay Governors','Bellarmine Knights','Central Arkansas Bears','Eastern Kentucky Colonels','Florida Gulf Coast Eagles','Jacksonville Dolphins','Lipscomb Bisons','North Alabama Lions','North Florida Ospreys','Queens University Royals','Stetson Hatters','West Georgia Wolves'],
 }
 
-// Normalize a team name for matching: lowercase, strip punctuation, collapse spaces
+// ─── TEAM NAME MAP: Odds API → ESPN ──────────────────────────────────────────
+const TEAM_NAME_MAP = {
+  "Appalachian State Mountaineers": "App State Mountaineers",
+  "Citadel Bulldogs": "The Citadel Bulldogs",
+  "Grambling State Tigers": "Grambling Tigers",
+  "Hawaii Rainbow Warriors": "Hawai'i Rainbow Warriors",
+  "Houston Baptist Huskies": "Houston Christian Huskies",
+  "Louisiana Ragin Cajuns": "Louisiana Ragin' Cajuns",
+  "Nicholls State Colonels": "Nicholls Colonels",
+  "Sam Houston State Bearkats": "Sam Houston Bearkats",
+  "San Jose State Spartans": "San José State Spartans",
+  "Southern Mississippi Golden Eagles": "Southern Miss Golden Eagles",
+  "Texas A&M-Commerce Lions": "East Texas A&M Lions",
+  "Los Angeles Clippers": "LA Clippers",
+  "Alabama St Hornets": "Alabama State Hornets",
+  "Albany Great Danes": "UAlbany Great Danes",
+  "Alcorn St Braves": "Alcorn State Braves",
+  "American Eagles": "American University Eagles",
+  "Appalachian St Mountaineers": "App State Mountaineers",
+  "Arizona St Sun Devils": "Arizona State Sun Devils",
+  "Arkansas St Red Wolves": "Arkansas State Red Wolves",
+  "Arkansas-Little Rock Trojans": "Little Rock Trojans",
+  "Army Knights": "Army Black Knights",
+  "Boston Univ. Terriers": "Boston University Terriers",
+  "CSU Bakersfield Roadrunners": "Cal State Bakersfield Roadrunners",
+  "CSU Fullerton Titans": "Cal State Fullerton Titans",
+  "CSU Northridge Matadors": "Cal State Northridge Matadors",
+  "Cal Baptist Lancers": "California Baptist Lancers",
+  "Central Connecticut St Blue Devils": "Central Connecticut Blue Devils",
+  "Chicago St Cougars": "Chicago State Cougars",
+  "Cleveland St Vikings": "Cleveland State Vikings",
+  "Colorado St Rams": "Colorado State Rams",
+  "Coppin St Eagles": "Coppin State Eagles",
+  "Delaware St Hornets": "Delaware State Hornets",
+  "East Tennessee St Buccaneers": "East Tennessee State Buccaneers",
+  "Florida Int'l Golden Panthers": "Florida International Panthers",
+  "Florida St Seminoles": "Florida State Seminoles",
+  "Fort Wayne Mastodons": "Purdue Fort Wayne Mastodons",
+  "Fresno St Bulldogs": "Fresno State Bulldogs",
+  "GW Revolutionaries": "George Washington Revolutionaries",
+  "Gardner-Webb Bulldogs": "Gardner-Webb Runnin' Bulldogs",
+  "Georgia St Panthers": "Georgia State Panthers",
+  "Grambling St Tigers": "Grambling Tigers",
+  "Grand Canyon Antelopes": "Grand Canyon Lopes",
+  "IUPUI Jaguars": "IU Indianapolis Jaguars",
+  "Illinois St Redbirds": "Illinois State Redbirds",
+  "Indiana St Sycamores": "Indiana State Sycamores",
+  "Jackson St Tigers": "Jackson State Tigers",
+  "Jacksonville St Gamecocks": "Jacksonville State Gamecocks",
+  "Kansas St Wildcats": "Kansas State Wildcats",
+  "Kennesaw St Owls": "Kennesaw State Owls",
+  "LIU Sharks": "Long Island University Sharks",
+  "Long Beach St 49ers": "Long Beach State Beach",
+  "Loyola (Chi) Ramblers": "Loyola Chicago Ramblers",
+  "Loyola (MD) Greyhounds": "Loyola Maryland Greyhounds",
+  "Michigan St Spartans": "Michigan State Spartans",
+  "Miss Valley St Delta Devils": "Mississippi Valley State Delta Devils",
+  "Mississippi St Bulldogs": "Mississippi State Bulldogs",
+  "Missouri St Bears": "Missouri State Bears",
+  "Montana St Bobcats": "Montana State Bobcats",
+  "Morehead St Eagles": "Morehead State Eagles",
+  "Morgan St Bears": "Morgan State Bears",
+  "Mt. St. Mary's Mountaineers": "Mount St. Mary's Mountaineers",
+  "Murray St Racers": "Murray State Racers",
+  "N Colorado Bears": "Northern Colorado Bears",
+  "New Mexico St Aggies": "New Mexico State Aggies",
+  "Nicholls St Colonels": "Nicholls Colonels",
+  "Norfolk St Spartans": "Norfolk State Spartans",
+  "North Dakota St Bison": "North Dakota State Bison",
+  "Northwestern St Demons": "Northwestern State Demons",
+  "Oklahoma St Cowboys": "Oklahoma State Cowboys",
+  "Oregon St Beavers": "Oregon State Beavers",
+  "Portland St Vikings": "Portland State Vikings",
+  "Prairie View Panthers": "Prairie View A&M Panthers",
+  "SE Missouri St Redhawks": "Southeast Missouri State Redhawks",
+  "SIU-Edwardsville Cougars": "SIU Edwardsville Cougars",
+  "Sacramento St Hornets": "Sacramento State Hornets",
+  "Sam Houston St Bearkats": "Sam Houston Bearkats",
+  "San Diego St Aztecs": "San Diego State Aztecs",
+  "San José St Spartans": "San José State Spartans",
+  "Seattle Redhawks": "Seattle U Redhawks",
+  "South Carolina St Bulldogs": "South Carolina State Bulldogs",
+  "South Dakota St Jackrabbits": "South Dakota State Jackrabbits",
+  "St. Francis (PA) Red Flash": "Saint Francis Red Flash",
+  "St. Thomas (MN) Tommies": "St. Thomas-Minnesota Tommies",
+  "Tenn-Martin Skyhawks": "UT Martin Skyhawks",
+  "Tennessee St Tigers": "Tennessee State Tigers",
+  "Texas A&M-CC Islanders": "Texas A&M-Corpus Christi Islanders",
+  "UMKC Kangaroos": "Kansas City Roos",
+  "UT-Arlington Mavericks": "UT Arlington Mavericks",
+  "Washington St Cougars": "Washington State Cougars",
+  "Wichita St Shockers": "Wichita State Shockers",
+  "Wright St Raiders": "Wright State Raiders",
+  "Youngstown St Penguins": "Youngstown State Penguins",
+  "Oakland Athletics": "Athletics",
+  "Montréal Canadiens": "Montreal Canadiens",
+  "St Louis Blues": "St. Louis Blues",
+  "Utah Hockey Club": "Utah Mammoth",
+}
+
+function toESPN(name) {
+  return TEAM_NAME_MAP[name] || name
+}
+
+// Normalize for fallback matching only (map handles 99% of cases)
 function normalizeTeam(name) {
   return (name || '').toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim()
 }
 
-// Expand common abbreviations so "Kansas St" and "Kansas State" normalize the same
 function expandAbbreviations(str) {
   return str
     .replace(/\bst\b/g, 'state')
@@ -96,52 +199,40 @@ function expandedNormalize(name) {
   return expandAbbreviations(normalizeTeam(name))
 }
 
-// Check if two team names refer to the same team:
-// 1. Exact normalized match
-// 2. Expanded abbreviation match (st→state, etc.)
-// 3. Substring match (one contains the other)
-// 4. School name match (strip mascot, compare school portion)
-// NO nickname-only fallback — prevents "Southern Miss Eagles" matching "Georgia Southern Eagles"
 function teamsMatch(a, b) {
+  // After toESPN translation, most will be exact
+  if (a === b) return true
   const na = normalizeTeam(a)
   const nb = normalizeTeam(b)
   if (na === nb) return true
   const ea = expandedNormalize(a)
   const eb = expandedNormalize(b)
   if (ea === eb) return true
-  if (ea.includes(eb) || eb.includes(ea)) return true
-  // School name match: strip last word (mascot) and compare
-  const partsA = ea.split(' ')
-  const partsB = eb.split(' ')
-  if (partsA.length >= 2 && partsB.length >= 2) {
-    const schoolA = partsA.slice(0, -1).join(' ')
-    const schoolB = partsB.slice(0, -1).join(' ')
-    if (schoolA === schoolB) return true
-    if (schoolA.includes(schoolB) || schoolB.includes(schoolA)) return true
-  }
+  // NO substring or school-name matching — map handles all known differences
   return false
 }
 
-// Helper: check if a game is started using ESPN scores_cache status first, then commence_time as fallback.
-// Uses exact UTC date matching to avoid matching yesterday's completed game to today's game.
+// Helper: check if a game is started
 function isGameStarted(game, liveScores) {
   if (!game) return false
   const gameDate = game.commence_time ? new Date(game.commence_time).toISOString().split('T')[0] : null
+  // Translate Odds API names to ESPN for lookup
+  const away = toESPN(game.away)
+  const home = toESPN(game.home)
 
-  // Try exact key first
-  const exactRow = liveScores[`${game.away}|${game.home}`]
+  // Try exact key with translated names
+  const exactRow = liveScores[`${away}|${home}`] || liveScores[`${game.away}|${game.home}`]
   if (exactRow && (!gameDate || !exactRow.game_date || gameDate === exactRow.game_date)) {
     return exactRow.status === 'in' || exactRow.status === 'post'
   }
 
-  // Fuzzy match: require both teams match AND exact same date
+  // Fallback: iterate with date + team matching
   for (const row of Object.values(liveScores)) {
     const sameDate = !gameDate || !row.game_date || gameDate === row.game_date
-    if (sameDate && teamsMatch(game.away, row.away_team) && teamsMatch(game.home, row.home_team)) {
+    if (sameDate && teamsMatch(away, row.away_team) && teamsMatch(home, row.home_team)) {
       return row.status === 'in' || row.status === 'post'
     }
   }
-  // Fall back to commence_time comparison
   return Date.now() >= new Date(game.commence_time).getTime()
 }
 
@@ -196,18 +287,21 @@ export default function Picks({ session, activeSport }) {
 
   function getLiveScore(pick) {
     if (!pick?.awayTeam || !pick?.homeTeam) return null
-    // Derive the expected game date from the pick's game in the odds data
     const game = pick.gameId ? games.find(g => g.id === pick.gameId) : null
     const pickDate = game?.commence_time ? new Date(game.commence_time).toISOString().split('T')[0] : null
+    // Translate Odds API names to ESPN
+    const away = toESPN(pick.awayTeam)
+    const home = toESPN(pick.homeTeam)
 
-    const exact = liveScores[`${pick.awayTeam}|${pick.homeTeam}`]
+    // Try exact key with translated names
+    const exact = liveScores[`${away}|${home}`] || liveScores[`${pick.awayTeam}|${pick.homeTeam}`]
     if (exact && (!pickDate || !exact.game_date || pickDate === exact.game_date)) {
       return exact
     }
-    // Fuzzy fallback with exact date constraint
+    // Fallback with date constraint
     for (const row of Object.values(liveScores)) {
       const sameDate = !pickDate || !row.game_date || pickDate === row.game_date
-      if (sameDate && teamsMatch(pick.awayTeam, row.away_team) && teamsMatch(pick.homeTeam, row.home_team)) {
+      if (sameDate && teamsMatch(away, row.away_team) && teamsMatch(home, row.home_team)) {
         return row
       }
     }

@@ -1,0 +1,3399 @@
+{
+  "nfl": {
+    "Arizona Cardinals": {
+      "espn": "Arizona Cardinals",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Atlanta Falcons": {
+      "espn": "Atlanta Falcons",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Baltimore Ravens": {
+      "espn": "Baltimore Ravens",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Buffalo Bills": {
+      "espn": "Buffalo Bills",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Carolina Panthers": {
+      "espn": "Carolina Panthers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Chicago Bears": {
+      "espn": "Chicago Bears",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Cincinnati Bengals": {
+      "espn": "Cincinnati Bengals",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Cleveland Browns": {
+      "espn": "Cleveland Browns",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Dallas Cowboys": {
+      "espn": "Dallas Cowboys",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Denver Broncos": {
+      "espn": "Denver Broncos",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Detroit Lions": {
+      "espn": "Detroit Lions",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Green Bay Packers": {
+      "espn": "Green Bay Packers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Houston Texans": {
+      "espn": "Houston Texans",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Indianapolis Colts": {
+      "espn": "Indianapolis Colts",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Jacksonville Jaguars": {
+      "espn": "Jacksonville Jaguars",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Kansas City Chiefs": {
+      "espn": "Kansas City Chiefs",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Las Vegas Raiders": {
+      "espn": "Las Vegas Raiders",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Los Angeles Chargers": {
+      "espn": "Los Angeles Chargers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Los Angeles Rams": {
+      "espn": "Los Angeles Rams",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Miami Dolphins": {
+      "espn": "Miami Dolphins",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Minnesota Vikings": {
+      "espn": "Minnesota Vikings",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "New England Patriots": {
+      "espn": "New England Patriots",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "New Orleans Saints": {
+      "espn": "New Orleans Saints",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "New York Giants": {
+      "espn": "New York Giants",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "New York Jets": {
+      "espn": "New York Jets",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Philadelphia Eagles": {
+      "espn": "Philadelphia Eagles",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Pittsburgh Steelers": {
+      "espn": "Pittsburgh Steelers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "San Francisco 49ers": {
+      "espn": "San Francisco 49ers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Seattle Seahawks": {
+      "espn": "Seattle Seahawks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Tampa Bay Buccaneers": {
+      "espn": "Tampa Bay Buccaneers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Tennessee Titans": {
+      "espn": "Tennessee Titans",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Washington Commanders": {
+      "espn": "Washington Commanders",
+      "confidence": 100,
+      "needsReview": false
+    }
+  },
+  "cfb": {
+    "Abilene Christian Wildcats": {
+      "espn": "Abilene Christian Wildcats",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Air Force Falcons": {
+      "espn": "Air Force Falcons",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Akron Zips": {
+      "espn": "Akron Zips",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Alabama A&M Bulldogs": {
+      "espn": "Alabama A&M Bulldogs",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Alabama Crimson Tide": {
+      "espn": "Alabama Crimson Tide",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Appalachian State Mountaineers": {
+      "espn": "App State Mountaineers",
+      "confidence": 30,
+      "needsReview": true
+    },
+    "Arizona State Sun Devils": {
+      "espn": "Arizona State Sun Devils",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Arizona Wildcats": {
+      "espn": "Arizona Wildcats",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Arkansas Razorbacks": {
+      "espn": "Arkansas Razorbacks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Arkansas State Red Wolves": {
+      "espn": "Arkansas State Red Wolves",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Army Black Knights": {
+      "espn": "Army Black Knights",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Auburn Tigers": {
+      "espn": "Auburn Tigers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Austin Peay Governors": {
+      "espn": "Austin Peay Governors",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "BYU Cougars": {
+      "espn": "BYU Cougars",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Ball State Cardinals": {
+      "espn": "Ball State Cardinals",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Baylor Bears": {
+      "espn": "Baylor Bears",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Bethune-Cookman Wildcats": {
+      "espn": "Bethune-Cookman Wildcats",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Boise State Broncos": {
+      "espn": "Boise State Broncos",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Boston College Eagles": {
+      "espn": "Boston College Eagles",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Bowling Green Falcons": {
+      "espn": "Bowling Green Falcons",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Bucknell Bison": {
+      "espn": "Bucknell Bison",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Buffalo Bulls": {
+      "espn": "Buffalo Bulls",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "California Golden Bears": {
+      "espn": "California Golden Bears",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Campbell Fighting Camels": {
+      "espn": "Campbell Fighting Camels",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Central Arkansas Bears": {
+      "espn": "Central Arkansas Bears",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Central Michigan Chippewas": {
+      "espn": "Central Michigan Chippewas",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Charleston Southern Buccaneers": {
+      "espn": "Charleston Southern Buccaneers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Charlotte 49ers": {
+      "espn": "Charlotte 49ers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Chattanooga Mocs": {
+      "espn": "Chattanooga Mocs",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Cincinnati Bearcats": {
+      "espn": "Cincinnati Bearcats",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Citadel Bulldogs": {
+      "espn": "The Citadel Bulldogs",
+      "confidence": 85,
+      "needsReview": false
+    },
+    "Clemson Tigers": {
+      "espn": "Clemson Tigers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Coastal Carolina Chanticleers": {
+      "espn": "Coastal Carolina Chanticleers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Colgate Raiders": {
+      "espn": "Colgate Raiders",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Colorado Buffaloes": {
+      "espn": "Colorado Buffaloes",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Colorado State Rams": {
+      "espn": "Colorado State Rams",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Davidson Wildcats": {
+      "espn": "Davidson Wildcats",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Duke Blue Devils": {
+      "espn": "Duke Blue Devils",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "East Carolina Pirates": {
+      "espn": "East Carolina Pirates",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "East Tennessee State Buccaneers": {
+      "espn": "East Tennessee State Buccaneers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Eastern Illinois Panthers": {
+      "espn": "Eastern Illinois Panthers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Eastern Kentucky Colonels": {
+      "espn": "Eastern Kentucky Colonels",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Eastern Michigan Eagles": {
+      "espn": "Eastern Michigan Eagles",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Florida Atlantic Owls": {
+      "espn": "Florida Atlantic Owls",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Florida Gators": {
+      "espn": "Florida Gators",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Florida International Panthers": {
+      "espn": "Florida International Panthers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Florida State Seminoles": {
+      "espn": "Florida State Seminoles",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Fresno State Bulldogs": {
+      "espn": "Fresno State Bulldogs",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Furman Paladins": {
+      "espn": "Furman Paladins",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Gardner-Webb Runnin Bulldogs": {
+      "espn": "Gardner-Webb Runnin' Bulldogs",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Georgetown Hoyas": {
+      "espn": "Georgetown Hoyas",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Georgia Bulldogs": {
+      "espn": "Georgia Bulldogs",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Georgia Southern Eagles": {
+      "espn": "Georgia Southern Eagles",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Georgia State Panthers": {
+      "espn": "Georgia State Panthers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Georgia Tech Yellow Jackets": {
+      "espn": "Georgia Tech Yellow Jackets",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Grambling State Tigers": {
+      "espn": "Grambling Tigers",
+      "confidence": 70,
+      "needsReview": true
+    },
+    "Hawaii Rainbow Warriors": {
+      "espn": "Hawai'i Rainbow Warriors",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Holy Cross Crusaders": {
+      "espn": "Holy Cross Crusaders",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Houston Baptist Huskies": {
+      "espn": "Houston Cougars",
+      "confidence": 70,
+      "needsReview": true
+    },
+    "Houston Cougars": {
+      "espn": "Houston Cougars",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Idaho State Bengals": {
+      "espn": "Idaho State Bengals",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Idaho Vandals": {
+      "espn": "Idaho Vandals",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Illinois Fighting Illini": {
+      "espn": "Illinois Fighting Illini",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Illinois State Redbirds": {
+      "espn": "Illinois State Redbirds",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Indiana Hoosiers": {
+      "espn": "Indiana Hoosiers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Indiana State Sycamores": {
+      "espn": "Indiana State Sycamores",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Iowa Hawkeyes": {
+      "espn": "Iowa Hawkeyes",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Iowa State Cyclones": {
+      "espn": "Iowa State Cyclones",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Jacksonville State Gamecocks": {
+      "espn": "Jacksonville State Gamecocks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "James Madison Dukes": {
+      "espn": "James Madison Dukes",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Kansas Jayhawks": {
+      "espn": "Kansas Jayhawks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Kansas State Wildcats": {
+      "espn": "Kansas State Wildcats",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Kennesaw State Owls": {
+      "espn": "Kennesaw State Owls",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Kent State Golden Flashes": {
+      "espn": "Kent State Golden Flashes",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Kentucky Wildcats": {
+      "espn": "Kentucky Wildcats",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "LSU Tigers": {
+      "espn": "LSU Tigers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Lamar Cardinals": {
+      "espn": "Lamar Cardinals",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Liberty Flames": {
+      "espn": "Liberty Flames",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Louisiana Ragin Cajuns": {
+      "espn": "Louisiana Ragin' Cajuns",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Louisiana Tech Bulldogs": {
+      "espn": "Louisiana Tech Bulldogs",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Louisville Cardinals": {
+      "espn": "Louisville Cardinals",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Marshall Thundering Herd": {
+      "espn": "Marshall Thundering Herd",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Maryland Terrapins": {
+      "espn": "Maryland Terrapins",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Memphis Tigers": {
+      "espn": "Memphis Tigers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Merrimack Warriors": {
+      "espn": "Merrimack Warriors",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Miami (OH) RedHawks": {
+      "espn": "Miami (OH) RedHawks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Miami Hurricanes": {
+      "espn": "Miami Hurricanes",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Michigan State Spartans": {
+      "espn": "Michigan State Spartans",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Michigan Wolverines": {
+      "espn": "Michigan Wolverines",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Middle Tennessee Blue Raiders": {
+      "espn": "Middle Tennessee Blue Raiders",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Minnesota Golden Gophers": {
+      "espn": "Minnesota Golden Gophers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Mississippi State Bulldogs": {
+      "espn": "Mississippi State Bulldogs",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Mississippi Valley State Delta Devils": {
+      "espn": "Mississippi Valley State Delta Devils",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Missouri Tigers": {
+      "espn": "Missouri Tigers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Morgan State Bears": {
+      "espn": "Morgan State Bears",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "NC State Wolfpack": {
+      "espn": "NC State Wolfpack",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Navy Midshipmen": {
+      "espn": "Navy Midshipmen",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Nebraska Cornhuskers": {
+      "espn": "Nebraska Cornhuskers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Nevada Wolf Pack": {
+      "espn": "Nevada Wolf Pack",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "New Mexico Lobos": {
+      "espn": "New Mexico Lobos",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "New Mexico State Aggies": {
+      "espn": "New Mexico State Aggies",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Nicholls State Colonels": {
+      "espn": "Nicholls Colonels",
+      "confidence": 70,
+      "needsReview": true
+    },
+    "Norfolk State Spartans": {
+      "espn": "Norfolk State Spartans",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "North Alabama Lions": {
+      "espn": "North Alabama Lions",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "North Carolina Central Eagles": {
+      "espn": "North Carolina Central Eagles",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "North Carolina Tar Heels": {
+      "espn": "North Carolina Tar Heels",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "North Dakota Fighting Hawks": {
+      "espn": "North Dakota Fighting Hawks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "North Texas Mean Green": {
+      "espn": "North Texas Mean Green",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Northern Illinois Huskies": {
+      "espn": "Northern Illinois Huskies",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Northern Iowa Panthers": {
+      "espn": "Northern Iowa Panthers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Northwestern Wildcats": {
+      "espn": "Northwestern Wildcats",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Notre Dame Fighting Irish": {
+      "espn": "Notre Dame Fighting Irish",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Ohio Bobcats": {
+      "espn": "Ohio Bobcats",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Ohio State Buckeyes": {
+      "espn": "Ohio State Buckeyes",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Oklahoma Sooners": {
+      "espn": "Oklahoma Sooners",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Oklahoma State Cowboys": {
+      "espn": "Oklahoma State Cowboys",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Old Dominion Monarchs": {
+      "espn": "Old Dominion Monarchs",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Ole Miss Rebels": {
+      "espn": "Ole Miss Rebels",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Oregon Ducks": {
+      "espn": "Oregon Ducks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Oregon State Beavers": {
+      "espn": "Oregon State Beavers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Penn State Nittany Lions": {
+      "espn": "Penn State Nittany Lions",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Pittsburgh Panthers": {
+      "espn": "Pittsburgh Panthers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Portland State Vikings": {
+      "espn": "Portland State Vikings",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Prairie View A&M Panthers": {
+      "espn": "Prairie View A&M Panthers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Purdue Boilermakers": {
+      "espn": "Purdue Boilermakers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Rice Owls": {
+      "espn": "Rice Owls",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Richmond Spiders": {
+      "espn": "Richmond Spiders",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Robert Morris Colonials": {
+      "espn": "Robert Morris Colonials",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Rutgers Scarlet Knights": {
+      "espn": "Rutgers Scarlet Knights",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "SMU Mustangs": {
+      "espn": "SMU Mustangs",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Sam Houston State Bearkats": {
+      "espn": "Houston Cougars",
+      "confidence": 70,
+      "needsReview": true
+    },
+    "San Diego State Aztecs": {
+      "espn": "San Diego State Aztecs",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "San Jose State Spartans": {
+      "espn": "Aurora Spartans",
+      "confidence": 30,
+      "needsReview": true
+    },
+    "South Alabama Jaguars": {
+      "espn": "South Alabama Jaguars",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "South Carolina Gamecocks": {
+      "espn": "South Carolina Gamecocks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "South Carolina State Bulldogs": {
+      "espn": "South Carolina State Bulldogs",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "South Dakota State Jackrabbits": {
+      "espn": "South Dakota State Jackrabbits",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "South Florida Bulls": {
+      "espn": "South Florida Bulls",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Southeast Missouri State Redhawks": {
+      "espn": "Southeast Missouri State Redhawks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Southern Illinois Salukis": {
+      "espn": "Southern Illinois Salukis",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Southern Mississippi Golden Eagles": {
+      "espn": "Southern Miss Golden Eagles",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "Stanford Cardinal": {
+      "espn": "Stanford Cardinal",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Stony Brook Seawolves": {
+      "espn": "Stony Brook Seawolves",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Syracuse Orange": {
+      "espn": "Syracuse Orange",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "TCU Horned Frogs": {
+      "espn": "TCU Horned Frogs",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Tarleton State Texans": {
+      "espn": "Tarleton State Texans",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Temple Owls": {
+      "espn": "Temple Owls",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Tennessee State Tigers": {
+      "espn": "Tennessee State Tigers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Tennessee Tech Golden Eagles": {
+      "espn": "Tennessee Tech Golden Eagles",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Tennessee Volunteers": {
+      "espn": "Tennessee Volunteers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Texas A&M Aggies": {
+      "espn": "Texas A&M Aggies",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Texas A&M-Commerce Lions": {
+      "espn": "Texas A&M Aggies",
+      "confidence": 70,
+      "needsReview": true
+    },
+    "Texas Longhorns": {
+      "espn": "Texas Longhorns",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Texas State Bobcats": {
+      "espn": "Texas State Bobcats",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Texas Tech Red Raiders": {
+      "espn": "Texas Tech Red Raiders",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Toledo Rockets": {
+      "espn": "Toledo Rockets",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Towson Tigers": {
+      "espn": "Towson Tigers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Troy Trojans": {
+      "espn": "Troy Trojans",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Tulane Green Wave": {
+      "espn": "Tulane Green Wave",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Tulsa Golden Hurricane": {
+      "espn": "Tulsa Golden Hurricane",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "UAB Blazers": {
+      "espn": "UAB Blazers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "UC Davis Aggies": {
+      "espn": "UC Davis Aggies",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "UCF Knights": {
+      "espn": "UCF Knights",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "UCLA Bruins": {
+      "espn": "UCLA Bruins",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "UConn Huskies": {
+      "espn": "UConn Huskies",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "UL Monroe Warhawks": {
+      "espn": "UL Monroe Warhawks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "UMass Minutemen": {
+      "espn": "UMass Dartmouth Corsairs",
+      "confidence": 70,
+      "needsReview": true
+    },
+    "UNLV Rebels": {
+      "espn": "UNLV Rebels",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "USC Trojans": {
+      "espn": "USC Trojans",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "UT Martin Skyhawks": {
+      "espn": "UT Martin Skyhawks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "UTEP Miners": {
+      "espn": "UTEP Miners",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "UTSA Roadrunners": {
+      "espn": "UTSA Roadrunners",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Utah State Aggies": {
+      "espn": "Utah State Aggies",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Utah Utes": {
+      "espn": "Utah Utes",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "VMI Keydets": {
+      "espn": "VMI Keydets",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Vanderbilt Commodores": {
+      "espn": "Vanderbilt Commodores",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Virginia Cavaliers": {
+      "espn": "Virginia Cavaliers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Virginia Tech Hokies": {
+      "espn": "Virginia Tech Hokies",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Wagner Seahawks": {
+      "espn": "Wagner Seahawks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Wake Forest Demon Deacons": {
+      "espn": "Wake Forest Demon Deacons",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Washington Huskies": {
+      "espn": "Washington Huskies",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Washington State Cougars": {
+      "espn": "Washington State Cougars",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Weber State Wildcats": {
+      "espn": "Weber State Wildcats",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "West Virginia Mountaineers": {
+      "espn": "West Virginia Mountaineers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Western Illinois Leathernecks": {
+      "espn": "Western Illinois Leathernecks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Western Kentucky Hilltoppers": {
+      "espn": "Western Kentucky Hilltoppers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Western Michigan Broncos": {
+      "espn": "Western Michigan Broncos",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Wisconsin Badgers": {
+      "espn": "Wisconsin Badgers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Wofford Terriers": {
+      "espn": "Wofford Terriers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Wyoming Cowboys": {
+      "espn": "Wyoming Cowboys",
+      "confidence": 100,
+      "needsReview": false
+    }
+  },
+  "nba": {
+    "Atlanta Hawks": {
+      "espn": "Atlanta Hawks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Boston Celtics": {
+      "espn": "Boston Celtics",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Brooklyn Nets": {
+      "espn": "Brooklyn Nets",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Charlotte Hornets": {
+      "espn": "Charlotte Hornets",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Chicago Bulls": {
+      "espn": "Chicago Bulls",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Cleveland Cavaliers": {
+      "espn": "Cleveland Cavaliers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Dallas Mavericks": {
+      "espn": "Dallas Mavericks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Denver Nuggets": {
+      "espn": "Denver Nuggets",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Detroit Pistons": {
+      "espn": "Detroit Pistons",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Golden State Warriors": {
+      "espn": "Golden State Warriors",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Houston Rockets": {
+      "espn": "Houston Rockets",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Indiana Pacers": {
+      "espn": "Indiana Pacers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Los Angeles Clippers": {
+      "espn": "Los Angeles Lakers",
+      "confidence": 80,
+      "needsReview": false
+    },
+    "Los Angeles Lakers": {
+      "espn": "Los Angeles Lakers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Memphis Grizzlies": {
+      "espn": "Memphis Grizzlies",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Miami Heat": {
+      "espn": "Miami Heat",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Milwaukee Bucks": {
+      "espn": "Milwaukee Bucks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Minnesota Timberwolves": {
+      "espn": "Minnesota Timberwolves",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "New Orleans Pelicans": {
+      "espn": "New Orleans Pelicans",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "New York Knicks": {
+      "espn": "New York Knicks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Oklahoma City Thunder": {
+      "espn": "Oklahoma City Thunder",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Orlando Magic": {
+      "espn": "Orlando Magic",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Philadelphia 76ers": {
+      "espn": "Philadelphia 76ers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Phoenix Suns": {
+      "espn": "Phoenix Suns",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Portland Trail Blazers": {
+      "espn": "Portland Trail Blazers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Sacramento Kings": {
+      "espn": "Sacramento Kings",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "San Antonio Spurs": {
+      "espn": "San Antonio Spurs",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Toronto Raptors": {
+      "espn": "Toronto Raptors",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Utah Jazz": {
+      "espn": "Utah Jazz",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Washington Wizards": {
+      "espn": "Washington Wizards",
+      "confidence": 100,
+      "needsReview": false
+    }
+  },
+  "cbb": {
+    "Abilene Christian Wildcats": {
+      "espn": "Abilene Christian Wildcats",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Air Force Falcons": {
+      "espn": "Air Force Falcons",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Akron Zips": {
+      "espn": "Akron Zips",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Alabama A&M Bulldogs": {
+      "espn": "Alabama A&M Bulldogs",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Alabama Crimson Tide": {
+      "espn": "Alabama Crimson Tide",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Alabama St Hornets": {
+      "espn": "Alabama State Hornets",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "Albany Great Danes": {
+      "espn": "UAlbany Great Danes",
+      "confidence": 85,
+      "needsReview": false
+    },
+    "Alcorn St Braves": {
+      "espn": "Alcorn State Braves",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "American Eagles": {
+      "espn": "American University Eagles",
+      "confidence": 70,
+      "needsReview": true
+    },
+    "Appalachian St Mountaineers": {
+      "espn": "App State Mountaineers",
+      "confidence": 30,
+      "needsReview": true
+    },
+    "Arizona St Sun Devils": {
+      "espn": "Arizona State Sun Devils",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "Arizona Wildcats": {
+      "espn": "Arizona Wildcats",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Arkansas Razorbacks": {
+      "espn": "Arkansas Razorbacks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Arkansas St Red Wolves": {
+      "espn": "Arkansas State Red Wolves",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "Arkansas-Little Rock Trojans": {
+      "espn": "Little Rock Trojans",
+      "confidence": 85,
+      "needsReview": false
+    },
+    "Arkansas-Pine Bluff Golden Lions": {
+      "espn": "Arkansas-Pine Bluff Golden Lions",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Army Knights": {
+      "espn": "Army Black Knights",
+      "confidence": 70,
+      "needsReview": true
+    },
+    "Auburn Tigers": {
+      "espn": "Auburn Tigers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Austin Peay Governors": {
+      "espn": "Austin Peay Governors",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "BYU Cougars": {
+      "espn": "BYU Cougars",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Ball State Cardinals": {
+      "espn": "Ball State Cardinals",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Baylor Bears": {
+      "espn": "Baylor Bears",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Bellarmine Knights": {
+      "espn": "Bellarmine Knights",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Belmont Bruins": {
+      "espn": "Belmont Bruins",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Bethune-Cookman Wildcats": {
+      "espn": "Bethune-Cookman Wildcats",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Binghamton Bearcats": {
+      "espn": "Binghamton Bearcats",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Boise State Broncos": {
+      "espn": "Boise State Broncos",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Boston College Eagles": {
+      "espn": "Boston College Eagles",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Boston Univ. Terriers": {
+      "espn": "Boston University Terriers",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "Bowling Green Falcons": {
+      "espn": "Bowling Green Falcons",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Bradley Braves": {
+      "espn": "Bradley Braves",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Brown Bears": {
+      "espn": "Brown Bears",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Bryant Bulldogs": {
+      "espn": "Bryant Bulldogs",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Bucknell Bison": {
+      "espn": "Bucknell Bison",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Buffalo Bulls": {
+      "espn": "Buffalo Bulls",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Butler Bulldogs": {
+      "espn": "Butler Bulldogs",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "CSU Bakersfield Roadrunners": {
+      "espn": "Cal State Bakersfield Roadrunners",
+      "confidence": 30,
+      "needsReview": true
+    },
+    "CSU Fullerton Titans": {
+      "espn": "Cal State Fullerton Titans",
+      "confidence": 30,
+      "needsReview": true
+    },
+    "CSU Northridge Matadors": {
+      "espn": "Cal State Northridge Matadors",
+      "confidence": 30,
+      "needsReview": true
+    },
+    "Cal Baptist Lancers": {
+      "espn": "California Baptist Lancers",
+      "confidence": 30,
+      "needsReview": true
+    },
+    "Cal Poly Mustangs": {
+      "espn": "Cal Poly Mustangs",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "California Golden Bears": {
+      "espn": "California Golden Bears",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Campbell Fighting Camels": {
+      "espn": "Campbell Fighting Camels",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Canisius Golden Griffins": {
+      "espn": "Canisius Golden Griffins",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Central Arkansas Bears": {
+      "espn": "Central Arkansas Bears",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Central Connecticut St Blue Devils": {
+      "espn": "Arizona State Sun Devils",
+      "confidence": 30,
+      "needsReview": true
+    },
+    "Central Michigan Chippewas": {
+      "espn": "Central Michigan Chippewas",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Charleston Cougars": {
+      "espn": "Charleston Cougars",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Charleston Southern Buccaneers": {
+      "espn": "Charleston Southern Buccaneers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Charlotte 49ers": {
+      "espn": "Charlotte 49ers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Chattanooga Mocs": {
+      "espn": "Chattanooga Mocs",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Chicago St Cougars": {
+      "espn": "Chicago State Cougars",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "Cincinnati Bearcats": {
+      "espn": "Cincinnati Bearcats",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Clemson Tigers": {
+      "espn": "Clemson Tigers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Cleveland St Vikings": {
+      "espn": "Cleveland State Vikings",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "Coastal Carolina Chanticleers": {
+      "espn": "Coastal Carolina Chanticleers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Colgate Raiders": {
+      "espn": "Colgate Raiders",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Colorado Buffaloes": {
+      "espn": "Colorado Buffaloes",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Colorado St Rams": {
+      "espn": "Colorado State Rams",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "Columbia Lions": {
+      "espn": "Columbia Lions",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Coppin St Eagles": {
+      "espn": "Coppin State Eagles",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "Cornell Big Red": {
+      "espn": "Cornell Big Red",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Creighton Bluejays": {
+      "espn": "Creighton Bluejays",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Dartmouth Big Green": {
+      "espn": "Dartmouth Big Green",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Davidson Wildcats": {
+      "espn": "Davidson Wildcats",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Dayton Flyers": {
+      "espn": "Dayton Flyers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "DePaul Blue Demons": {
+      "espn": "DePaul Blue Demons",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Delaware Blue Hens": {
+      "espn": "Delaware Blue Hens",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Delaware St Hornets": {
+      "espn": "Delaware State Hornets",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "Denver Pioneers": {
+      "espn": "Denver Pioneers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Detroit Mercy Titans": {
+      "espn": "Detroit Mercy Titans",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Drake Bulldogs": {
+      "espn": "Drake Bulldogs",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Drexel Dragons": {
+      "espn": "Drexel Dragons",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Duke Blue Devils": {
+      "espn": "Duke Blue Devils",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Duquesne Dukes": {
+      "espn": "Duquesne Dukes",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "East Carolina Pirates": {
+      "espn": "East Carolina Pirates",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "East Tennessee St Buccaneers": {
+      "espn": "East Tennessee State Buccaneers",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "Eastern Illinois Panthers": {
+      "espn": "Eastern Illinois Panthers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Eastern Kentucky Colonels": {
+      "espn": "Eastern Kentucky Colonels",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Eastern Michigan Eagles": {
+      "espn": "Eastern Michigan Eagles",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Eastern Washington Eagles": {
+      "espn": "Eastern Washington Eagles",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Elon Phoenix": {
+      "espn": "Elon Phoenix",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Evansville Purple Aces": {
+      "espn": "Evansville Purple Aces",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Fairfield Stags": {
+      "espn": "Fairfield Stags",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Fairleigh Dickinson Knights": {
+      "espn": "Fairleigh Dickinson Knights",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Florida A&M Rattlers": {
+      "espn": "Florida A&M Rattlers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Florida Atlantic Owls": {
+      "espn": "Florida Atlantic Owls",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Florida Gators": {
+      "espn": "Florida Gators",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Florida Gulf Coast Eagles": {
+      "espn": "Florida Gulf Coast Eagles",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Florida Int'l Golden Panthers": {
+      "espn": "Florida Gators",
+      "confidence": 70,
+      "needsReview": true
+    },
+    "Florida St Seminoles": {
+      "espn": "Florida State Seminoles",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "Fordham Rams": {
+      "espn": "Fordham Rams",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Fort Wayne Mastodons": {
+      "espn": "Purdue Fort Wayne Mastodons",
+      "confidence": 85,
+      "needsReview": false
+    },
+    "Fresno St Bulldogs": {
+      "espn": "Fresno State Bulldogs",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "Furman Paladins": {
+      "espn": "Furman Paladins",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "GW Revolutionaries": {
+      "espn": "Longwood Lancers",
+      "confidence": 70,
+      "needsReview": true
+    },
+    "Gardner-Webb Bulldogs": {
+      "espn": "Gardner-Webb Runnin' Bulldogs",
+      "confidence": 70,
+      "needsReview": true
+    },
+    "George Mason Patriots": {
+      "espn": "George Mason Patriots",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Georgetown Hoyas": {
+      "espn": "Georgetown Hoyas",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Georgia Bulldogs": {
+      "espn": "Georgia Bulldogs",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Georgia Southern Eagles": {
+      "espn": "Georgia Southern Eagles",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Georgia St Panthers": {
+      "espn": "Georgia State Panthers",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "Georgia Tech Yellow Jackets": {
+      "espn": "Georgia Tech Yellow Jackets",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Gonzaga Bulldogs": {
+      "espn": "Gonzaga Bulldogs",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Grambling St Tigers": {
+      "espn": "Grambling Tigers",
+      "confidence": 70,
+      "needsReview": true
+    },
+    "Grand Canyon Antelopes": {
+      "espn": "Grand Canyon Lopes",
+      "confidence": 80,
+      "needsReview": false
+    },
+    "Green Bay Phoenix": {
+      "espn": "Green Bay Phoenix",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Hampton Pirates": {
+      "espn": "Hampton Pirates",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Harvard Crimson": {
+      "espn": "Harvard Crimson",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Hawai'i Rainbow Warriors": {
+      "espn": "Hawai'i Rainbow Warriors",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "High Point Panthers": {
+      "espn": "High Point Panthers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Hofstra Pride": {
+      "espn": "Hofstra Pride",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Holy Cross Crusaders": {
+      "espn": "Holy Cross Crusaders",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Houston Christian Huskies": {
+      "espn": "Houston Christian Huskies",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Houston Cougars": {
+      "espn": "Houston Cougars",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Howard Bison": {
+      "espn": "Howard Bison",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "IUPUI Jaguars": {
+      "espn": "IU Indianapolis Jaguars",
+      "confidence": 30,
+      "needsReview": true
+    },
+    "Idaho State Bengals": {
+      "espn": "Idaho State Bengals",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Idaho Vandals": {
+      "espn": "Idaho Vandals",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Illinois Fighting Illini": {
+      "espn": "Illinois Fighting Illini",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Illinois St Redbirds": {
+      "espn": "Illinois State Redbirds",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "Incarnate Word Cardinals": {
+      "espn": "Incarnate Word Cardinals",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Indiana Hoosiers": {
+      "espn": "Indiana Hoosiers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Indiana St Sycamores": {
+      "espn": "Indiana State Sycamores",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "Iona Gaels": {
+      "espn": "Iona Gaels",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Iowa Hawkeyes": {
+      "espn": "Iowa Hawkeyes",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Iowa State Cyclones": {
+      "espn": "Iowa State Cyclones",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Jackson St Tigers": {
+      "espn": "Jackson State Tigers",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "Jacksonville Dolphins": {
+      "espn": "Jacksonville Dolphins",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Jacksonville St Gamecocks": {
+      "espn": "Jacksonville State Gamecocks",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "James Madison Dukes": {
+      "espn": "James Madison Dukes",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Kansas Jayhawks": {
+      "espn": "Kansas Jayhawks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Kansas St Wildcats": {
+      "espn": "Kansas State Wildcats",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "Kennesaw St Owls": {
+      "espn": "Kennesaw State Owls",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "Kent State Golden Flashes": {
+      "espn": "Kent State Golden Flashes",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Kentucky Wildcats": {
+      "espn": "Kentucky Wildcats",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "LIU Sharks": {
+      "espn": "Long Island University Sharks",
+      "confidence": 30,
+      "needsReview": true
+    },
+    "LSU Tigers": {
+      "espn": "LSU Tigers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "La Salle Explorers": {
+      "espn": "La Salle Explorers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Lafayette Leopards": {
+      "espn": "Lafayette Leopards",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Lamar Cardinals": {
+      "espn": "Lamar Cardinals",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Le Moyne Dolphins": {
+      "espn": "Le Moyne Dolphins",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Lehigh Mountain Hawks": {
+      "espn": "Lehigh Mountain Hawks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Liberty Flames": {
+      "espn": "Liberty Flames",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Lindenwood Lions": {
+      "espn": "Lindenwood Lions",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Lipscomb Bisons": {
+      "espn": "Lipscomb Bisons",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Long Beach St 49ers": {
+      "espn": "Long Beach State Beach",
+      "confidence": 80,
+      "needsReview": false
+    },
+    "Longwood Lancers": {
+      "espn": "Longwood Lancers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Louisiana Ragin' Cajuns": {
+      "espn": "Louisiana Ragin' Cajuns",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Louisiana Tech Bulldogs": {
+      "espn": "Louisiana Tech Bulldogs",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Louisville Cardinals": {
+      "espn": "Louisville Cardinals",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Loyola (Chi) Ramblers": {
+      "espn": "Loyola Chicago Ramblers",
+      "confidence": 70,
+      "needsReview": true
+    },
+    "Loyola (MD) Greyhounds": {
+      "espn": "Loyola Maryland Greyhounds",
+      "confidence": 30,
+      "needsReview": true
+    },
+    "Loyola Marymount Lions": {
+      "espn": "Loyola Marymount Lions",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Maine Black Bears": {
+      "espn": "Maine Black Bears",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Manhattan Jaspers": {
+      "espn": "Manhattan Jaspers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Marist Red Foxes": {
+      "espn": "Marist Red Foxes",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Marquette Golden Eagles": {
+      "espn": "Marquette Golden Eagles",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Marshall Thundering Herd": {
+      "espn": "Marshall Thundering Herd",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Maryland Terrapins": {
+      "espn": "Maryland Terrapins",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Maryland-Eastern Shore Hawks": {
+      "espn": "Maryland Terrapins",
+      "confidence": 70,
+      "needsReview": true
+    },
+    "Massachusetts Minutemen": {
+      "espn": "Massachusetts Minutemen",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "McNeese Cowboys": {
+      "espn": "McNeese Cowboys",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Memphis Tigers": {
+      "espn": "Memphis Tigers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Mercer Bears": {
+      "espn": "Mercer Bears",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Mercyhurst Lakers": {
+      "espn": "Mercyhurst Lakers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Merrimack Warriors": {
+      "espn": "Merrimack Warriors",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Miami (OH) RedHawks": {
+      "espn": "Miami (OH) RedHawks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Miami Hurricanes": {
+      "espn": "Miami Hurricanes",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Michigan St Spartans": {
+      "espn": "Michigan State Spartans",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "Michigan Wolverines": {
+      "espn": "Michigan Wolverines",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Middle Tennessee Blue Raiders": {
+      "espn": "Middle Tennessee Blue Raiders",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Milwaukee Panthers": {
+      "espn": "Milwaukee Panthers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Minnesota Golden Gophers": {
+      "espn": "Minnesota Golden Gophers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Miss Valley St Delta Devils": {
+      "espn": "Mississippi Valley State Delta Devils",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "Mississippi St Bulldogs": {
+      "espn": "Mississippi State Bulldogs",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "Missouri St Bears": {
+      "espn": "Missouri State Bears",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "Missouri Tigers": {
+      "espn": "Missouri Tigers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Monmouth Hawks": {
+      "espn": "Monmouth Hawks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Montana Grizzlies": {
+      "espn": "Montana Grizzlies",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Montana St Bobcats": {
+      "espn": "Montana State Bobcats",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "Morehead St Eagles": {
+      "espn": "Morehead State Eagles",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "Morgan St Bears": {
+      "espn": "Morgan State Bears",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "Mt. St. Mary's Mountaineers": {
+      "espn": "Mount St. Mary's Mountaineers",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "Murray St Racers": {
+      "espn": "Murray State Racers",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "N Colorado Bears": {
+      "espn": "Northern Colorado Bears",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "NC State Wolfpack": {
+      "espn": "NC State Wolfpack",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "NJIT Highlanders": {
+      "espn": "NJIT Highlanders",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Navy Midshipmen": {
+      "espn": "Navy Midshipmen",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Nebraska Cornhuskers": {
+      "espn": "Nebraska Cornhuskers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Nevada Wolf Pack": {
+      "espn": "Nevada Wolf Pack",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "New Hampshire Wildcats": {
+      "espn": "New Hampshire Wildcats",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "New Mexico Lobos": {
+      "espn": "New Mexico Lobos",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "New Mexico St Aggies": {
+      "espn": "New Mexico State Aggies",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "New Orleans Privateers": {
+      "espn": "New Orleans Privateers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Niagara Purple Eagles": {
+      "espn": "Niagara Purple Eagles",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Nicholls St Colonels": {
+      "espn": "Nicholls Colonels",
+      "confidence": 70,
+      "needsReview": true
+    },
+    "Norfolk St Spartans": {
+      "espn": "Norfolk State Spartans",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "North Alabama Lions": {
+      "espn": "North Alabama Lions",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "North Carolina A&T Aggies": {
+      "espn": "North Carolina A&T Aggies",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "North Carolina Central Eagles": {
+      "espn": "North Carolina Central Eagles",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "North Carolina Tar Heels": {
+      "espn": "North Carolina Tar Heels",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "North Dakota Fighting Hawks": {
+      "espn": "North Dakota Fighting Hawks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "North Dakota St Bison": {
+      "espn": "North Dakota State Bison",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "North Florida Ospreys": {
+      "espn": "North Florida Ospreys",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "North Texas Mean Green": {
+      "espn": "North Texas Mean Green",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Northeastern Huskies": {
+      "espn": "Northeastern Huskies",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Northern Arizona Lumberjacks": {
+      "espn": "Northern Arizona Lumberjacks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Northern Illinois Huskies": {
+      "espn": "Northern Illinois Huskies",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Northern Iowa Panthers": {
+      "espn": "Northern Iowa Panthers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Northern Kentucky Norse": {
+      "espn": "Northern Kentucky Norse",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Northwestern St Demons": {
+      "espn": "Northwestern State Demons",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "Northwestern Wildcats": {
+      "espn": "Northwestern Wildcats",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Notre Dame Fighting Irish": {
+      "espn": "Notre Dame Fighting Irish",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Oakland Golden Grizzlies": {
+      "espn": "Oakland Golden Grizzlies",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Ohio Bobcats": {
+      "espn": "Ohio Bobcats",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Ohio State Buckeyes": {
+      "espn": "Ohio State Buckeyes",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Oklahoma Sooners": {
+      "espn": "Oklahoma Sooners",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Oklahoma St Cowboys": {
+      "espn": "Oklahoma State Cowboys",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "Old Dominion Monarchs": {
+      "espn": "Old Dominion Monarchs",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Ole Miss Rebels": {
+      "espn": "Ole Miss Rebels",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Omaha Mavericks": {
+      "espn": "Omaha Mavericks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Oral Roberts Golden Eagles": {
+      "espn": "Oral Roberts Golden Eagles",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Oregon Ducks": {
+      "espn": "Oregon Ducks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Oregon St Beavers": {
+      "espn": "Oregon State Beavers",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "Pacific Tigers": {
+      "espn": "Pacific Tigers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Penn State Nittany Lions": {
+      "espn": "Penn State Nittany Lions",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Pennsylvania Quakers": {
+      "espn": "Pennsylvania Quakers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Pepperdine Waves": {
+      "espn": "Pepperdine Waves",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Pittsburgh Panthers": {
+      "espn": "Pittsburgh Panthers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Portland Pilots": {
+      "espn": "Portland Pilots",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Portland St Vikings": {
+      "espn": "Portland State Vikings",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "Prairie View Panthers": {
+      "espn": "Prairie View A&M Panthers",
+      "confidence": 70,
+      "needsReview": true
+    },
+    "Presbyterian Blue Hose": {
+      "espn": "Presbyterian Blue Hose",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Princeton Tigers": {
+      "espn": "Princeton Tigers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Providence Friars": {
+      "espn": "Providence Friars",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Queens University Royals": {
+      "espn": "Queens University Royals",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Quinnipiac Bobcats": {
+      "espn": "Quinnipiac Bobcats",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Radford Highlanders": {
+      "espn": "Radford Highlanders",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Rhode Island Rams": {
+      "espn": "Rhode Island Rams",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Rice Owls": {
+      "espn": "Rice Owls",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Richmond Spiders": {
+      "espn": "Richmond Spiders",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Rider Broncs": {
+      "espn": "Rider Broncs",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Robert Morris Colonials": {
+      "espn": "Robert Morris Colonials",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Rutgers Scarlet Knights": {
+      "espn": "Rutgers Scarlet Knights",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "SE Louisiana Lions": {
+      "espn": "SE Louisiana Lions",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "SE Missouri St Redhawks": {
+      "espn": "Missouri State Bears",
+      "confidence": 70,
+      "needsReview": true
+    },
+    "SIU-Edwardsville Cougars": {
+      "espn": "BYU Cougars",
+      "confidence": 30,
+      "needsReview": true
+    },
+    "SMU Mustangs": {
+      "espn": "SMU Mustangs",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Sacramento St Hornets": {
+      "espn": "Sacramento State Hornets",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "Sacred Heart Pioneers": {
+      "espn": "Sacred Heart Pioneers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Saint Joseph's Hawks": {
+      "espn": "Saint Joseph's Hawks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Saint Louis Billikens": {
+      "espn": "Saint Louis Billikens",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Saint Mary's Gaels": {
+      "espn": "Saint Mary's Gaels",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Saint Peter's Peacocks": {
+      "espn": "Saint Peter's Peacocks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Sam Houston St Bearkats": {
+      "espn": "Houston Cougars",
+      "confidence": 70,
+      "needsReview": true
+    },
+    "Samford Bulldogs": {
+      "espn": "Samford Bulldogs",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "San Diego St Aztecs": {
+      "espn": "San Diego State Aztecs",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "San Diego Toreros": {
+      "espn": "San Diego Toreros",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "San Francisco Dons": {
+      "espn": "San Francisco Dons",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "San José St Spartans": {
+      "espn": "San José State Spartans",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "Santa Clara Broncos": {
+      "espn": "Santa Clara Broncos",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Seattle Redhawks": {
+      "espn": "Seattle U Redhawks",
+      "confidence": 70,
+      "needsReview": true
+    },
+    "Seton Hall Pirates": {
+      "espn": "Seton Hall Pirates",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Siena Saints": {
+      "espn": "Siena Saints",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "South Alabama Jaguars": {
+      "espn": "South Alabama Jaguars",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "South Carolina Gamecocks": {
+      "espn": "South Carolina Gamecocks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "South Carolina St Bulldogs": {
+      "espn": "South Carolina State Bulldogs",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "South Carolina Upstate Spartans": {
+      "espn": "South Carolina Upstate Spartans",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "South Dakota Coyotes": {
+      "espn": "South Dakota Coyotes",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "South Dakota St Jackrabbits": {
+      "espn": "South Dakota State Jackrabbits",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "South Florida Bulls": {
+      "espn": "South Florida Bulls",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Southern Illinois Salukis": {
+      "espn": "Southern Illinois Salukis",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Southern Indiana Screaming Eagles": {
+      "espn": "Southern Indiana Screaming Eagles",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Southern Jaguars": {
+      "espn": "Southern Jaguars",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Southern Miss Golden Eagles": {
+      "espn": "Southern Miss Golden Eagles",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Southern Utah Thunderbirds": {
+      "espn": "Southern Utah Thunderbirds",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "St. Bonaventure Bonnies": {
+      "espn": "St. Bonaventure Bonnies",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "St. Francis (PA) Red Flash": {
+      "espn": "Saint Francis Red Flash",
+      "confidence": 30,
+      "needsReview": true
+    },
+    "St. John's Red Storm": {
+      "espn": "St. John's Red Storm",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "St. Thomas (MN) Tommies": {
+      "espn": "St. Thomas-Minnesota Tommies",
+      "confidence": 30,
+      "needsReview": true
+    },
+    "Stanford Cardinal": {
+      "espn": "Stanford Cardinal",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Stephen F. Austin Lumberjacks": {
+      "espn": "Stephen F. Austin Lumberjacks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Stetson Hatters": {
+      "espn": "Stetson Hatters",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Stonehill Skyhawks": {
+      "espn": "Stonehill Skyhawks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Stony Brook Seawolves": {
+      "espn": "Stony Brook Seawolves",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Syracuse Orange": {
+      "espn": "Syracuse Orange",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "TCU Horned Frogs": {
+      "espn": "TCU Horned Frogs",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Tarleton State Texans": {
+      "espn": "Tarleton State Texans",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Temple Owls": {
+      "espn": "Temple Owls",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Tenn-Martin Skyhawks": {
+      "espn": "Stonehill Skyhawks",
+      "confidence": 30,
+      "needsReview": true
+    },
+    "Tennessee St Tigers": {
+      "espn": "Tennessee State Tigers",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "Tennessee Tech Golden Eagles": {
+      "espn": "Tennessee Tech Golden Eagles",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Tennessee Volunteers": {
+      "espn": "Tennessee Volunteers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Texas A&M Aggies": {
+      "espn": "Texas A&M Aggies",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Texas A&M-CC Islanders": {
+      "espn": "Texas A&M Aggies",
+      "confidence": 70,
+      "needsReview": true
+    },
+    "Texas A&M-Commerce Lions": {
+      "espn": "Texas A&M Aggies",
+      "confidence": 70,
+      "needsReview": true
+    },
+    "Texas Longhorns": {
+      "espn": "Texas Longhorns",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Texas Southern Tigers": {
+      "espn": "Texas Southern Tigers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Texas State Bobcats": {
+      "espn": "Texas State Bobcats",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Texas Tech Red Raiders": {
+      "espn": "Texas Tech Red Raiders",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "The Citadel Bulldogs": {
+      "espn": "The Citadel Bulldogs",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Toledo Rockets": {
+      "espn": "Toledo Rockets",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Towson Tigers": {
+      "espn": "Towson Tigers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Troy Trojans": {
+      "espn": "Troy Trojans",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Tulane Green Wave": {
+      "espn": "Tulane Green Wave",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Tulsa Golden Hurricane": {
+      "espn": "Tulsa Golden Hurricane",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "UAB Blazers": {
+      "espn": "UAB Blazers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "UC Davis Aggies": {
+      "espn": "UC Davis Aggies",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "UC Irvine Anteaters": {
+      "espn": "UC Irvine Anteaters",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "UC Riverside Highlanders": {
+      "espn": "UC Riverside Highlanders",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "UC San Diego Tritons": {
+      "espn": "UC San Diego Tritons",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "UC Santa Barbara Gauchos": {
+      "espn": "UC Santa Barbara Gauchos",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "UCF Knights": {
+      "espn": "UCF Knights",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "UCLA Bruins": {
+      "espn": "UCLA Bruins",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "UConn Huskies": {
+      "espn": "UConn Huskies",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "UIC Flames": {
+      "espn": "UIC Flames",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "UL Monroe Warhawks": {
+      "espn": "UL Monroe Warhawks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "UMBC Retrievers": {
+      "espn": "UMBC Retrievers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "UMKC Kangaroos": {
+      "espn": null,
+      "confidence": 0,
+      "needsReview": true
+    },
+    "UMass Lowell River Hawks": {
+      "espn": "UMass Lowell River Hawks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "UNC Asheville Bulldogs": {
+      "espn": "UNC Asheville Bulldogs",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "UNC Greensboro Spartans": {
+      "espn": "UNC Greensboro Spartans",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "UNC Wilmington Seahawks": {
+      "espn": "UNC Wilmington Seahawks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "UNLV Rebels": {
+      "espn": "UNLV Rebels",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "USC Trojans": {
+      "espn": "USC Trojans",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "UT Rio Grande Valley Vaqueros": {
+      "espn": "UT Rio Grande Valley Vaqueros",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "UT-Arlington Mavericks": {
+      "espn": "Omaha Mavericks",
+      "confidence": 30,
+      "needsReview": true
+    },
+    "UTEP Miners": {
+      "espn": "UTEP Miners",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "UTSA Roadrunners": {
+      "espn": "UTSA Roadrunners",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Utah State Aggies": {
+      "espn": "Utah State Aggies",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Utah Tech Trailblazers": {
+      "espn": "Utah Tech Trailblazers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Utah Utes": {
+      "espn": "Utah Utes",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Utah Valley Wolverines": {
+      "espn": "Utah Valley Wolverines",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "VCU Rams": {
+      "espn": "VCU Rams",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "VMI Keydets": {
+      "espn": "VMI Keydets",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Valparaiso Beacons": {
+      "espn": "Valparaiso Beacons",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Vanderbilt Commodores": {
+      "espn": "Vanderbilt Commodores",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Vermont Catamounts": {
+      "espn": "Vermont Catamounts",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Villanova Wildcats": {
+      "espn": "Villanova Wildcats",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Virginia Cavaliers": {
+      "espn": "Virginia Cavaliers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Virginia Tech Hokies": {
+      "espn": "Virginia Tech Hokies",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Wagner Seahawks": {
+      "espn": "Wagner Seahawks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Wake Forest Demon Deacons": {
+      "espn": "Wake Forest Demon Deacons",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Washington Huskies": {
+      "espn": "Washington Huskies",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Washington St Cougars": {
+      "espn": "Washington State Cougars",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "Weber State Wildcats": {
+      "espn": "Weber State Wildcats",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "West Georgia Wolves": {
+      "espn": "West Georgia Wolves",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "West Virginia Mountaineers": {
+      "espn": "West Virginia Mountaineers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Western Carolina Catamounts": {
+      "espn": "Western Carolina Catamounts",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Western Illinois Leathernecks": {
+      "espn": "Western Illinois Leathernecks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Western Kentucky Hilltoppers": {
+      "espn": "Western Kentucky Hilltoppers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Western Michigan Broncos": {
+      "espn": "Western Michigan Broncos",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Wichita St Shockers": {
+      "espn": "Wichita State Shockers",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "William & Mary Tribe": {
+      "espn": "William & Mary Tribe",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Winthrop Eagles": {
+      "espn": "Winthrop Eagles",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Wisconsin Badgers": {
+      "espn": "Wisconsin Badgers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Wofford Terriers": {
+      "espn": "Wofford Terriers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Wright St Raiders": {
+      "espn": "Wright State Raiders",
+      "confidence": 95,
+      "needsReview": false
+    },
+    "Wyoming Cowboys": {
+      "espn": "Wyoming Cowboys",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Xavier Musketeers": {
+      "espn": "Xavier Musketeers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Yale Bulldogs": {
+      "espn": "Yale Bulldogs",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Youngstown St Penguins": {
+      "espn": "Youngstown State Penguins",
+      "confidence": 95,
+      "needsReview": false
+    }
+  },
+  "mlb": {
+    "Arizona Diamondbacks": {
+      "espn": "Arizona Diamondbacks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Atlanta Braves": {
+      "espn": "Atlanta Braves",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Baltimore Orioles": {
+      "espn": "Baltimore Orioles",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Boston Red Sox": {
+      "espn": "Boston Red Sox",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Chicago Cubs": {
+      "espn": "Chicago Cubs",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Chicago White Sox": {
+      "espn": "Chicago White Sox",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Cincinnati Reds": {
+      "espn": "Cincinnati Reds",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Cleveland Guardians": {
+      "espn": "Cleveland Guardians",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Colorado Rockies": {
+      "espn": "Colorado Rockies",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Detroit Tigers": {
+      "espn": "Detroit Tigers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Houston Astros": {
+      "espn": "Houston Astros",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Kansas City Royals": {
+      "espn": "Kansas City Royals",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Los Angeles Angels": {
+      "espn": "Los Angeles Angels",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Los Angeles Dodgers": {
+      "espn": "Los Angeles Dodgers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Miami Marlins": {
+      "espn": "Miami Marlins",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Milwaukee Brewers": {
+      "espn": "Milwaukee Brewers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Minnesota Twins": {
+      "espn": "Minnesota Twins",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "New York Mets": {
+      "espn": "New York Mets",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "New York Yankees": {
+      "espn": "New York Yankees",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Oakland Athletics": {
+      "espn": "Athletics",
+      "confidence": 85,
+      "needsReview": false
+    },
+    "Philadelphia Phillies": {
+      "espn": "Philadelphia Phillies",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Pittsburgh Pirates": {
+      "espn": "Pittsburgh Pirates",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "San Diego Padres": {
+      "espn": "San Diego Padres",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "San Francisco Giants": {
+      "espn": "San Francisco Giants",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Seattle Mariners": {
+      "espn": "Seattle Mariners",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "St. Louis Cardinals": {
+      "espn": "St. Louis Cardinals",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Tampa Bay Rays": {
+      "espn": "Tampa Bay Rays",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Texas Rangers": {
+      "espn": "Texas Rangers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Toronto Blue Jays": {
+      "espn": "Toronto Blue Jays",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Washington Nationals": {
+      "espn": "Washington Nationals",
+      "confidence": 100,
+      "needsReview": false
+    }
+  },
+  "nhl": {
+    "Anaheim Ducks": {
+      "espn": "Anaheim Ducks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Boston Bruins": {
+      "espn": "Boston Bruins",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Buffalo Sabres": {
+      "espn": "Buffalo Sabres",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Calgary Flames": {
+      "espn": "Calgary Flames",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Carolina Hurricanes": {
+      "espn": "Carolina Hurricanes",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Chicago Blackhawks": {
+      "espn": "Chicago Blackhawks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Colorado Avalanche": {
+      "espn": "Colorado Avalanche",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Columbus Blue Jackets": {
+      "espn": "Columbus Blue Jackets",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Dallas Stars": {
+      "espn": "Dallas Stars",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Detroit Red Wings": {
+      "espn": "Detroit Red Wings",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Edmonton Oilers": {
+      "espn": "Edmonton Oilers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Florida Panthers": {
+      "espn": "Florida Panthers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Los Angeles Kings": {
+      "espn": "Los Angeles Kings",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Minnesota Wild": {
+      "espn": "Minnesota Wild",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Montréal Canadiens": {
+      "espn": "Montreal Canadiens",
+      "confidence": 30,
+      "needsReview": true
+    },
+    "Nashville Predators": {
+      "espn": "Nashville Predators",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "New Jersey Devils": {
+      "espn": "New Jersey Devils",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "New York Islanders": {
+      "espn": "New York Islanders",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "New York Rangers": {
+      "espn": "New York Rangers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Ottawa Senators": {
+      "espn": "Ottawa Senators",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Philadelphia Flyers": {
+      "espn": "Philadelphia Flyers",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Pittsburgh Penguins": {
+      "espn": "Pittsburgh Penguins",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "San Jose Sharks": {
+      "espn": "San Jose Sharks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Seattle Kraken": {
+      "espn": "Seattle Kraken",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "St Louis Blues": {
+      "espn": "St. Louis Blues",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Tampa Bay Lightning": {
+      "espn": "Tampa Bay Lightning",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Toronto Maple Leafs": {
+      "espn": "Toronto Maple Leafs",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Utah Hockey Club": {
+      "espn": "Utah Mammoth",
+      "confidence": 70,
+      "needsReview": true
+    },
+    "Vancouver Canucks": {
+      "espn": "Vancouver Canucks",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Vegas Golden Knights": {
+      "espn": "Vegas Golden Knights",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Washington Capitals": {
+      "espn": "Washington Capitals",
+      "confidence": 100,
+      "needsReview": false
+    },
+    "Winnipeg Jets": {
+      "espn": "Winnipeg Jets",
+      "confidence": 100,
+      "needsReview": false
+    }
+  }
+}

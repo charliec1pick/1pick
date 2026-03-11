@@ -6,7 +6,7 @@ const SPORT_LABELS = {
 }
 
 // Only active sports — update this as seasons change
-const ACTIVE_SPORTS = ['cbb', 'nba']
+const ACTIVE_SPORTS = ['cbb', 'nba', 'nhl']
 
 // Module-level client cache so switching tabs doesn't re-query Supabase
 const clientCache = {}

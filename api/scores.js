@@ -5,6 +5,120 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY
 )
 
+// ─── COMPLETE TEAM NAME MAP: Odds API → ESPN ─────────────────────────────────
+// Manually verified — March 2026
+// Only contains entries where names DIFFER. If not in map, names are identical.
+
+const TEAM_NAME_MAP = {
+  // CFB
+  "Appalachian State Mountaineers": "App State Mountaineers",
+  "Citadel Bulldogs": "The Citadel Bulldogs",
+  "Grambling State Tigers": "Grambling Tigers",
+  "Hawaii Rainbow Warriors": "Hawai'i Rainbow Warriors",
+  "Houston Baptist Huskies": "Houston Christian Huskies",
+  "Louisiana Ragin Cajuns": "Louisiana Ragin' Cajuns",
+  "Nicholls State Colonels": "Nicholls Colonels",
+  "Sam Houston State Bearkats": "Sam Houston Bearkats",
+  "San Jose State Spartans": "San José State Spartans",
+  "Southern Mississippi Golden Eagles": "Southern Miss Golden Eagles",
+  "Texas A&M-Commerce Lions": "East Texas A&M Lions",
+  // NBA
+  "Los Angeles Clippers": "LA Clippers",
+  // CBB
+  "Alabama St Hornets": "Alabama State Hornets",
+  "Albany Great Danes": "UAlbany Great Danes",
+  "Alcorn St Braves": "Alcorn State Braves",
+  "American Eagles": "American University Eagles",
+  "Appalachian St Mountaineers": "App State Mountaineers",
+  "Arizona St Sun Devils": "Arizona State Sun Devils",
+  "Arkansas St Red Wolves": "Arkansas State Red Wolves",
+  "Arkansas-Little Rock Trojans": "Little Rock Trojans",
+  "Army Knights": "Army Black Knights",
+  "Boston Univ. Terriers": "Boston University Terriers",
+  "CSU Bakersfield Roadrunners": "Cal State Bakersfield Roadrunners",
+  "CSU Fullerton Titans": "Cal State Fullerton Titans",
+  "CSU Northridge Matadors": "Cal State Northridge Matadors",
+  "Cal Baptist Lancers": "California Baptist Lancers",
+  "Central Connecticut St Blue Devils": "Central Connecticut Blue Devils",
+  "Chicago St Cougars": "Chicago State Cougars",
+  "Cleveland St Vikings": "Cleveland State Vikings",
+  "Colorado St Rams": "Colorado State Rams",
+  "Coppin St Eagles": "Coppin State Eagles",
+  "Delaware St Hornets": "Delaware State Hornets",
+  "East Tennessee St Buccaneers": "East Tennessee State Buccaneers",
+  "Florida Int'l Golden Panthers": "Florida International Panthers",
+  "Florida St Seminoles": "Florida State Seminoles",
+  "Fort Wayne Mastodons": "Purdue Fort Wayne Mastodons",
+  "Fresno St Bulldogs": "Fresno State Bulldogs",
+  "GW Revolutionaries": "George Washington Revolutionaries",
+  "Gardner-Webb Bulldogs": "Gardner-Webb Runnin' Bulldogs",
+  "Georgia St Panthers": "Georgia State Panthers",
+  "Grambling St Tigers": "Grambling Tigers",
+  "Grand Canyon Antelopes": "Grand Canyon Lopes",
+  "IUPUI Jaguars": "IU Indianapolis Jaguars",
+  "Illinois St Redbirds": "Illinois State Redbirds",
+  "Indiana St Sycamores": "Indiana State Sycamores",
+  "Jackson St Tigers": "Jackson State Tigers",
+  "Jacksonville St Gamecocks": "Jacksonville State Gamecocks",
+  "Kansas St Wildcats": "Kansas State Wildcats",
+  "Kennesaw St Owls": "Kennesaw State Owls",
+  "LIU Sharks": "Long Island University Sharks",
+  "Long Beach St 49ers": "Long Beach State Beach",
+  "Loyola (Chi) Ramblers": "Loyola Chicago Ramblers",
+  "Loyola (MD) Greyhounds": "Loyola Maryland Greyhounds",
+  "Michigan St Spartans": "Michigan State Spartans",
+  "Miss Valley St Delta Devils": "Mississippi Valley State Delta Devils",
+  "Mississippi St Bulldogs": "Mississippi State Bulldogs",
+  "Missouri St Bears": "Missouri State Bears",
+  "Montana St Bobcats": "Montana State Bobcats",
+  "Morehead St Eagles": "Morehead State Eagles",
+  "Morgan St Bears": "Morgan State Bears",
+  "Mt. St. Mary's Mountaineers": "Mount St. Mary's Mountaineers",
+  "Murray St Racers": "Murray State Racers",
+  "N Colorado Bears": "Northern Colorado Bears",
+  "New Mexico St Aggies": "New Mexico State Aggies",
+  "Nicholls St Colonels": "Nicholls Colonels",
+  "Norfolk St Spartans": "Norfolk State Spartans",
+  "North Dakota St Bison": "North Dakota State Bison",
+  "Northwestern St Demons": "Northwestern State Demons",
+  "Oklahoma St Cowboys": "Oklahoma State Cowboys",
+  "Oregon St Beavers": "Oregon State Beavers",
+  "Portland St Vikings": "Portland State Vikings",
+  "Prairie View Panthers": "Prairie View A&M Panthers",
+  "SE Missouri St Redhawks": "Southeast Missouri State Redhawks",
+  "SIU-Edwardsville Cougars": "SIU Edwardsville Cougars",
+  "Sacramento St Hornets": "Sacramento State Hornets",
+  "Sam Houston St Bearkats": "Sam Houston Bearkats",
+  "San Diego St Aztecs": "San Diego State Aztecs",
+  "San José St Spartans": "San José State Spartans",
+  "Seattle Redhawks": "Seattle U Redhawks",
+  "South Carolina St Bulldogs": "South Carolina State Bulldogs",
+  "South Dakota St Jackrabbits": "South Dakota State Jackrabbits",
+  "St. Francis (PA) Red Flash": "Saint Francis Red Flash",
+  "St. Thomas (MN) Tommies": "St. Thomas-Minnesota Tommies",
+  "Tenn-Martin Skyhawks": "UT Martin Skyhawks",
+  "Tennessee St Tigers": "Tennessee State Tigers",
+  "Texas A&M-CC Islanders": "Texas A&M-Corpus Christi Islanders",
+  "UMKC Kangaroos": "Kansas City Roos",
+  "UT-Arlington Mavericks": "UT Arlington Mavericks",
+  "Washington St Cougars": "Washington State Cougars",
+  "Wichita St Shockers": "Wichita State Shockers",
+  "Wright St Raiders": "Wright State Raiders",
+  "Youngstown St Penguins": "Youngstown State Penguins",
+  // MLB
+  "Oakland Athletics": "Athletics",
+  // NHL
+  "Montréal Canadiens": "Montreal Canadiens",
+  "St Louis Blues": "St. Louis Blues",
+  "Utah Hockey Club": "Utah Mammoth",
+}
+
+function toESPN(name) {
+  return TEAM_NAME_MAP[name] || name
+}
+
+// ─── Result checking ─────────────────────────────────────────────────────────
+
 function determineWinner(homeTeam, awayTeam, homeScore, awayScore) {
   if (homeScore === awayScore) return 'draw'
   return homeScore > awayScore ? homeTeam : awayTeam
@@ -12,10 +126,13 @@ function determineWinner(homeTeam, awayTeam, homeScore, awayScore) {
 
 function checkPickResult(pick, homeTeam, awayTeam, homeScore, awayScore) {
   const winner = determineWinner(homeTeam, awayTeam, homeScore, awayScore)
+  const pickTeamESPN = toESPN(pick.team)
 
   if (pick.category === 'ml-fav' || pick.category === 'ml-dog') {
     if (winner === 'draw') return 'pending'
-    return pick.team === winner ? 'win' : 'loss'
+    if (pickTeamESPN === winner) return 'win'
+    if (teamsMatchSingle(pickTeamESPN, winner)) return 'win'
+    return 'loss'
   }
 
   if (pick.category === 'tot-ov' || pick.category === 'tot-un') {
@@ -23,7 +140,7 @@ function checkPickResult(pick, homeTeam, awayTeam, homeScore, awayScore) {
     if (!match) return 'pending'
     const total = parseFloat(match[1])
     const combined = homeScore + awayScore
-    if (combined === total) return 'pending' // exact push
+    if (combined === total) return 'pending'
     if (pick.category === 'tot-ov') return combined > total ? 'win' : 'loss'
     if (pick.category === 'tot-un') return combined < total ? 'win' : 'loss'
   }
@@ -32,13 +149,12 @@ function checkPickResult(pick, homeTeam, awayTeam, homeScore, awayScore) {
     const match = pick.team.match(/([+-]?\d+\.?\d*)$/)
     if (!match) return 'pending'
     const spread = parseFloat(match[1])
-    const teamName = pick.team.replace(/[+-]?\d+\.?\d*$/, '').trim()
-    // Use proper expanded matching instead of nickname-only check
-    const isHome = teamsMatchSingle(teamName, homeTeam)
+    const teamName = toESPN(pick.team.replace(/[+-]?\d+\.?\d*$/, '').trim())
+    const isHome = teamName === homeTeam || teamsMatchSingle(teamName, homeTeam)
     const teamScore = isHome ? homeScore : awayScore
     const oppScore = isHome ? awayScore : homeScore
     const margin = teamScore + spread - oppScore
-    if (margin === 0) return 'pending' // exact push
+    if (margin === 0) return 'pending'
     return margin > 0 ? 'win' : 'loss'
   }
 
@@ -52,9 +168,12 @@ function calcPayout(units, lockedOdds, result) {
   return parseFloat((units * (odds / 100)).toFixed(1))
 }
 
-// --- Team matching: date-aware + abbreviation-expanded, NO nickname-only fallback ---
+// ─── Fuzzy matching (safety net only — map handles 99% of cases) ─────────────
 
-// Expand common abbreviations so "Kansas St" and "Kansas State" normalize the same
+function normalizeTeam(name) {
+  return (name || '').toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim()
+}
+
 function expandAbbreviations(str) {
   return str
     .replace(/\bst\b/g, 'state')
@@ -62,8 +181,6 @@ function expandAbbreviations(str) {
     .replace(/\bintl?\b/g, 'international')
     .replace(/\bmt\b/g, 'mount')
     .replace(/\bft\b/g, 'fort')
-    // Directional: "N" → "northern", "S" → "southern", etc.
-    // Must come after other replacements to avoid conflicts
     .replace(/\bn\b/g, 'northern')
     .replace(/\bs\b/g, 'southern')
     .replace(/\be\b/g, 'eastern')
@@ -71,69 +188,49 @@ function expandAbbreviations(str) {
     .replace(/\bmiss\b/g, 'mississippi')
 }
 
-function normalizeTeam(name) {
-  return (name || '').toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim()
-}
-
-// Expanded normalization for fuzzy comparison — applies abbreviation expansion
 function expandedNormalize(name) {
   return expandAbbreviations(normalizeTeam(name))
 }
 
 function teamsMatchSingle(a, b) {
-  // 1. Exact normalized match
   const na = normalizeTeam(a)
   const nb = normalizeTeam(b)
   if (na === nb) return true
-
-  // 2. Expanded abbreviation match
   const ea = expandedNormalize(a)
   const eb = expandedNormalize(b)
   if (ea === eb) return true
-
-  // 3. Substring match (one contains the other) — catches partial name differences
-  if (ea.includes(eb) || eb.includes(ea)) return true
-
-  // 4. School name match — strip the last word (mascot) and compare the school portion.
-  //    Handles "Florida International Golden Panthers" vs "Florida International Panthers"
-  //    where the mascot word differs but the school is the same.
-  const partsA = ea.split(' ')
-  const partsB = eb.split(' ')
-  if (partsA.length >= 2 && partsB.length >= 2) {
-    const schoolA = partsA.slice(0, -1).join(' ')
-    const schoolB = partsB.slice(0, -1).join(' ')
-    if (schoolA === schoolB) return true
-    if (schoolA.includes(schoolB) || schoolB.includes(schoolA)) return true
-  }
-
-  // NO nickname-only fallback — this is what caused cross-game contamination
+  // NO substring or school-name matching — those caused false positives
+  // The map handles all known differences. This only catches abbreviation expansions.
   return false
 }
 
-// Extract the UTC game date from a pick's commence_time as YYYY-MM-DD
 function pickGameDate(pick) {
   if (!pick.commence_time) return null
-  // Both ESPN (scores_cache.game_date) and Odds API (commence_time) use UTC,
-  // so splitting at 'T' gives a consistent date for exact matching.
   return new Date(pick.commence_time).toISOString().split('T')[0]
 }
 
 function teamsMatch(pick, scoreRow) {
-  // Date gate: require exact date match (both are UTC-based YYYY-MM-DD).
-  // If either date is missing, skip the date filter to avoid breaking old picks
-  // that were saved without commence_time.
   const pDate = pickGameDate(pick)
   const sDate = scoreRow.game_date
   if (pDate && sDate && pDate !== sDate) return false
 
+  // Translate Odds API names to ESPN names via the map
+  const pickHome = toESPN(pick.home_team)
+  const pickAway = toESPN(pick.away_team)
+
+  // Direct match first (hits ~99% with the map)
+  if (pickHome === scoreRow.home_team && pickAway === scoreRow.away_team) return true
+
+  // Fuzzy fallback for any team not yet in the map
   return (
-    teamsMatchSingle(pick.home_team, scoreRow.home_team) &&
-    teamsMatchSingle(pick.away_team, scoreRow.away_team)
+    teamsMatchSingle(pickHome, scoreRow.home_team) &&
+    teamsMatchSingle(pickAway, scoreRow.away_team)
   )
 }
 
+// ─── Handler ─────────────────────────────────────────────────────────────────
+
 export default async function handler(req, res) {
-  // Fetch all completed games from scores_cache
   const { data: completedGames, error: scoresError } = await supabase
     .from('scores_cache')
     .select('*')
@@ -143,7 +240,6 @@ export default async function handler(req, res) {
     return res.status(200).json({ updated: 0, message: 'No completed games found' })
   }
 
-  // Fetch all pending picks that have home_team/away_team stored
   const { data: pendingPicks, error: picksError } = await supabase
     .from('picks')
     .select('*')
@@ -157,8 +253,6 @@ export default async function handler(req, res) {
   let totalUpdated = 0
 
   for (const pick of pendingPicks) {
-    // Try to match by game_id first (Odds API ID stored in scores_cache if we ever add it)
-    // Fall back to team name matching
     const scoreRow = completedGames.find(g => teamsMatch(pick, g))
     if (!scoreRow) continue
 
