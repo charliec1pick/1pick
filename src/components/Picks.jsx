@@ -13,34 +13,85 @@ const PICK_CATS = [
 
 // ─── SPORT-SPECIFIC FILTERS ──────────────────────────────────────────────────
 
-// CBB Top 25 — update these periodically or fetch from ESPN rankings API
-const CBB_TOP_25 = [
-  { rank: 1,  name: 'Duke Blue Devils' },
-  { rank: 2,  name: 'Arizona Wildcats' },
-  { rank: 3,  name: 'Michigan Wolverines' },
-  { rank: 4,  name: 'Florida Gators' },
-  { rank: 5,  name: 'Houston Cougars' },
-  { rank: 6,  name: 'UConn Huskies' },
-  { rank: 7,  name: 'Iowa State Cyclones' },
-  { rank: 8,  name: 'Michigan State Spartans' },
-  { rank: 9,  name: 'Illinois Fighting Illini' },
-  { rank: 10, name: 'Virginia Cavaliers' },
-  { rank: 11, name: 'Nebraska Cornhuskers' },
-  { rank: 12, name: 'Gonzaga Bulldogs' },
-  { rank: 13, name: "St. John's Red Storm" },
-  { rank: 14, name: 'Kansas Jayhawks' },
-  { rank: 15, name: 'Alabama Crimson Tide' },
-  { rank: 16, name: 'Texas Tech Red Raiders' },
-  { rank: 17, name: 'Arkansas Razorbacks' },
-  { rank: 18, name: 'Purdue Boilermakers' },
-  { rank: 19, name: 'North Carolina Tar Heels' },
-  { rank: 20, name: 'Miami (OH) RedHawks' },
-  { rank: 21, name: "Saint Mary's Gaels" },
-  { rank: 22, name: 'Vanderbilt Commodores' },
-  { rank: 23, name: 'Wisconsin Badgers' },
-  { rank: 24, name: 'Louisville Cardinals' },
-  { rank: 25, name: 'Tennessee Volunteers' },
-]
+// 2026 March Madness Bracket — using Odds API team names
+const MARCH_MADNESS = {
+  'East': [
+    { seed: 1, name: 'Duke Blue Devils' },
+    { seed: 2, name: 'UConn Huskies' },
+    { seed: 3, name: 'Michigan St Spartans' },
+    { seed: 4, name: 'Kansas Jayhawks' },
+    { seed: 5, name: "St. John's Red Storm" },
+    { seed: 6, name: 'Louisville Cardinals' },
+    { seed: 7, name: 'UCLA Bruins' },
+    { seed: 8, name: 'Ohio State Buckeyes' },
+    { seed: 9, name: 'TCU Horned Frogs' },
+    { seed: 10, name: 'UCF Knights' },
+    { seed: 11, name: 'South Florida Bulls' },
+    { seed: 12, name: 'Northern Iowa Panthers' },
+    { seed: 13, name: 'Cal Baptist Lancers' },
+    { seed: 14, name: 'North Dakota St Bison' },
+    { seed: 15, name: 'Furman Paladins' },
+    { seed: 16, name: 'Siena Saints' },
+  ],
+  'West': [
+    { seed: 1, name: 'Arizona Wildcats' },
+    { seed: 2, name: 'Purdue Boilermakers' },
+    { seed: 3, name: 'Gonzaga Bulldogs' },
+    { seed: 4, name: 'Arkansas Razorbacks' },
+    { seed: 5, name: 'Wisconsin Badgers' },
+    { seed: 6, name: 'BYU Cougars' },
+    { seed: 7, name: 'Miami Hurricanes' },
+    { seed: 8, name: 'Villanova Wildcats' },
+    { seed: 9, name: 'Utah State Aggies' },
+    { seed: 10, name: 'Missouri Tigers' },
+    { seed: 11, name: 'Texas Longhorns' },
+    { seed: 11, name: 'NC State Wolfpack' },
+    { seed: 12, name: 'High Point Panthers' },
+    { seed: 13, name: 'Hawaii Rainbow Warriors' },
+    { seed: 14, name: 'Kennesaw St Owls' },
+    { seed: 15, name: 'Queens University Royals' },
+    { seed: 16, name: 'LIU Sharks' },
+  ],
+  'Midwest': [
+    { seed: 1, name: 'Michigan Wolverines' },
+    { seed: 2, name: 'Iowa State Cyclones' },
+    { seed: 3, name: 'Virginia Cavaliers' },
+    { seed: 4, name: 'Alabama Crimson Tide' },
+    { seed: 5, name: 'Texas Tech Red Raiders' },
+    { seed: 6, name: 'Tennessee Volunteers' },
+    { seed: 7, name: 'Kentucky Wildcats' },
+    { seed: 8, name: 'Georgia Bulldogs' },
+    { seed: 9, name: 'Saint Louis Billikens' },
+    { seed: 10, name: 'Santa Clara Broncos' },
+    { seed: 11, name: 'Miami (OH) RedHawks' },
+    { seed: 11, name: 'SMU Mustangs' },
+    { seed: 12, name: 'Akron Zips' },
+    { seed: 13, name: 'Hofstra Pride' },
+    { seed: 14, name: 'Wright St Raiders' },
+    { seed: 15, name: 'Tennessee St Tigers' },
+    { seed: 16, name: 'UMBC Retrievers' },
+    { seed: 16, name: 'Howard Bison' },
+  ],
+  'South': [
+    { seed: 1, name: 'Florida Gators' },
+    { seed: 2, name: 'Houston Cougars' },
+    { seed: 3, name: 'Illinois Fighting Illini' },
+    { seed: 4, name: 'Nebraska Cornhuskers' },
+    { seed: 5, name: 'Vanderbilt Commodores' },
+    { seed: 6, name: 'North Carolina Tar Heels' },
+    { seed: 7, name: "Saint Mary's Gaels" },
+    { seed: 8, name: 'Clemson Tigers' },
+    { seed: 9, name: 'Iowa Hawkeyes' },
+    { seed: 10, name: 'Texas A&M Aggies' },
+    { seed: 11, name: 'VCU Rams' },
+    { seed: 12, name: 'McNeese Cowboys' },
+    { seed: 13, name: 'Troy Trojans' },
+    { seed: 14, name: 'Pennsylvania Quakers' },
+    { seed: 15, name: 'Idaho Vandals' },
+    { seed: 16, name: 'Prairie View Panthers' },
+    { seed: 16, name: 'Lehigh Mountain Hawks' },
+  ],
+}
 
 // CBB Conferences — ALL conferences, using Odds API names
 const CBB_CONFERENCES = {
@@ -150,13 +201,13 @@ const MLB_FILTERS = {
 // Map sport to its filter config
 function getFiltersForSport(sport) {
   switch (sport) {
-    case 'cbb': return { filters: CBB_CONFERENCES, top25: CBB_TOP_25, label: 'Conferences' }
-    case 'cfb': return { filters: CFB_CONFERENCES, top25: null, label: 'Conferences' }
-    case 'nba': return { filters: NBA_FILTERS, top25: null, label: 'Conferences & Divisions' }
-    case 'nhl': return { filters: NHL_FILTERS, top25: null, label: 'Conferences & Divisions' }
-    case 'nfl': return { filters: NFL_FILTERS, top25: null, label: 'Conferences & Divisions' }
-    case 'mlb': return { filters: MLB_FILTERS, top25: null, label: 'Leagues & Divisions' }
-    default: return { filters: {}, top25: null, label: 'Filters' }
+    case 'cbb': return { filters: CBB_CONFERENCES, regions: MARCH_MADNESS, label: 'Conferences' }
+    case 'cfb': return { filters: CFB_CONFERENCES, regions: null, label: 'Conferences' }
+    case 'nba': return { filters: NBA_FILTERS, regions: null, label: 'Conferences & Divisions' }
+    case 'nhl': return { filters: NHL_FILTERS, regions: null, label: 'Conferences & Divisions' }
+    case 'nfl': return { filters: NFL_FILTERS, regions: null, label: 'Conferences & Divisions' }
+    case 'mlb': return { filters: MLB_FILTERS, regions: null, label: 'Leagues & Divisions' }
+    default: return { filters: {}, regions: null, label: 'Filters' }
   }
 }
 
@@ -324,7 +375,7 @@ function isGameStarted(game, liveScores) {
   return Date.now() >= new Date(game.commence_time).getTime()
 }
 
-export default function Picks({ session, activeSport }) {
+export default function Picks({ session, activeSport, preselectedPoolId, onPoolChange }) {
   const [myPools, setMyPools] = useState([])
   const [allPoolEntries, setAllPoolEntries] = useState([])
   const [activePoolEntry, setActivePoolEntry] = useState(null)
@@ -416,14 +467,21 @@ export default function Picks({ session, activeSport }) {
       })
       setMyPools(currentEntries)
       if (currentEntries.length > 0) {
-        const pool = currentEntries[0].friend_pools
+        // If navigating from Lobby with a specific pool, select that one
+        let selected = currentEntries[0]
+        if (preselectedPoolId) {
+          const match = currentEntries.find(e => e.friend_pool_id === preselectedPoolId)
+          if (match) selected = match
+        }
+        const pool = selected.friend_pools
         const currentPeriod = pool.current_period || 1
         setTotalSessions(currentPeriod)
         setSelectedSession(currentPeriod)
         setViewingPastSession(false)
-        setActivePoolEntry(currentEntries[0])
-        setOptedIn(currentEntries[0].opted_in || false)
-        await loadPicks(currentEntries[0].id)
+        setActivePoolEntry(selected)
+        setOptedIn(selected.opted_in || false)
+        onPoolChange?.(selected.friend_pool_id)
+        await loadPicks(selected.id)
       }
     } else {
       setMyPools([])
@@ -624,9 +682,11 @@ export default function Picks({ session, activeSport }) {
 
     const sportConfig = getFiltersForSport(activeSport)
 
-    if (gameFilter === 'top25' && sportConfig.top25) {
+    // Check if filtering by a March Madness region
+    if (sportConfig.regions && sportConfig.regions[gameFilter]) {
+      const regionTeams = sportConfig.regions[gameFilter].map(t => t.name)
       filtered = filtered.filter(g =>
-        sportConfig.top25.some(t => g.home === t.name || g.away === t.name)
+        regionTeams.some(t => g.home === t || g.away === t)
       )
     } else if (gameFilter !== 'all' && sportConfig.filters[gameFilter]) {
       const teams = sportConfig.filters[gameFilter]
@@ -671,6 +731,7 @@ export default function Picks({ session, activeSport }) {
                   setUnits({ 'ml-fav': 15, 'ml-dog': 10, 'sp-fav': 15, 'sp-dog': 15, 'tot-ov': 15, 'tot-un': 15 })
                   setActivePoolEntry(entry)
                   setOptedIn(entry.opted_in || false)
+                  onPoolChange?.(entry.friend_pool_id)
                   const p = entry.friend_pools.current_period || 1
                   setTotalSessions(p)
                   setSelectedSession(p)
@@ -885,7 +946,13 @@ export default function Picks({ session, activeSport }) {
                   const sportConfig = getFiltersForSport(activeSport)
                   return (
                     <>
-                      {sportConfig.top25 && <option value="top25">⭐ Top 25</option>}
+                      {sportConfig.regions && (
+                        <optgroup label="🏆 March Madness Regions">
+                          {Object.keys(sportConfig.regions).map(region => (
+                            <option key={region} value={region}>🏀 {region} Region</option>
+                          ))}
+                        </optgroup>
+                      )}
                       {Object.keys(sportConfig.filters).length > 0 && (
                         <optgroup label={sportConfig.label}>
                           {Object.keys(sportConfig.filters).map(key => (
@@ -928,12 +995,12 @@ export default function Picks({ session, activeSport }) {
                         <span>
                           {(() => {
                             const sportConfig = getFiltersForSport(activeSport)
-                            const top25 = sportConfig.top25 || []
-                            const awayRank = top25.find(t => game.away?.includes(t.name))
-                            const homeRank = top25.find(t => game.home?.includes(t.name))
+                            const allSeeds = sportConfig.regions ? Object.values(sportConfig.regions).flat() : []
+                            const awaySeed = allSeeds.find(t => game.away === t.name)
+                            const homeSeed = allSeeds.find(t => game.home === t.name)
                             return (
                               <>
-                                {awayRank && <span style={s.rankBadge}>#{awayRank.rank}</span>}{game.away} @ {homeRank && <span style={s.rankBadge}>#{homeRank.rank}</span>}{game.home}
+                                {awaySeed && <span style={s.rankBadge}>({awaySeed.seed})</span>}{game.away} @ {homeSeed && <span style={s.rankBadge}>({homeSeed.seed})</span>}{game.home}
                               </>
                             )
                           })()}

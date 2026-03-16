@@ -12,7 +12,7 @@ const PICK_CATS = [
   { id: 'tot-un', label: 'Under', color: '#6b47b8' },
 ]
 
-export default function Leaderboard({ session, activeSport }) {
+export default function Leaderboard({ session, activeSport, preselectedPoolId, onPoolChange }) {
   const [myPools, setMyPools] = useState([])
   const [activePool, setActivePool] = useState(null)
   const [entries, setEntries] = useState([])
@@ -209,12 +209,18 @@ async function fetchLiveScores() {
 
     setMyPools(deduped)
     if (deduped.length > 0) {
-      const pool = deduped[0].friend_pools
+      let selected = deduped[0]
+      if (preselectedPoolId) {
+        const match = deduped.find(e => e.friend_pool_id === preselectedPoolId)
+        if (match) selected = match
+      }
+      const pool = selected.friend_pools
       setActivePool(pool)
+      onPoolChange?.(pool.id)
       const currentPeriod = pool.current_period || 1
       setTotalSessions(currentPeriod)
       setSelectedSession(currentPeriod)
-      await loadLeaderboard(deduped[0].friend_pool_id, currentPeriod)
+      await loadLeaderboard(selected.friend_pool_id, currentPeriod)
     }
     setLoading(false)
   }
@@ -329,6 +335,7 @@ async function fetchLiveScores() {
                 style={{...s.poolChip, ...(activePool?.id===entry.friend_pool_id ? s.poolChipActive : {})}}
                 onClick={() => {
                   setActivePool(entry.friend_pools)
+                  onPoolChange?.(entry.friend_pool_id)
                   const p = entry.friend_pools.current_period || 1
                   setTotalSessions(p)
                   setSelectedSession(p)
