@@ -180,8 +180,8 @@ export default function Lobby({ session, profile, onNavigateToPool }) {
           </div>
           <div style={s.field}><label style={s.label}>First Session Name <span style={s.optional}>(optional)</span></label><input style={s.input} type="text" placeholder="e.g. Round of 64" value={firstSessionName} onChange={e=>setFirstSessionName(e.target.value)} /></div>
           <div style={s.dateRow}>
-            <div style={{flex:1,minWidth:'140px'}}><label style={s.label}>Session Start <span style={s.optional}>(optional)</span></label><input style={s.input} type="date" value={sessionStart} onChange={e=>setSessionStart(e.target.value)} /></div>
-            <div style={{flex:1,minWidth:'140px'}}><label style={s.label}>Session End <span style={s.optional}>(optional)</span></label><input style={s.input} type="date" value={sessionEnd} onChange={e=>setSessionEnd(e.target.value)} /></div>
+            <div style={{flex:1,minWidth:'250px'}}><label style={s.label}>Session Start <span style={s.optional}>(optional)</span></label><input style={s.input} type="date" value={sessionStart} onChange={e=>setSessionStart(e.target.value)} /></div>
+            <div style={{flex:1,minWidth:'250px'}}><label style={s.label}>Session End <span style={s.optional}>(optional)</span></label><input style={s.input} type="date" value={sessionEnd} onChange={e=>setSessionEnd(e.target.value)} /></div>
           </div>
           <div style={s.dateHint}>If set, only games within this window will appear in pick selection.</div>
           {error && <div style={s.error}>{error}</div>}
@@ -275,8 +275,8 @@ export default function Lobby({ session, profile, onNavigateToPool }) {
                           <div style={s.confirmText}>This will clear all picks for everyone in <strong>{pool.name}</strong> and start a new session. Season standings preserved.</div>
                           <div style={s.field}><label style={{...s.label,color:'#c0392b'}}>Session Name <span style={s.optional}>(optional)</span></label><input style={s.input} type="text" placeholder="e.g. Round of 32" value={newSessionName} onChange={e=>setNewSessionName(e.target.value)} /></div>
                           <div style={s.dateRow}>
-                            <div style={{flex:1,minWidth:'140px'}}><label style={{...s.label,color:'#c0392b'}}>Start <span style={s.optional}>(opt)</span></label><input style={s.input} type="date" value={newSessionStart} onChange={e=>setNewSessionStart(e.target.value)} /></div>
-                            <div style={{flex:1,minWidth:'140px'}}><label style={{...s.label,color:'#c0392b'}}>End <span style={s.optional}>(opt)</span></label><input style={s.input} type="date" value={newSessionEnd} onChange={e=>setNewSessionEnd(e.target.value)} /></div>
+                            <div style={{flex:1,minWidth:'250px'}}><label style={{...s.label,color:'#c0392b'}}>Start <span style={s.optional}>(opt)</span></label><input style={s.input} type="date" value={newSessionStart} onChange={e=>setNewSessionStart(e.target.value)} /></div>
+                            <div style={{flex:1,minWidth:'250px'}}><label style={{...s.label,color:'#c0392b'}}>End <span style={s.optional}>(opt)</span></label><input style={s.input} type="date" value={newSessionEnd} onChange={e=>setNewSessionEnd(e.target.value)} /></div>
                           </div>
                           <div style={{display:'flex',gap:'8px',marginTop:'14px'}}>
                             <button style={s.btnCancel} onClick={()=>setShowResetConfirm(null)}>Cancel</button>
