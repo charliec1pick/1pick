@@ -147,7 +147,7 @@ export default function Lobby({ session, profile, onNavigateToPool }) {
         <div style={s.heroInner}>
           <div style={{flex:1}}>
             <div style={s.heroLabel}>Your Pools</div>
-            <div style={s.heroTitle}>Play Against <em style={{fontStyle:'normal',color:'#C9A84C'}}>Your Crew</em></div>
+            <div style={s.heroTitle}>Play Against <em style={{fontStyle:'normal',color:'#C9A84C'}}>Your Friends</em></div>
             <div style={s.heroSub}>Create a private pool and invite friends with a code. Pick winners across any sport — bragging rights on the line.</div>
           </div>
           <div style={s.heroButtons}>
@@ -172,7 +172,7 @@ export default function Lobby({ session, profile, onNavigateToPool }) {
       {showCreate && (
         <div style={s.formCard}>
           <div style={s.formTitle}>Create a Pool</div>
-          <div style={s.field}><label style={s.label}>Pool Name</label><input style={s.input} type="text" placeholder="e.g. Friday Night Crew" value={poolName} onChange={e=>setPoolName(e.target.value)} /></div>
+          <div style={s.field}><label style={s.label}>Pool Name</label><input style={s.input} type="text" placeholder="e.g. March Madness Pool" value={poolName} onChange={e=>setPoolName(e.target.value)} /></div>
           <div style={s.field}><label style={s.label}>Sport</label>
             <select style={s.input} value={poolSport} onChange={e=>setPoolSport(e.target.value)}>
               {SPORT_ORDER.map(id=>(<option key={id} value={id}>{SPORT_CONFIG[id].emoji} {SPORT_CONFIG[id].label}</option>))}

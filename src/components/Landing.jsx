@@ -38,7 +38,7 @@ return (
         </h1>
         <p style={s.heroSub}>
           Make 6 picks across every major sport. Lock your units. Climb the leaderboard. 
-          No house edge — just you vs. your crew.
+          No house edge — just you vs. your friends.
         </p>
         <button style={s.heroBtn} onClick={() => setShowAuth(true)}>
           Get Started Free →
