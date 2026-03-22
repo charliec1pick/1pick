@@ -351,6 +351,13 @@ function teamsMatch(a, b) {
   return false
 }
 
+// Helper: ±1 day tolerance for UTC/US timezone edge cases
+function datesWithinOneDay(d1, d2) {
+  if (!d1 || !d2) return true
+  const a = new Date(d1), b = new Date(d2)
+  return Math.abs(a - b) <= 86400000
+}
+
 // Helper: check if a game is started
 function isGameStarted(game, liveScores) {
   if (!game) return false
@@ -361,7 +368,7 @@ function isGameStarted(game, liveScores) {
 
   // Try exact key with translated names
   const exactRow = liveScores[`${away}|${home}`] || liveScores[`${game.away}|${game.home}`]
-  if (exactRow && (!gameDate || !exactRow.game_date || gameDate === exactRow.game_date)) {
+  if (exactRow && datesWithinOneDay(gameDate, exactRow.game_date)) {
     return exactRow.status === 'in' || exactRow.status === 'post'
   }
 
@@ -434,12 +441,12 @@ export default function Picks({ session, activeSport, preselectedPoolId, onPoolC
 
     // Try exact key with translated names
     const exact = liveScores[`${away}|${home}`] || liveScores[`${pick.awayTeam}|${pick.homeTeam}`]
-    if (exact && (!pickDate || !exact.game_date || pickDate === exact.game_date)) {
+    if (exact && datesWithinOneDay(pickDate, exact.game_date)) {
       return exact
     }
     // Fallback with date constraint
     for (const row of Object.values(liveScores)) {
-      const sameDate = !pickDate || !row.game_date || pickDate === row.game_date
+      const sameDate = datesWithinOneDay(pickDate, row.game_date)
       if (sameDate && teamsMatch(away, row.away_team) && teamsMatch(home, row.home_team)) {
         return row
       }

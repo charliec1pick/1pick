@@ -137,6 +137,12 @@ export default function Leaderboard({ session, activeSport, preselectedPoolId, o
     return na === nb
   }
 
+  function datesWithinOneDay(d1, d2) {
+    if (!d1 || !d2) return true
+    const a = new Date(d1), b = new Date(d2)
+    return Math.abs(a - b) <= 86400000
+  }
+
   useEffect(() => { loadMyPools() }, [activeSport])
   useEffect(() => { if (activePool) loadLeaderboard(activePool.id) }, [view, selectedSession])
 
@@ -172,13 +178,13 @@ async function fetchLiveScores() {
 
     // Try exact key with translated names
     const exact = liveScores[`${away}|${home}`] || liveScores[`${pick.away_team}|${pick.home_team}`]
-    if (exact && (!pickDate || !exact.game_date || pickDate === exact.game_date)) {
+    if (exact && datesWithinOneDay(pickDate, exact.game_date)) {
       return exact
     }
 
     // Fallback with date constraint
     for (const row of Object.values(liveScores)) {
-      const sameDate = !pickDate || !row.game_date || pickDate === row.game_date
+      const sameDate = datesWithinOneDay(pickDate, row.game_date)
       if (sameDate && teamsMatch(away, row.away_team) && teamsMatch(home, row.home_team)) {
         return row
       }

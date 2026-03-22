@@ -209,10 +209,18 @@ function pickGameDate(pick) {
   return new Date(pick.commence_time).toISOString().split('T')[0]
 }
 
+function datesWithinOneDay(d1, d2) {
+  if (!d1 || !d2) return true // if either is missing, skip date filter
+  const a = new Date(d1)
+  const b = new Date(d2)
+  const diffMs = Math.abs(a - b)
+  return diffMs <= 86400000 // 24 hours in ms
+}
+
 function teamsMatch(pick, scoreRow) {
   const pDate = pickGameDate(pick)
   const sDate = scoreRow.game_date
-  if (pDate && sDate && pDate !== sDate) return false
+  if (!datesWithinOneDay(pDate, sDate)) return false
 
   // Translate Odds API names to ESPN names via the map
   const pickHome = toESPN(pick.home_team)
