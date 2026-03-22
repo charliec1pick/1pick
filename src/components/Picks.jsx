@@ -394,6 +394,9 @@ export default function Picks({ session, activeSport, preselectedPoolId, onPoolC
   const [totalSessions, setTotalSessions] = useState(1)
   const [viewingPastSession, setViewingPastSession] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [savedToast, setSavedToast] = useState(null) // category id of just-saved pick
+  const [showWalkthrough, setShowWalkthrough] = useState(false)
+  const [walkthroughStep, setWalkthroughStep] = useState(0)
   const [gameFilter, setGameFilter] = useState('all')
   const [gameSearch, setGameSearch] = useState('')
   const [liveScores, setLiveScores] = useState({}) // keyed by "away_team|home_team"
@@ -405,6 +408,12 @@ export default function Picks({ session, activeSport, preselectedPoolId, onPoolC
   const remaining = 100 - totalUnits
 
   useEffect(() => { setGameFilter('all'); loadMyPools() }, [activeSport])
+
+  // Show walkthrough for first-time users
+  useEffect(() => {
+    const seen = localStorage.getItem('1pick_walkthrough_seen')
+    if (!seen) setShowWalkthrough(true)
+  }, [])
 
   // Poll scores_cache every 60s for live score updates + lock status
   useEffect(() => {
@@ -618,11 +627,22 @@ export default function Picks({ session, activeSport, preselectedPoolId, onPoolC
     setPicks(prev => ({ ...prev, [catId]: { gameId, team, lockedOdds, homeTeam, awayTeam } }))
     setOpenModal(null)
     setSaving(false)
+    setSavedToast(catId)
+    setTimeout(() => setSavedToast(null), 2000)
   }
 
   // Per-category unit cap
   function maxUnits(catId) {
     return catId === 'ml-dog' ? 10 : 40
+  }
+
+  // Calculate potential payout from American odds
+  function calcPayout(odds, unitsBet) {
+    const o = parseInt(odds)
+    if (isNaN(o) || !unitsBet) return null
+    if (o > 0) return +(unitsBet * o / 100).toFixed(1)
+    if (o < 0) return +(unitsBet * 100 / Math.abs(o)).toFixed(1)
+    return null
   }
 
   async function increment(catId) {
@@ -831,6 +851,16 @@ export default function Picks({ session, activeSport, preselectedPoolId, onPoolC
         <span>{viewingPastSession ? `Session ${selectedSession} Results` : !optedIn ? 'Opt in above to make picks' : "This Session's Picks — Tap to select"}</span>
       </div>
 
+      {/* Quick tips banner */}
+      {!viewingPastSession && optedIn && (
+        <div style={s.tipsBanner}>
+          <div style={s.tipsRow}>
+            <span style={s.tipsIcon}>💡</span>
+            <span style={s.tipsText}>Picks <strong>auto-save</strong> and lock at game time · Odds are <strong>locked when you pick</strong> · Payouts use <strong>real odds</strong> (not 1:1)</span>
+          </div>
+        </div>
+      )}
+
       {(viewingPastSession || optedIn) && (
       <div style={s.picksGrid}>
         {PICK_CATS.map(cat => {
@@ -885,6 +915,13 @@ export default function Picks({ session, activeSport, preselectedPoolId, onPoolC
 
                     <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px', marginTop: '4px' }}>
                       <span style={s.oddsChip}>{pick.lockedOdds}</span>
+                      {/* Potential payout — shown before game resolves */}
+                      {!result || result === 'pending' ? (() => {
+                        const pot = calcPayout(pick.lockedOdds, catUnits)
+                        return pot !== null ? (
+                          <span style={s.potentialPayout}>{catUnits}u → win {pot}u</span>
+                        ) : null
+                      })() : null}
                       {(viewingPastSession || isFinal) && result && result !== 'pending' && (
                         <div style={{ ...s.payoutChip, color: resultColor }}>
                           {result === 'win' ? `+${pick.payoutUnits}` : pick.payoutUnits} units
@@ -894,6 +931,10 @@ export default function Picks({ session, activeSport, preselectedPoolId, onPoolC
                         <div style={{ ...s.payoutChip, color: '#888580' }}>⏳ Pending</div>
                       )}
                     </div>
+                    {/* Saved toast */}
+                    {savedToast === cat.id && (
+                      <div style={s.savedToast}>✓ Pick saved — locks at game time</div>
+                    )}
                   </>
                 ) : (
                   <div style={s.pickEmpty}>{viewingPastSession ? 'No pick made' : 'Tap to choose a game →'}</div>
@@ -1028,6 +1069,57 @@ export default function Picks({ session, activeSport, preselectedPoolId, onPoolC
           </div>
         </div>
       )}
+
+      {/* First-time walkthrough overlay */}
+      {showWalkthrough && (
+        <div style={s.walkthroughOverlay}>
+          <div style={s.walkthroughCard}>
+            {walkthroughStep === 0 && (
+              <>
+                <div style={s.wtEmoji}>🎯</div>
+                <div style={s.wtTitle}>Welcome to 1Pick</div>
+                <div style={s.wtText}>You get <strong>6 picks per session</strong> — one for each category: ML Favorite, ML Underdog, Spread Favorite, Spread Underdog, Over, and Under.</div>
+              </>
+            )}
+            {walkthroughStep === 1 && (
+              <>
+                <div style={s.wtEmoji}>💰</div>
+                <div style={s.wtTitle}>Allocate 100 Units</div>
+                <div style={s.wtText}>Spread <strong>100 units</strong> across your 6 picks however you want. Confident in a pick? Load it up. Not sure? Keep it light. Any units left unallocated at session end count as a penalty.</div>
+              </>
+            )}
+            {walkthroughStep === 2 && (
+              <>
+                <div style={s.wtEmoji}>🔒</div>
+                <div style={s.wtTitle}>Auto-Save & Lock</div>
+                <div style={s.wtText}>Your picks <strong>save automatically</strong> — no submit button needed. You can change any pick up until that game starts. Once it tips off or kicks off, it's locked.</div>
+              </>
+            )}
+            {walkthroughStep === 3 && (
+              <>
+                <div style={s.wtEmoji}>📊</div>
+                <div style={s.wtTitle}>Real Odds, Real Payouts</div>
+                <div style={s.wtText}>Payouts are calculated using the <strong>actual sportsbook odds</strong> locked at the time you pick — not a simple 1:1. Pick a +200 underdog with 10 units? You win 20 if it hits. That's how the leaderboard separates the sharp from the lucky.</div>
+              </>
+            )}
+            <div style={s.wtFooter}>
+              <div style={s.wtDots}>
+                {[0,1,2,3].map(i => (
+                  <div key={i} style={{...s.wtDot, background: i === walkthroughStep ? '#4B2E83' : '#e2dfd8'}} />
+                ))}
+              </div>
+              {walkthroughStep < 3 ? (
+                <button style={s.wtBtn} onClick={() => setWalkthroughStep(walkthroughStep + 1)}>Next →</button>
+              ) : (
+                <button style={s.wtBtn} onClick={() => { setShowWalkthrough(false); localStorage.setItem('1pick_walkthrough_seen', 'true') }}>Let's Go →</button>
+              )}
+            </div>
+            <button style={s.wtSkip} onClick={() => { setShowWalkthrough(false); localStorage.setItem('1pick_walkthrough_seen', 'true') }}>
+              {walkthroughStep === 3 ? '' : 'Skip'}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -1100,4 +1192,20 @@ const s = {
   optOutConfirmNo: { padding: '7px 14px', background: '#f9f8f6', border: '1.5px solid #e2dfd8', borderRadius: '7px', color: '#888580', fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: '0.7rem', cursor: 'pointer' },
   optOutConfirmYes: { padding: '7px 14px', background: '#c0392b', border: 'none', borderRadius: '7px', color: '#fff', fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', cursor: 'pointer' },
   unitMax: { fontSize: '0.5rem', fontFamily: "'Barlow Condensed',sans-serif", textTransform: 'uppercase', letterSpacing: '1px', color: '#aaa', textAlign: 'center', marginTop: '1px' },
+  potentialPayout: { display: 'inline-block', fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: '0.7rem', color: '#4B2E83', background: '#f0eaf9', border: '1px solid rgba(75,46,131,0.2)', borderRadius: '6px', padding: '2px 8px', marginTop: '4px', marginLeft: '4px' },
+  savedToast: { marginTop: '6px', padding: '5px 10px', background: '#eaf7ef', border: '1px solid rgba(26,122,74,0.25)', borderRadius: '8px', fontSize: '0.72rem', fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, color: '#1a7a4a', textAlign: 'center', animation: 'fadeIn 0.3s ease' },
+  tipsBanner: { background: '#fff', border: '1px solid #e2dfd8', borderRadius: '10px', padding: '10px 14px', marginBottom: '14px' },
+  tipsRow: { display: 'flex', alignItems: 'center', gap: '8px' },
+  tipsIcon: { fontSize: '0.9rem', flexShrink: 0 },
+  tipsText: { fontSize: '0.72rem', color: '#888580', lineHeight: 1.5 },
+  walkthroughOverlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' },
+  walkthroughCard: { background: '#fff', borderRadius: '20px', padding: '36px 28px 24px', maxWidth: '380px', width: '100%', textAlign: 'center', position: 'relative' },
+  wtEmoji: { fontSize: '2.5rem', marginBottom: '16px' },
+  wtTitle: { fontFamily: "'Playfair Display',serif", fontWeight: 900, fontSize: '1.3rem', marginBottom: '10px', color: '#1a1a1a' },
+  wtText: { fontSize: '0.88rem', color: '#555', lineHeight: 1.6, marginBottom: '24px' },
+  wtFooter: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
+  wtDots: { display: 'flex', gap: '6px' },
+  wtDot: { width: '8px', height: '8px', borderRadius: '50%', transition: 'background 0.2s' },
+  wtBtn: { padding: '10px 24px', background: '#4B2E83', border: 'none', borderRadius: '9px', color: '#fff', fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px', cursor: 'pointer' },
+  wtSkip: { position: 'absolute', top: '14px', right: '16px', background: 'none', border: 'none', color: '#aaa', fontFamily: "'Barlow Condensed',sans-serif", fontSize: '0.75rem', cursor: 'pointer', letterSpacing: '1px' },
 }
