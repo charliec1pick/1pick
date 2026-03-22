@@ -137,6 +137,27 @@ export default function Lobby({ session, profile, onNavigateToPool }) {
     setEditingSessionName(null); setSavingSessionName(false); loadAllPools()
   }
 
+  function sharePool(pool) {
+    const sportLabel = SPORT_CONFIG[pool.sport]?.label || pool.sport.toUpperCase()
+    const text = `Join my picks pool on 1Pick! Pick winners against me with real odds.\n\nPool: ${pool.name}\nSport: ${sportLabel}\nCode: ${pool.invite_code}\n\nJoin here: 1picksports.com`
+
+    if (navigator.share) {
+      navigator.share({ title: '1Pick Sports — Join My Pool', text }).catch(() => {})
+    } else {
+      navigator.clipboard.writeText(text).then(() => alert('Invite copied to clipboard!'))
+    }
+  }
+
+  function shareGeneral() {
+    const text = `I've been using 1Pick to compete against friends with sports picks — real odds, no money needed. Check it out: 1picksports.com`
+
+    if (navigator.share) {
+      navigator.share({ title: '1Pick Sports', text }).catch(() => {})
+    } else {
+      navigator.clipboard.writeText(text).then(() => alert('Invite copied to clipboard!'))
+    }
+  }
+
   const poolsBySport = getPoolsBySport()
   const activeSports = SPORT_ORDER.filter(s => poolsBySport[s]?.length)
 
@@ -153,6 +174,7 @@ export default function Lobby({ session, profile, onNavigateToPool }) {
           <div style={s.heroButtons}>
             <button style={s.btnCreate} onClick={()=>{setShowCreate(true);setShowJoin(false);setError('')}}>+ Create Pool</button>
             <button style={s.btnJoin} onClick={()=>{setShowJoin(true);setShowCreate(false);setError('')}}>Enter Code</button>
+            {allPools.length > 0 && <button style={s.btnInvite} onClick={()=>shareGeneral()}>📤 Invite Friends</button>}
           </div>
         </div>
       </div>
@@ -261,12 +283,15 @@ export default function Lobby({ session, profile, onNavigateToPool }) {
                         </div>
                         <div style={s.poolRight} onClick={e=>e.stopPropagation()}>
                           <div style={s.poolBadge}>{isCom?'👑':'✓'}</div>
-                          {isCom && (
-                            <div style={s.comActions}>
-                              <button style={s.actBtn} onClick={()=>{setShowResetConfirm(pool.id);setNewSessionStart('');setNewSessionEnd('');setNewSessionName('')}}>New Session</button>
-                              <button style={{...s.actBtn,...s.delBtn}} onClick={()=>setShowDeleteConfirm(pool.id)}>Delete</button>
-                            </div>
-                          )}
+                          <div style={s.comActions}>
+                            <button style={s.shareBtn} onClick={()=>sharePool(pool)}>📤 Share</button>
+                            {isCom && (
+                              <>
+                                <button style={s.actBtn} onClick={()=>{setShowResetConfirm(pool.id);setNewSessionStart('');setNewSessionEnd('');setNewSessionName('')}}>New Session</button>
+                                <button style={{...s.actBtn,...s.delBtn}} onClick={()=>setShowDeleteConfirm(pool.id)}>Delete</button>
+                              </>
+                            )}
+                          </div>
                         </div>
                       </div>
                       {showResetConfirm===pool.id && (
@@ -315,6 +340,7 @@ const s = {
   heroButtons:{display:'flex',gap:'10px',flexShrink:0},
   btnCreate:{padding:'10px 22px',background:'#4B2E83',border:'none',borderRadius:'9px',color:'#fff',fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.85rem',textTransform:'uppercase',letterSpacing:'1px',cursor:'pointer'},
   btnJoin:{padding:'10px 22px',background:'rgba(255,255,255,0.08)',border:'1px solid rgba(255,255,255,0.2)',borderRadius:'9px',color:'rgba(255,255,255,0.8)',fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.85rem',textTransform:'uppercase',letterSpacing:'1px',cursor:'pointer'},
+  btnInvite:{padding:'10px 22px',background:'rgba(201,168,76,0.15)',border:'1px solid rgba(201,168,76,0.4)',borderRadius:'9px',color:'#C9A84C',fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.85rem',textTransform:'uppercase',letterSpacing:'1px',cursor:'pointer'},
   howItWorks:{background:'#fff',border:'1px solid #e2dfd8',borderRadius:'14px',padding:'18px 20px',marginBottom:'20px'},
   howTitle:{fontFamily:"'Barlow Condensed',sans-serif",fontSize:'0.65rem',fontWeight:700,textTransform:'uppercase',letterSpacing:'3px',color:'#C9A84C',marginBottom:'14px'},
   howGrid:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))',gap:'12px'},
@@ -354,6 +380,7 @@ const s = {
   poolBadge:{fontSize:'0.9rem'},
   comActions:{display:'flex',gap:'4px'},
   actBtn:{padding:'3px 8px',background:'#f9f8f6',border:'1px solid #e2dfd8',borderRadius:'5px',color:'#888580',fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.6rem',textTransform:'uppercase',letterSpacing:'0.5px',cursor:'pointer'},
+  shareBtn:{padding:'3px 8px',background:'#f0eaf9',border:'1px solid rgba(75,46,131,0.25)',borderRadius:'5px',color:'#4B2E83',fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.6rem',textTransform:'uppercase',letterSpacing:'0.5px',cursor:'pointer'},
   delBtn:{color:'#c0392b',borderColor:'rgba(192,57,43,0.2)'},
   confirmCard:{background:'#fff8f8',border:'1.5px solid rgba(192,57,43,0.3)',borderRadius:'12px',padding:'16px',marginTop:'4px',marginLeft:'20px'},
   confirmTitle:{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.95rem',color:'#c0392b',marginBottom:'6px'},
