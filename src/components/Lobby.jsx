@@ -256,42 +256,52 @@ export default function Lobby({ session, profile, onNavigateToPool }) {
                   return (
                     <div key={entry.id}>
                       <div style={s.poolCard} onClick={()=>onNavigateToPool(pool.sport,pool.id)}>
-                        <div style={{...s.poolDot,background:cfg.color}} />
-                        <div style={s.poolInfo}>
-                          {editingPoolName===pool.id ? (
-                            <div style={{display:'flex',gap:'6px',alignItems:'center',marginBottom:'2px'}} onClick={e=>e.stopPropagation()}>
-                              <input style={{...s.input,padding:'4px 8px',fontSize:'0.85rem',fontWeight:700,flex:1}} value={editPoolNameVal} onChange={e=>setEditPoolNameVal(e.target.value)} onKeyDown={e=>e.key==='Enter'&&savePoolName(pool.id)} autoFocus />
-                              <button style={s.inlineSave} onClick={()=>savePoolName(pool.id)}>✓</button>
-                              <button style={s.inlineCancel} onClick={()=>setEditingPoolName(null)}>✕</button>
+                        {/* Top: Pool info */}
+                        <div style={s.poolCardTop}>
+                          <div style={{display:'flex',alignItems:'center',gap:'10px',flex:1,minWidth:0}}>
+                            <div style={{...s.poolDot,background:cfg.color}} />
+                            <div style={{flex:1,minWidth:0}}>
+                              {editingPoolName===pool.id ? (
+                                <div style={{display:'flex',gap:'6px',alignItems:'center'}} onClick={e=>e.stopPropagation()}>
+                                  <input style={{...s.input,padding:'4px 8px',fontSize:'0.85rem',fontWeight:700,flex:1}} value={editPoolNameVal} onChange={e=>setEditPoolNameVal(e.target.value)} onKeyDown={e=>e.key==='Enter'&&savePoolName(pool.id)} autoFocus />
+                                  <button style={s.inlineSave} onClick={()=>savePoolName(pool.id)}>✓</button>
+                                  <button style={s.inlineCancel} onClick={()=>setEditingPoolName(null)}>✕</button>
+                                </div>
+                              ) : (
+                                <div style={s.poolName}>{pool.name}{isCom && <span style={s.editIcon} onClick={e=>{e.stopPropagation();setEditingPoolName(pool.id);setEditPoolNameVal(pool.name)}}> ✎</span>}</div>
+                              )}
                             </div>
-                          ) : (
-                            <div style={s.poolName}>{pool.name}{isCom && <span style={s.editIcon} onClick={e=>{e.stopPropagation();setEditingPoolName(pool.id);setEditPoolNameVal(pool.name)}}>✎</span>}</div>
-                          )}
-                          <div style={s.poolMeta}>
-                            Code: <strong>{pool.invite_code}</strong> · Session {pool.current_period||1}
-                            {editingSessionName===pool.id ? (
-                              <span style={{display:'inline-flex',gap:'4px',alignItems:'center',marginLeft:'6px'}} onClick={e=>e.stopPropagation()}>
-                                · <input style={{...s.input,padding:'2px 6px',fontSize:'0.7rem',width:'100px',display:'inline'}} placeholder="Session name" value={editSessionNameVal} onChange={e=>setEditSessionNameVal(e.target.value)} onKeyDown={e=>e.key==='Enter'&&saveSessionName(pool.id,pool.current_period||1,sn)} autoFocus />
-                                <button style={s.inlineSave} onClick={()=>saveSessionName(pool.id,pool.current_period||1,sn)}>✓</button>
-                                <button style={s.inlineCancel} onClick={()=>setEditingSessionName(null)}>✕</button>
-                              </span>
-                            ) : csn ? (
-                              <span> · 📋 {csn}{isCom && <span style={s.editIcon} onClick={e=>{e.stopPropagation();setEditingSessionName(pool.id);setEditSessionNameVal(csn)}}> ✎</span>}</span>
-                            ) : isCom ? <span style={s.editIcon} onClick={e=>{e.stopPropagation();setEditingSessionName(pool.id);setEditSessionNameVal('')}}> + name session</span> : null}
-                            {pool.session_start&&pool.session_end && <span> · 📅 {pool.session_start} → {pool.session_end}</span>}
                           </div>
-                        </div>
-                        <div style={s.poolRight} onClick={e=>e.stopPropagation()}>
                           <div style={s.poolBadge}>{isCom?'👑':'✓'}</div>
-                          <div style={s.comActions}>
-                            <button style={s.shareBtn} onClick={()=>sharePool(pool)}>📤 Share</button>
-                            {isCom && (
-                              <>
-                                <button style={s.actBtn} onClick={()=>{setShowResetConfirm(pool.id);setNewSessionStart('');setNewSessionEnd('');setNewSessionName('')}}>New Session</button>
-                                <button style={{...s.actBtn,...s.delBtn}} onClick={()=>setShowDeleteConfirm(pool.id)}>Delete</button>
-                              </>
-                            )}
-                          </div>
+                        </div>
+
+                        {/* Middle: Meta info */}
+                        <div style={s.poolCardMeta}>
+                          <span>Code: <strong>{pool.invite_code}</strong></span>
+                          <span> · Session {pool.current_period||1}</span>
+                          {editingSessionName===pool.id ? (
+                            <span style={{display:'inline-flex',gap:'4px',alignItems:'center',marginLeft:'6px'}} onClick={e=>e.stopPropagation()}>
+                              · <input style={{...s.input,padding:'2px 6px',fontSize:'0.7rem',width:'100px',display:'inline'}} placeholder="Session name" value={editSessionNameVal} onChange={e=>setEditSessionNameVal(e.target.value)} onKeyDown={e=>e.key==='Enter'&&saveSessionName(pool.id,pool.current_period||1,sn)} autoFocus />
+                              <button style={s.inlineSave} onClick={()=>saveSessionName(pool.id,pool.current_period||1,sn)}>✓</button>
+                              <button style={s.inlineCancel} onClick={()=>setEditingSessionName(null)}>✕</button>
+                            </span>
+                          ) : csn ? (
+                            <span> · 📋 {csn}{isCom && <span style={s.editIcon} onClick={e=>{e.stopPropagation();setEditingSessionName(pool.id);setEditSessionNameVal(csn)}}> ✎</span>}</span>
+                          ) : isCom ? <span style={s.editIcon} onClick={e=>{e.stopPropagation();setEditingSessionName(pool.id);setEditSessionNameVal('')}}> + name session</span> : null}
+                          {pool.session_start&&pool.session_end && (
+                            <div style={{marginTop:'2px'}}>📅 {pool.session_start} → {pool.session_end}</div>
+                          )}
+                        </div>
+
+                        {/* Bottom: Action buttons */}
+                        <div style={s.poolCardActions} onClick={e=>e.stopPropagation()}>
+                          <button style={s.shareBtn} onClick={()=>sharePool(pool)}>📤 Share</button>
+                          {isCom && (
+                            <>
+                              <button style={s.actBtn} onClick={()=>{setShowResetConfirm(pool.id);setNewSessionStart('');setNewSessionEnd('');setNewSessionName('')}}>New Session</button>
+                              <button style={{...s.actBtn,...s.delBtn}} onClick={()=>setShowDeleteConfirm(pool.id)}>Delete</button>
+                            </>
+                          )}
                         </div>
                       </div>
                       {showResetConfirm===pool.id && (
@@ -371,14 +381,17 @@ const s = {
   sportLabel:{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.9rem',textTransform:'uppercase',letterSpacing:'1.5px'},
   sportCount:{fontSize:'0.68rem',fontFamily:"'Barlow Condensed',sans-serif",color:'#888580'},
   chevron:{fontSize:'1rem',color:'#888580',transition:'transform 0.2s ease'},
-  poolCard:{background:'#fff',border:'1px solid #e2dfd8',borderRadius:'10px',padding:'14px 14px',marginTop:'4px',marginLeft:'12px',display:'flex',alignItems:'flex-start',gap:'10px',cursor:'pointer',flexWrap:'wrap',overflow:'hidden',boxSizing:'border-box',maxWidth:'calc(100% - 12px)'},
+  poolCard:{background:'#fff',border:'1px solid #e2dfd8',borderRadius:'12px',marginTop:'6px',marginLeft:'12px',cursor:'pointer',overflow:'hidden',boxSizing:'border-box',maxWidth:'calc(100% - 12px)'},
+  poolCardTop:{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'12px 14px 0',gap:'8px'},
   poolDot:{width:'8px',height:'8px',borderRadius:'50%',flexShrink:0},
   poolInfo:{flex:1,minWidth:0},
-  poolName:{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.92rem',marginBottom:'2px',display:'flex',alignItems:'center',gap:'6px'},
-  poolMeta:{fontSize:'0.7rem',color:'#888580',lineHeight:1.4},
-  poolRight:{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:'6px',flexShrink:0},
-  poolBadge:{fontSize:'0.9rem'},
-  comActions:{display:'flex',gap:'4px',flexWrap:'wrap',justifyContent:'flex-end'},
+  poolName:{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.95rem',display:'flex',alignItems:'center',gap:'4px',overflow:'hidden',textOverflow:'ellipsis'},
+  poolCardMeta:{padding:'4px 14px 0 36px',fontSize:'0.7rem',color:'#888580',lineHeight:1.6},
+  poolBadge:{fontSize:'0.9rem',flexShrink:0},
+  poolCardActions:{display:'flex',gap:'6px',flexWrap:'wrap',padding:'10px 14px',borderTop:'1px solid #f0eeea',marginTop:'10px'},
+  poolRight:{},
+  poolMeta:{},
+  comActions:{},
   actBtn:{padding:'3px 8px',background:'#f9f8f6',border:'1px solid #e2dfd8',borderRadius:'5px',color:'#888580',fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.6rem',textTransform:'uppercase',letterSpacing:'0.5px',cursor:'pointer'},
   shareBtn:{padding:'3px 8px',background:'#f0eaf9',border:'1px solid rgba(75,46,131,0.25)',borderRadius:'5px',color:'#4B2E83',fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:'0.6rem',textTransform:'uppercase',letterSpacing:'0.5px',cursor:'pointer'},
   delBtn:{color:'#c0392b',borderColor:'rgba(192,57,43,0.2)'},
