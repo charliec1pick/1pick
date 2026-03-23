@@ -861,6 +861,25 @@ export default function Picks({ session, activeSport, preselectedPoolId, onPoolC
         </div>
       )}
 
+      {/* Not opted in — show disabled pick cards */}
+      {!viewingPastSession && !optedIn && (
+        <div style={s.notOptedInGrid}>
+          <div style={s.picksGrid}>
+            {PICK_CATS.map(cat => (
+              <div key={cat.id} style={{...s.pickCard, borderColor: '#e2dfd8', opacity: 0.5, cursor: 'default'}}>
+                <div style={{...s.pickCardTop, background: cat.color}}>
+                  <div style={s.pickTypeLabel}>{cat.label}</div>
+                  <div style={s.pickLockBadge}>🔒 Not Opted In</div>
+                </div>
+                <div style={s.pickCardBody}>
+                  <div style={s.pickEmpty}>Opt in to make picks</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {(viewingPastSession || optedIn) && (
       <div style={s.picksGrid}>
         {PICK_CATS.map(cat => {
@@ -1144,6 +1163,7 @@ const s = {
   unitsSub: { fontSize: '0.7rem', color: '#888580' },
   sectionTitle: { fontFamily: "'Barlow Condensed',sans-serif", fontSize: '0.68rem', fontWeight: 700, letterSpacing: '3px', color: '#888580', textTransform: 'uppercase', marginBottom: '14px' },
   picksGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: '14px', marginBottom: '20px' },
+  notOptedInGrid: { position: 'relative', marginBottom: '20px' },
   pickCard: { background: '#fff', border: '1.5px solid #e2dfd8', borderRadius: '14px', overflow: 'hidden', cursor: 'pointer' },
   pickCardTop: { padding: '8px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
   pickTypeLabel: { fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '2px', color: 'rgba(255,255,255,0.9)' },

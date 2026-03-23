@@ -24,6 +24,7 @@ export default function Leaderboard({ session, activeSport, preselectedPoolId, o
   const [viewingProfile, setViewingProfile] = useState(null)
   const [expandedPicks, setExpandedPicks] = useState({})
   const [loadingPicks, setLoadingPicks] = useState(false)
+  const [userOptedIn, setUserOptedIn] = useState(true)
 
   const { games } = useOdds(activeSport)
   const [liveScores, setLiveScores] = useState({}) // keyed by "away_team|home_team"
@@ -223,6 +224,7 @@ async function fetchLiveScores() {
       const pool = selected.friend_pools
       setActivePool(pool)
       onPoolChange?.(pool.id)
+      setUserOptedIn(selected.opted_in || false)
       const currentPeriod = pool.current_period || 1
       setTotalSessions(currentPeriod)
       setSelectedSession(currentPeriod)
@@ -342,6 +344,7 @@ async function fetchLiveScores() {
                 onClick={() => {
                   setActivePool(entry.friend_pools)
                   onPoolChange?.(entry.friend_pool_id)
+                  setUserOptedIn(entry.opted_in || false)
                   const p = entry.friend_pools.current_period || 1
                   setTotalSessions(p)
                   setSelectedSession(p)
@@ -352,6 +355,13 @@ async function fetchLiveScores() {
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {!userOptedIn && selectedSession === (activePool?.current_period || 1) && (
+        <div style={s.optInReminder}>
+          <span style={{fontSize:'0.85rem'}}>👀</span>
+          <span style={s.optInReminderText}>You're not opted in for this session. Head to <strong>My Picks</strong> to join.</span>
         </div>
       )}
 
@@ -644,4 +654,6 @@ const s = {
   chipScoreTeam:{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:600,fontSize:'0.68rem',color:'#333'},
   chipScoreNum:{fontFamily:"'Playfair Display',serif",fontWeight:900,fontSize:'0.9rem',color:'#1a1a1a',marginLeft:'6px'},
   chipScoreStatus:{fontFamily:"'Barlow Condensed',sans-serif",fontSize:'0.58rem',textTransform:'uppercase',letterSpacing:'1px',color:'#e05c00',fontWeight:700,marginTop:'3px',textAlign:'center'},
+  optInReminder:{display:'flex',alignItems:'center',gap:'10px',background:'linear-gradient(135deg, #1a1a1a 0%, #2d1a5a 100%)',borderRadius:'10px',padding:'12px 16px',marginBottom:'16px'},
+  optInReminderText:{fontSize:'0.78rem',color:'rgba(255,255,255,0.7)',lineHeight:1.4},
 }
